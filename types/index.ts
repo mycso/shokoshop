@@ -1,13 +1,21 @@
+export interface ProductVariantOption {
+  name: string;
+  values: string[];
+}
+
 export interface Product {
   id: string;
   slug: string;
   name: string;
   description: string;
-  price: number;
+  price: number; // lowest variant price (pence), 0 if unset
   images: string[];
   category: string;
   gelatoProductId?: string;
   variants?: ProductVariant[];
+  productVariantOptions?: ProductVariantOption[];
+  variantPrices?: Record<string, number>; // variantId → price in pence
+  variantImages?: Record<string, string>;  // variantId → preview image URL
   inStock: boolean;
 }
 
@@ -16,6 +24,7 @@ export interface ProductVariant {
   name: string;
   price: number;
   sku: string;
+  variantOptions?: Record<string, string>; // e.g. { Color: "White", Size: "M" }
 }
 
 export interface CartItem {
@@ -28,6 +37,7 @@ export interface CartItem {
   variantId?: string;
   variantName?: string;
   customDesignUrl?: string;
+  gelatoProductId?: string;
 }
 
 export interface Cart {

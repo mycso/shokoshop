@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { ShoppingCart, User, Menu, X, Package } from "lucide-react";
+import { Bebas_Neue } from "next/font/google";
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
+
+const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 export default function Navbar() {
   const { itemCount } = useCart();
@@ -20,8 +23,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Package className="h-7 w-7 text-indigo-600" />
-            <span className="text-xl font-bold text-gray-900">ShokoShop</span>
+            <img
+              src="/shokoshoplogo.svg"
+              alt="ShokoShop logo"
+              className="h-8 w-8 object-contain"
+            />
+            <span className={`${bebas.className} text-xl font-bold text-gray-900`}>ShokoShop</span>
           </Link>
 
           {/* Desktop nav */}
@@ -46,7 +53,7 @@ export default function Navbar() {
             >
               <ShoppingCart className="h-5 w-5 text-gray-700" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-accent text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
               )}

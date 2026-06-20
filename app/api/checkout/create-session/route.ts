@@ -49,6 +49,16 @@ export async function POST(request: Request) {
       const baseUrl =
         process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
+      const isSafeImageUrl = (url?: string) => {
+        if (!url) return false;
+        try {
+          const u = new URL(url);
+          return (u.protocol === "http:" || u.protocol === "https:") && url.length <= 2048;
+        } catch {
+          return false;
+        }
+      };
+
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
         mode: "payment",
@@ -59,7 +69,7 @@ export async function POST(request: Request) {
             product_data: {
               name: item.name,
               description: item.variantName ?? undefined,
-              images: item.image ? [item.image] : [],
+              images: isSafeImageUrl(item.image) ? [item.image!] : [],
             },
             unit_amount: item.price,
           },

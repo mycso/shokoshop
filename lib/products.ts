@@ -4,9 +4,9 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: "prod_001",
     slug: "custom-tshirt",
-    name: "Custom Print T-Shirt",
+    name: "Custom T-Shirt",
     description:
-      "High-quality 100% cotton t-shirt with your custom design printed directly onto the fabric. Available in multiple sizes and colors. Perfect for personal use, gifts, or small businesses.",
+      "High-quality 100% cotton t-shirt with your custom design on the fabric. Available in multiple sizes and colors. Perfect for personal use, gifts, or small businesses.",
     price: 2999,
     images: [
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
@@ -27,7 +27,7 @@ export const MOCK_PRODUCTS: Product[] = [
     slug: "custom-mug",
     name: "Custom Photo Mug",
     description:
-      "11oz ceramic mug with your photo or design printed in vibrant, dishwasher-safe ink. A perfect personalised gift for any occasion.",
+      "11oz ceramic mug with your photo or design in vibrant, dishwasher-safe finish. A perfect personalised gift for any occasion.",
     price: 1499,
     images: [
       "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=800",
@@ -47,7 +47,7 @@ export const MOCK_PRODUCTS: Product[] = [
     slug: "custom-poster",
     name: "Custom Art Poster",
     description:
-      "Professional-grade art poster printed on thick, semi-gloss paper. Upload your artwork or photo and get a stunning print delivered to your door.",
+      "Professional-grade art poster on thick, semi-gloss paper. Upload your artwork or photo and get a stunning poster delivered to your door.",
     price: 1999,
     images: [
       "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800",
@@ -85,9 +85,9 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: "prod_005",
     slug: "custom-canvas",
-    name: "Custom Canvas Print",
+    name: "Custom Canvas",
     description:
-      "Gallery-quality canvas print stretched over a solid wood frame. Your photo or artwork printed with fade-resistant inks.",
+      "Gallery-quality canvas stretched over a solid wood frame. Your photo or artwork reproduced with fade-resistant inks.",
     price: 4999,
     images: [
       "https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=800",
@@ -104,7 +104,7 @@ export const MOCK_PRODUCTS: Product[] = [
   {
     id: "prod_006",
     slug: "custom-hoodie",
-    name: "Custom Print Hoodie",
+    name: "Custom Hoodie",
     description:
       "Cosy 80% cotton, 20% polyester hoodie with your custom design. Double-lined hood, front kangaroo pocket, and ribbed cuffs.",
     price: 4999,

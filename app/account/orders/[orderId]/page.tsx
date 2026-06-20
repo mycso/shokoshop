@@ -8,6 +8,9 @@ import {
   MapPin,
   ExternalLink,
 } from "lucide-react";
+import { getOrderById } from "@/lib/orders";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -18,152 +21,10 @@ export async function generateMetadata({
   return { title: `Order ${orderId.slice(-8).toUpperCase()} – ShokoShop` };
 }
 
-// Demo order data
-const DEMO_ORDERS: Record<string, object> = {
-  ord_demo_001: {
-    id: "ord_demo_001",
-    customerEmail: "customer@example.com",
-    customerName: "Jane Smith",
-    status: "shipped",
-    total: 5998,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    trackingNumber: "JD000340014700000000",
-    trackingUrl: "https://track.gelato.com/demo",
-    shippingAddress: {
-      name: "Jane Smith",
-      line1: "123 Example Street",
-      city: "London",
-      postalCode: "SW1A 1AA",
-      country: "GB",
-    },
-    items: [
-      {
-        id: "ci_1",
-        name: "Custom Print T-Shirt",
-        variantName: "Medium",
-        price: 2999,
-        quantity: 2,
-        image:
-          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200",
-      },
-    ],
-  },
-  ord_demo_002: {
-    id: "ord_demo_002",
-    customerEmail: "customer@example.com",
-    customerName: "Jane Smith",
-    status: "delivered",
-    total: 2999,
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    trackingNumber: "JD000340014700000001",
-    trackingUrl: "https://track.gelato.com/demo",
-    shippingAddress: {
-      name: "Jane Smith",
-      line1: "123 Example Street",
-      city: "London",
-      postalCode: "SW1A 1AA",
-      country: "GB",
-    },
-    items: [
-      {
-        id: "ci_2",
-        name: "Custom Photo Mug",
-        variantName: "11oz White",
-        price: 1499,
-        quantity: 2,
-        image:
-          "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=200",
-      },
-    ],
-  },
-  ord_demo_003: {
-    id: "ord_demo_003",
-    customerEmail: "customer@example.com",
-    customerName: "Jane Smith",
-    status: "delivered",
-    total: 7498,
-    createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    trackingNumber: "JD000340014700000002",
-    trackingUrl: "https://track.gelato.com/demo",
-    shippingAddress: {
-      name: "Jane Smith",
-      line1: "123 Example Street",
-      city: "London",
-      postalCode: "SW1A 1AA",
-      country: "GB",
-    },
-    items: [
-      {
-        id: "ci_3",
-        name: "Custom Art Poster",
-        variantName: "A3",
-        price: 2999,
-        quantity: 1,
-        image:
-          "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=200",
-      },
-      {
-        id: "ci_4",
-        name: "Custom Print T-Shirt",
-        variantName: "Large",
-        price: 2999,
-        quantity: 1,
-        image:
-          "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200",
-      },
-      {
-        id: "ci_5",
-        name: "Custom Phone Case",
-        variantName: "iPhone 15",
-        price: 1500,
-        quantity: 1,
-        image:
-          "https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=200",
-      },
-    ],
-  },
-};
-
-interface OrderItem {
-  id: string;
-  name: string;
-  variantName?: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-interface ShippingAddress {
-  name: string;
-  line1: string;
-  line2?: string;
-  city: string;
-  state?: string;
-  postalCode: string;
-  country: string;
-}
-
-interface OrderData {
-  id: string;
-  customerEmail: string;
-  customerName: string;
-  status: string;
-  total: number;
-  createdAt: string;
-  updatedAt: string;
-  trackingNumber?: string;
-  trackingUrl?: string;
-  shippingAddress: ShippingAddress;
-  items: OrderItem[];
-}
-
 const STATUS_STEPS = [
   { key: "pending", label: "Order Placed", icon: Clock },
   { key: "paid", label: "Payment Confirmed", icon: CheckCircle },
-  { key: "processing", label: "Printing", icon: Package },
+  { key: "processing", label: "Producing", icon: Package },
   { key: "shipped", label: "Shipped", icon: Truck },
   { key: "delivered", label: "Delivered", icon: CheckCircle },
 ];
@@ -183,17 +44,13 @@ export default async function OrderDetailPage({
   params: Promise<{ orderId: string }>;
 }) {
   const { orderId } = await params;
-
-  // Try demo data first; in production, fetch from your DB
-  const raw = DEMO_ORDERS[orderId];
-  if (!raw) notFound();
-  const order = raw as OrderData;
+  const order = getOrderById(orderId);
+  if (!order) notFound();
 
   const currentStep = STATUS_ORDER.indexOf(order.status);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2">
         <Link href="/account/orders" className="hover:text-gray-700">
           My Orders
@@ -309,10 +166,12 @@ export default async function OrderDetailPage({
           <div className="space-y-4">
             {order.items.map((item) => (
               <div key={item.id} className="flex gap-3 items-center">
-                <div
-                  className="h-16 w-16 rounded-xl bg-gray-100 bg-cover bg-center flex-shrink-0"
-                  style={{ backgroundImage: `url(${item.image})` }}
-                />
+                {item.image && (
+                  <div
+                    className="h-16 w-16 rounded-xl bg-gray-100 bg-cover bg-center flex-shrink-0"
+                    style={{ backgroundImage: `url(${item.image})` }}
+                  />
+                )}
                 <div className="flex-1">
                   <p className="font-medium text-gray-900 text-sm">
                     {item.name}

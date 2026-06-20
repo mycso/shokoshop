@@ -8,12 +8,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <Package className="h-6 w-6 text-indigo-400" />
+              <Package className="h-6 w-6 text-brand" />
               <span className="text-lg font-bold text-white">ShokoShop</span>
             </div>
             <p className="text-sm text-gray-400 max-w-xs">
-              Premium print-on-demand products delivered to your door. Upload
-              your design and we&apos;ll handle the rest.
+              Shop custom T-shirts and wall art delivered to your door. Choose a design and we&apos;ll handle the rest.
             </p>
           </div>
           <div>
@@ -72,8 +71,8 @@ export default function Footer() {
           </p>
           <p className="text-xs text-gray-500">
             Powered by{" "}
-            <span className="text-indigo-400">Gelato</span> &amp;{" "}
-            <span className="text-indigo-400">Stripe</span>
+            <span className="text-brand">Gelato</span> &amp;{" "}
+            <span className="text-brand">Stripe</span>
           </p>
         </div>
       </div>

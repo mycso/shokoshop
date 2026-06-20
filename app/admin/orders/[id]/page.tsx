@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
+import { getOrderById } from "@/lib/orders";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -9,75 +12,6 @@ export async function generateMetadata({
 }) {
   const { id } = await params;
   return { title: `Order ${id.slice(-8).toUpperCase()} – Admin | ShokoShop` };
-}
-
-const DEMO_ORDERS: Record<string, object> = {
-  ord_demo_001: {
-    id: "ord_demo_001",
-    customerEmail: "jane@example.com",
-    customerName: "Jane Smith",
-    status: "shipped",
-    total: 5998,
-    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    trackingNumber: "JD000340014700000000",
-    gelatoOrderId: "gel_12345",
-    shippingAddress: {
-      name: "Jane Smith",
-      line1: "123 Example Street",
-      city: "London",
-      postalCode: "SW1A 1AA",
-      country: "GB",
-    },
-    items: [
-      { id: "ci_1", name: "Custom Print T-Shirt", variantName: "Medium", price: 2999, quantity: 2 },
-    ],
-  },
-  ord_demo_002: {
-    id: "ord_demo_002",
-    customerEmail: "john@example.com",
-    customerName: "John Doe",
-    status: "processing",
-    total: 2999,
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    gelatoOrderId: "gel_12346",
-    shippingAddress: {
-      name: "John Doe",
-      line1: "456 High Street",
-      city: "Manchester",
-      postalCode: "M1 1AA",
-      country: "GB",
-    },
-    items: [
-      { id: "ci_2", name: "Custom Photo Mug", variantName: "11oz White", price: 1499, quantity: 2 },
-    ],
-  },
-};
-
-interface AdminOrderItem {
-  id: string;
-  name: string;
-  variantName?: string;
-  price: number;
-  quantity: number;
-}
-
-interface AdminOrder {
-  id: string;
-  customerEmail: string;
-  customerName: string;
-  status: string;
-  total: number;
-  createdAt: string;
-  trackingNumber?: string;
-  gelatoOrderId?: string;
-  shippingAddress: {
-    name: string;
-    line1: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  items: AdminOrderItem[];
 }
 
 function formatPrice(pence: number) {
@@ -93,9 +27,8 @@ export default async function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const raw = DEMO_ORDERS[id];
-  if (!raw) notFound();
-  const order = raw as AdminOrder;
+  const order = getOrderById(id);
+  if (!order) notFound();
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -143,6 +76,9 @@ export default async function AdminOrderDetailPage({
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-sm font-medium text-gray-700 mb-1">Shipping</p>
             <p className="text-sm text-gray-500">{order.shippingAddress.line1}</p>
+            {order.shippingAddress.line2 && (
+              <p className="text-sm text-gray-500">{order.shippingAddress.line2}</p>
+            )}
             <p className="text-sm text-gray-500">
               {order.shippingAddress.city}, {order.shippingAddress.postalCode}
             </p>

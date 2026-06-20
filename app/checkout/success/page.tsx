@@ -36,7 +36,7 @@ function SuccessContent() {
         Thank you for your purchase.
       </p>
       <p className="text-gray-500 mb-8">
-        Your order has been received and is being prepared for printing. You'll
+        Your order has been received and is being prepared for fulfilment. You'll
         receive a confirmation email shortly.
       </p>
 
@@ -54,8 +54,8 @@ function SuccessContent() {
         <h2 className="font-semibold text-gray-900 mb-4">What happens next?</h2>
         <ol className="space-y-3 text-sm text-gray-600">
           {[
-            "We send your order to Gelato for printing",
-            "Your item is printed and quality-checked",
+              "We send your order to Gelato for production",
+              "Your item is produced and quality-checked",
             "Shipped directly to your address",
             "You receive tracking information by email",
           ].map((step, i) => (

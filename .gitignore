@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local Gelato config
+.gelato.config.json
+
+# local data files
+.orders.json
+.local-products.json

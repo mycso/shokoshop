@@ -25,6 +25,27 @@ export async function POST(request: Request) {
     const [firstName, ...lastNameParts] = order.shippingAddress.name.split(" ");
     const lastName = lastNameParts.join(" ") || firstName;
 
+    const items = order.items
+      .filter((item) => item.customDesignUrl)
+      .map((item) => ({
+        itemReferenceId: item.id,
+        productUid: item.gelatoProductId ?? item.productId,
+        quantity: item.quantity,
+        files: [
+          {
+            type: "default",
+            url: item.customDesignUrl!,
+          },
+        ],
+      }));
+
+    if (items.length === 0) {
+      return Response.json(
+        { error: "No items with a design file — upload a design before ordering" },
+        { status: 400 }
+      );
+    }
+
     const payload: GelatoOrderPayload = {
       orderReferenceId: order.id,
       customerReferenceId: order.customerEmail,
@@ -40,19 +61,7 @@ export async function POST(request: Request) {
         country: order.shippingAddress.country,
         email: order.customerEmail,
       },
-      items: order.items
-        .filter((item) => item.customDesignUrl)
-        .map((item) => ({
-          itemReferenceId: item.id,
-          productUid: item.productId,
-          quantity: item.quantity,
-          files: [
-            {
-              type: "default",
-              url: item.customDesignUrl!,
-            },
-          ],
-        })),
+      items,
     };
 
     const res = await fetch(`${GELATO_API_BASE}/v4/orders`, {

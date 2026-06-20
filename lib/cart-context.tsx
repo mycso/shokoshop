@@ -48,8 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function addItem(item: Omit<CartItem, "id">) {
     setCart((prev) => {
       const existing = prev.items.find(
-        (i) =>
-          i.productId === item.productId && i.variantId === item.variantId
+        (i) => i.productId === item.productId && i.variantId === item.variantId && i.gelatoProductId === (item as any).gelatoProductId
       );
       let newItems: CartItem[];
       if (existing) {

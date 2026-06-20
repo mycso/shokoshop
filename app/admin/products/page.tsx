@@ -1,104 +1,149 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { MOCK_PRODUCTS, formatPrice } from "@/lib/products";
+import { Pencil, RefreshCw } from "lucide-react";
+import { formatPrice } from "@/lib/products";
 
-export const metadata = { title: "Products – Admin | ShokoShop" };
+function toSlug(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
 
 export default function AdminProductsPage() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [syncLog, setSyncLog] = useState<string[]>([]);
+
+  async function loadProducts() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/gelato/store-products");
+      const data = await res.json();
+      const list = Array.isArray(data.products) ? data.products : [];
+
+      const lpRes = await fetch("/api/gelato/local-products");
+      const localProducts: any[] = await lpRes.json();
+
+      setProducts(list.map((p: any) => {
+        const name = p.title ?? p.name ?? "Untitled";
+        const slug = toSlug(name);
+        const local = localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug);
+        const variantPrices: Record<string, number> = local?.variantPrices ?? {};
+        const vals = Object.values(variantPrices) as number[];
+        const price = vals.length > 0 ? Math.min(...vals) : (local?.price ?? 0);
+        return { ...p, name, slug, price, thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null };
+      }));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function syncPrices() {
+    setSyncing(true);
+    setSyncLog([]);
+    try {
+      const res = await fetch("/api/gelato/sync-prices", { method: "POST" });
+      const data = await res.json();
+      setSyncLog(data.log ?? []);
+      await loadProducts();
+    } catch (e: any) {
+      setSyncLog([`Error: ${e.message}`]);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  useEffect(() => { loadProducts(); }, []);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-500 text-sm">
-            {MOCK_PRODUCTS.length} products
-          </p>
+          <p className="text-gray-500 text-sm">{products.length} products</p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+        <button
+          onClick={syncPrices}
+          disabled={syncing}
+          className="inline-flex items-center gap-1.5 bg-brand text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-60"
         >
-          <Plus className="h-4 w-4" />
-          Add Product
-        </Link>
+          <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+          {syncing ? "Syncing…" : "Sync Prices from Gelato"}
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Product
-              </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
-                Category
-              </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Price
-              </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                Status
-              </th>
-              <th className="px-6 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {MOCK_PRODUCTS.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{product.name}</p>
-                      <p className="text-xs text-gray-400 font-mono">
-                        {product.id}
-                      </p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-gray-600 hidden sm:table-cell">
-                  {product.category}
-                </td>
-                <td className="px-6 py-4 font-semibold text-gray-900">
-                  {formatPrice(product.price)}
-                </td>
-                <td className="px-6 py-4 hidden md:table-cell">
-                  <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      product.inStock
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.inStock ? "In Stock" : "Out of Stock"}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2 justify-end">
-                    <Link
-                      href={`/admin/products/${product.id}`}
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-indigo-600 transition-colors"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Link>
-                    <button className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
+      {syncLog.length > 0 && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
+          <p className="font-semibold mb-1">Sync complete:</p>
+          <ul className="list-disc list-inside space-y-0.5">
+            {syncLog.map((l, i) => <li key={i}>{l}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="text-center py-20 text-gray-400">Loading products…</div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Status</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">From Price</th>
+                <th className="px-6 py-3" />
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {products.map((product) => (
+                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        {product.thumbnail ? (
+                          <Image src={product.thumbnail} alt={product.name} fill className="object-cover" unoptimized />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-400 font-mono">{product.id}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 hidden sm:table-cell">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                      product.status === "active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                    }`}>
+                      {product.status ?? "unknown"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-gray-900">
+                    {product.price > 0
+                      ? `From ${formatPrice(product.price)}`
+                      : <span className="text-gray-400 font-normal">No price — sync needed</span>}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2 justify-end">
+                      <Link
+                        href={`/admin/products/${product.id}`}
+                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-brand transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

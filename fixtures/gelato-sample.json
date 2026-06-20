@@ -1,0 +1,32 @@
+{
+  "products": [
+    {
+      "productUid": "apparel_product_gca_t-shirt_thriller_unisex",
+      "id": "apparel_product_gca_t-shirt_thriller_unisex",
+      "name": "Michael Jackson - Thriller Album T-Shirt",
+      "description": "Unisex high performance moisture-wicking T-Shirt featuring the Michael Jackson Thriller album art.",
+      "categoryName": "T-Shirts",
+      "files": [
+        { "type": "default", "url": "https://cdn.example.com/thriller-front.png" },
+        { "type": "back", "url": "https://cdn.example.com/thriller-back.png" }
+      ],
+      "prices": [ { "amount": 1999, "currency": "USD" } ],
+      "variants": [
+        { "id": "s", "name": "Small", "price": 1999 },
+        { "id": "m", "name": "Medium", "price": 1999 },
+        { "id": "l", "name": "Large", "price": 1999 }
+      ],
+      "available": true
+    },
+    {
+      "productUid": "poster_product_thriller",
+      "id": "poster_product_thriller",
+      "name": "Thriller - Album Poster",
+      "description": "High-quality poster print of Michael Jackson's Thriller album art.",
+      "categoryName": "Posters",
+      "image": "https://cdn.example.com/thriller-poster.png",
+      "price": 1299,
+      "available": true
+    }
+  ]
+}

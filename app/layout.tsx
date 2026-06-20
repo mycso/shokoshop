@@ -5,9 +5,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "ShokoShop – Custom Print-on-Demand",
+  title: "ShokoShop – T-Shirts & Wall Art",
   description:
-    "Upload your design and get premium custom-printed products delivered to your door.",
+    "Shop custom T-shirts, posters and canvas wall art. Choose a design and have high-quality products delivered to your door.",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-gray-50">
+  <body className="min-h-full flex flex-col bg-gray-50">
         <CartProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
