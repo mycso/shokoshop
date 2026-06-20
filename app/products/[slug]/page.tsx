@@ -62,22 +62,22 @@ async function fetchGelatoProduct(slug: string) {
     })
     .map(([optName, values]) => ({ name: optName, values: Array.from(values) }));
 
-  // Images: product previewUrl only (Gelato doesn't provide per-variant images via API)
-  const images: string[] = [];
+  // Images: prefer locally-saved URLs (from sync-prices), fall back to API fields
+  const apiImages: string[] = [];
   const seen = new Set<string>();
   function addImg(u: unknown) {
     if (typeof u === "string" && u.length > 0 && !seen.has(u)) {
-      seen.add(u); images.push(u);
+      seen.add(u); apiImages.push(u);
     }
   }
   addImg(p.previewUrl);
   addImg(p.externalPreviewUrl);
   addImg(p.externalThumbnailUrl);
-  if (images.length === 0) images.push("/shokoshoplogo.svg");
 
-  // Merge prices from .local-products.json
+  // Merge prices and images from .local-products.json
   let price = 0;
   let variantPrices: Record<string, number> = {};
+  let images: string[] = apiImages;
   try {
     const lp = path.resolve(process.cwd(), ".local-products.json");
     if (fs.existsSync(lp)) {
@@ -89,9 +89,12 @@ async function fetchGelatoProduct(slug: string) {
         variantPrices = localMatch.variantPrices ?? {};
         const vpValues = Object.values(variantPrices) as number[];
         price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
+        if ((localMatch.images ?? []).length > 0) images = localMatch.images;
       }
     }
   } catch { /* ignore */ }
+
+  if (images.length === 0) images = ["/shokoshoplogo.svg"];
 
   return {
     id: p.id,

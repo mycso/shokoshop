@@ -95,6 +95,15 @@ async function main() {
     const detail = await get(`${BASE}/products/${pid}`);
     const variants = detail.variants ?? [];
 
+    // Collect images from the detail response
+    const images = [];
+    for (const field of ["previewUrl", "externalPreviewUrl", "externalThumbnailUrl"]) {
+      const url = detail[field];
+      if (typeof url === "string" && url.length > 0 && !images.includes(url)) {
+        images.push(url);
+      }
+    }
+
     // Check if we already have prices for all variants (skip re-fetch if so)
     const existingEntry = existing.find(e => e.gelatoProductId === pid);
     const existingVP = existingEntry?.variantPrices ?? {};
@@ -102,7 +111,7 @@ async function main() {
 
     if (missingVariants.length === 0 && Object.keys(existingVP).length > 0) {
       console.log(`  ✅ Already priced (${variants.length} variants) — skipping\n`);
-      results.push(existingEntry);
+      results.push({ ...existingEntry, images });
       continue;
     }
 
@@ -125,6 +134,7 @@ async function main() {
       slug,
       price: minPrice,
       variantPrices,
+      images,
     });
     console.log(`  → From £${(minPrice / 100).toFixed(2)}\n`);
   }

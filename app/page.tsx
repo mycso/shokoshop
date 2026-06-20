@@ -21,14 +21,17 @@ async function getPopularProducts(limit = 3) {
     }
   } catch { /* ignore */ }
 
-  function mergePrice(gelatoId: string, slug: string) {
+  function mergeLocalData(gelatoId: string, slug: string) {
     const match = localProducts.find(
       (l: any) => l.gelatoProductId === gelatoId || l.slug === slug
     );
-    if (!match) return 0;
+    if (!match) return { price: 0, localImages: [] as string[] };
     const vp: Record<string, number> = match.variantPrices ?? {};
     const vals = Object.values(vp) as number[];
-    return vals.length > 0 ? Math.min(...vals) : (match.price ?? 0);
+    return {
+      price: vals.length > 0 ? Math.min(...vals) : (match.price ?? 0),
+      localImages: (match.images ?? []) as string[],
+    };
   }
 
   try {
@@ -46,14 +49,15 @@ async function getPopularProducts(limit = 3) {
     return list.map((p: any) => {
       const name = p.title ?? p.name ?? "Untitled product";
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      const thumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
+      const { price, localImages } = mergeLocalData(p.id, slug);
+      const apiThumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
       return {
         id: p.id,
         slug,
         name,
         description: (p.description ?? "").replace(/<[^>]+>/g, ""),
-        price: mergePrice(p.id, slug),
-        images: thumbnail ? [thumbnail] : ["/shokoshoplogo.svg"],
+        price,
+        images: localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"],
         category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
       };
     });
@@ -177,11 +181,6 @@ export default async function HomePage() {
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-3 left-3">
-                    <span className="bg-accent text-white text-xs font-semibold px-2 py-1 rounded-full">
-                      {product.category}
-                    </span>
-                  </div>
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg group-hover:text-brand transition-colors">

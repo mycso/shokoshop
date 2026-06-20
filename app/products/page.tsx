@@ -18,15 +18,15 @@ async function getProducts() {
     }
   } catch { /* ignore */ }
 
-  function mergePrice(gelatoId: string, slug: string): { price: number; variantPrices: Record<string, number> } {
+  function mergePrice(gelatoId: string, slug: string): { price: number; variantPrices: Record<string, number>; localImages: string[] } {
     const match = localProducts.find(
       (l: any) => l.gelatoProductId === gelatoId || l.slug === slug
     );
-    if (!match) return { price: 0, variantPrices: {} };
+    if (!match) return { price: 0, variantPrices: {}, localImages: [] };
     const vp: Record<string, number> = match.variantPrices ?? {};
     const vpValues = Object.values(vp) as number[];
     const price = vpValues.length > 0 ? Math.min(...vpValues) : (match.price ?? 0);
-    return { price, variantPrices: vp };
+    return { price, variantPrices: vp, localImages: match.images ?? [] };
   }
 
   const res = await fetch(
@@ -48,9 +48,9 @@ async function getProducts() {
   return list.map((p: any) => {
     const name = p.title ?? p.name ?? "Untitled product";
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const thumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
-    const images = thumbnail ? [thumbnail] : ["/shokoshoplogo.svg"];
-    const { price, variantPrices } = mergePrice(p.id, slug);
+    const { price, variantPrices, localImages } = mergePrice(p.id, slug);
+    const apiThumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
+    const images = localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"];
 
     return {
       id: p.id,
@@ -181,11 +181,6 @@ export default async function ProductsPage({
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute top-3 left-3">
-                <span className="bg-white/90 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full border border-gray-200">
-                  {(product.productVariantOptions?.[0]?.values ?? []).join(" · ") || product.category}
-                </span>
-              </div>
               {!product.inStock && (
                 <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                   <span className="text-sm font-semibold text-gray-600">

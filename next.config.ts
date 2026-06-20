@@ -25,9 +25,13 @@ const nextConfig: NextConfig = {
         hostname: "*.public.blob.vercel-storage.com",
       },
       {
-        // Gelato CDN previews
+        // Gelato CDN (product preview images — exact domain varies by store)
         protocol: "https",
-        hostname: "*.gelatoapis.com",
+        hostname: "*.gelato.cloud",
+      },
+      {
+        protocol: "https",
+        hostname: "*.gelato.com",
       },
     ],
   },
