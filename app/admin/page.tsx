@@ -18,8 +18,8 @@ const STATS = [
     value: "128",
     change: "+12% this month",
     icon: ShoppingBag,
-    color: "text-indigo-600",
-    bg: "bg-indigo-50",
+    color: "text-brand",
+    bg: "bg-brand-light",
   },
   {
     label: "Revenue",
@@ -76,7 +76,7 @@ export default function AdminDashboard() {
         <div className="flex gap-2">
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center gap-1.5 bg-brand text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors"
           >
             <Plus className="h-4 w-4" />
             New Product
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
             <h2 className="font-semibold text-gray-900">Recent Orders</h2>
             <Link
               href="/admin/orders"
-              className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-sm text-brand hover:text-branddark flex items-center gap-1"
             >
               View all <ArrowRight className="h-3 w-3" />
             </Link>
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
                   <span
                     className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${
                       order.status === "shipped"
-                        ? "bg-indigo-100 text-indigo-700"
+                        ? "bg-brand-light text-brand-dark"
                         : order.status === "delivered"
                         ? "bg-green-100 text-green-700"
                         : "bg-yellow-100 text-yellow-700"
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
                   </span>
                   <Link
                     href={`/admin/orders/${order.id}`}
-                    className="text-gray-400 hover:text-indigo-600"
+                    className="text-gray-400 hover:text-brand"
                   >
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -188,11 +188,11 @@ export default function AdminDashboard() {
                 href={href}
                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
               >
-                <Icon className="h-4 w-4 text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                <Icon className="h-4 w-4 text-gray-500 group-hover:text-brand transition-colors" />
                 <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
                   {label}
                 </span>
-                <ArrowRight className="h-3 w-3 text-gray-300 ml-auto group-hover:text-indigo-600 transition-colors" />
+                <ArrowRight className="h-3 w-3 text-gray-300 ml-auto group-hover:text-brand transition-colors" />
               </Link>
             ))}
           </div>

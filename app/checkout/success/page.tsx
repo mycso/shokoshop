@@ -23,8 +23,8 @@ function SuccessContent() {
     <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <div className="flex justify-center mb-8">
         <div className="relative">
-          <div className="h-24 w-24 rounded-full bg-green-100 flex items-center justify-center">
-            <CheckCircle className="h-12 w-12 text-green-500" />
+          <div className="h-28 w-28 rounded-full bg-green-50 ring-8 ring-green-100 flex items-center justify-center">
+            <CheckCircle className="h-14 w-14 text-green-500" />
           </div>
         </div>
       </div>
@@ -41,8 +41,8 @@ function SuccessContent() {
       </p>
 
       {orderId && (
-        <div className="bg-indigo-50 rounded-2xl p-6 mb-8 inline-block text-left w-full">
-          <div className="flex items-center gap-2 text-indigo-700 font-semibold mb-1">
+        <div className="bg-brand-light rounded-2xl p-6 mb-8 inline-block text-left w-full">
+          <div className="flex items-center gap-2 text-brand-dark font-semibold mb-1">
             <Package className="h-5 w-5" />
             Order Reference
           </div>
@@ -60,7 +60,7 @@ function SuccessContent() {
             "You receive tracking information by email",
           ].map((step, i) => (
             <li key={i} className="flex gap-3">
-              <span className="flex-shrink-0 h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">
+              <span className="flex-shrink-0 h-6 w-6 rounded-full bg-brand-light text-brand-dark text-xs font-bold flex items-center justify-center">
                 {i + 1}
               </span>
               {step}
@@ -73,7 +73,7 @@ function SuccessContent() {
         {orderId && (
           <Link
             href={`/account/orders/${orderId}`}
-            className="inline-flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-brand text-white font-semibold px-6 py-3 rounded-xl hover:bg-brand-dark transition-colors"
           >
             <Package className="h-4 w-4" />
             Track Your Order

@@ -9,7 +9,7 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   paid: "bg-blue-100 text-blue-700",
   processing: "bg-purple-100 text-purple-700",
-  shipped: "bg-indigo-100 text-indigo-700",
+  shipped: "bg-blue-100 text-blue-700",
   delivered: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
 };
@@ -88,7 +88,7 @@ export default function AdminOrdersPage() {
                   <td className="px-6 py-4">
                     <Link
                       href={`/admin/orders/${order.id}`}
-                      className="text-gray-400 hover:text-indigo-600 transition-colors"
+                      className="text-gray-400 hover:text-brand transition-colors"
                     >
                       <ArrowRight className="h-4 w-4" />
                     </Link>

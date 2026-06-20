@@ -40,7 +40,7 @@ export default function ShippingSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, freeShippingThreshold: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             />
             <p className="text-xs text-gray-400 mt-1">
               Orders above this amount get free shipping. 5000 = £50.00
@@ -57,7 +57,7 @@ export default function ShippingSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, standardRate: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             />
           </div>
           <div>
@@ -71,14 +71,14 @@ export default function ShippingSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, expressRate: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             />
           </div>
         </div>
 
         <button
           type="submit"
-          className="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 bg-brand text-white font-semibold px-6 py-3 rounded-xl hover:bg-brand-dark transition-colors"
         >
           {saved ? (
             <>

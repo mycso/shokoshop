@@ -80,7 +80,7 @@ export default async function OrderDetailPage({
             order.status === "delivered"
               ? "bg-green-100 text-green-700"
               : order.status === "shipped"
-              ? "bg-indigo-100 text-indigo-700"
+              ? "bg-blue-100 text-blue-700"
               : order.status === "cancelled"
               ? "bg-red-100 text-red-700"
               : "bg-yellow-100 text-yellow-700"
@@ -104,15 +104,15 @@ export default async function OrderDetailPage({
                   <div
                     className={`h-9 w-9 rounded-full flex items-center justify-center transition-all ${
                       isCompleted
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-brand text-white"
                         : "bg-gray-100 text-gray-400"
-                    } ${isCurrent ? "ring-4 ring-indigo-100" : ""}`}
+                    } ${isCurrent ? "ring-4 ring-brand-light" : ""}`}
                   >
                     <Icon className="h-4 w-4" />
                   </div>
                   <span
                     className={`mt-2 text-xs font-medium text-center max-w-16 ${
-                      isCompleted ? "text-indigo-600" : "text-gray-400"
+                      isCompleted ? "text-brand" : "text-gray-400"
                     }`}
                   >
                     {step.label}
@@ -121,7 +121,7 @@ export default async function OrderDetailPage({
                 {i < STATUS_STEPS.length - 1 && (
                   <div
                     className={`flex-1 h-0.5 mx-2 mb-5 transition-all ${
-                      i < currentStep ? "bg-indigo-600" : "bg-gray-200"
+                      i < currentStep ? "bg-brand" : "bg-gray-200"
                     }`}
                   />
                 )}
@@ -133,10 +133,10 @@ export default async function OrderDetailPage({
 
       {/* Tracking */}
       {order.trackingNumber && (
-        <div className="bg-indigo-50 rounded-2xl p-5 mb-6">
+        <div className="bg-brand-light rounded-2xl p-5 mb-6">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <div className="flex items-center gap-2 text-indigo-700 font-semibold mb-1">
+              <div className="flex items-center gap-2 text-brand-dark font-semibold mb-1">
                 <Truck className="h-4 w-4" />
                 Tracking Number
               </div>
@@ -149,7 +149,7 @@ export default async function OrderDetailPage({
                 href={order.trackingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-1.5 bg-brand text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors"
               >
                 Track Package
                 <ExternalLink className="h-3.5 w-3.5" />
@@ -198,7 +198,7 @@ export default async function OrderDetailPage({
         {/* Shipping */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-indigo-600" />
+            <MapPin className="h-4 w-4 text-brand" />
             Shipping Address
           </h2>
           <div className="text-sm text-gray-600 space-y-1">

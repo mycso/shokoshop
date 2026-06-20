@@ -21,7 +21,7 @@ export default function CartPage() {
         </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 bg-indigo-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+          className="inline-flex items-center gap-2 bg-brand text-white font-semibold px-8 py-3 rounded-xl hover:bg-brand-dark transition-colors"
         >
           Browse Products
           <ArrowRight className="h-4 w-4" />
@@ -60,7 +60,7 @@ export default function CartPage() {
                       </p>
                     )}
                     {item.customDesignUrl && (
-                      <p className="text-xs text-indigo-600 mt-0.5">
+                      <p className="text-xs text-brand mt-0.5">
                         ✓ Custom design uploaded
                       </p>
                     )}
@@ -140,7 +140,7 @@ export default function CartPage() {
             </div>
             <Link
               href="/checkout"
-              className="w-full mt-6 flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors"
+              className="w-full mt-6 flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3.5 rounded-xl hover:bg-brand-dark transition-colors shadow-md"
             >
               Proceed to Checkout
               <ArrowRight className="h-4 w-4" />

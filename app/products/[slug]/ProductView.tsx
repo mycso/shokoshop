@@ -33,7 +33,7 @@ function Gallery({
 
   return (
     <div className="space-y-3">
-      <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden bg-gray-100 group">
+      <div className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 group">
         <Image
           key={images[activeIndex]}
           src={images[activeIndex]}

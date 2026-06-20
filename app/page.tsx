@@ -72,7 +72,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative bg-[#e70a9b] text-white">
+      <section className="relative bg-accent text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36">
           <div className="max-w-2xl">
             <h1 className={`${archivo.className} text-4xl sm:text-5xl lg:text-7xl uppercase font-extrabold leading-tight tracking-tight mb-6`}>
@@ -218,7 +218,7 @@ export default async function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
             Ready to create something amazing?
           </h2>
-          <p className="text-blue-100 text-lg mb-8">
+          <p className="text-white/80 text-lg mb-8">
             Join thousands of customers who trust ShokoShop for custom T-shirts and wall art.
           </p>
           <Link

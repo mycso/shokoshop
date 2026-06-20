@@ -56,7 +56,7 @@ export default function NewProductPage() {
               required
               value={form.name}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             />
           </div>
           <div>
@@ -69,7 +69,7 @@ export default function NewProductPage() {
               rows={4}
               value={form.description}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light resize-none"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -84,7 +84,7 @@ export default function NewProductPage() {
                 min="0"
                 value={form.price}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                 placeholder="e.g. 2999 = £29.99"
               />
             </div>
@@ -97,7 +97,7 @@ export default function NewProductPage() {
                 required
                 value={form.category}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               >
                 <option value="">Select category</option>
                 <option value="Apparel">Apparel</option>
@@ -117,7 +117,7 @@ export default function NewProductPage() {
               name="gelatoProductId"
               value={form.gelatoProductId}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="e.g. apparel_product_uid"
             />
           </div>
@@ -127,7 +127,7 @@ export default function NewProductPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors"
           >
             <Save className="h-4 w-4" />
             {saving ? "Saving…" : "Save Product"}

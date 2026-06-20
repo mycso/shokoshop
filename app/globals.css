@@ -32,6 +32,8 @@
 .hover\:text-brand:hover { color: var(--brand); }
 .hover\:border-brand:hover { border-color: var(--brand); }
 .focus\:ring-brand:focus { --tw-ring-color: var(--brand); }
+.ring-brand-light { --tw-ring-color: var(--brand-light); }
+.hover\:bg-accent:hover { background-color: var(--accent); }
 
 @media (prefers-color-scheme: dark) {
   :root {

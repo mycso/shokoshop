@@ -125,7 +125,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
           </h2>
 
           {uploadedImage ? (
-            <div className="relative rounded-2xl overflow-hidden border-2 border-indigo-400 bg-gray-50 h-80">
+            <div className="relative rounded-2xl overflow-hidden border-2 border-brand bg-gray-50 h-80">
               <Image
                 src={uploadedImage}
                 alt="Your design"
@@ -151,8 +151,8 @@ export default function CustomiseClient({ product }: { product: Product }) {
             <div
               className={`border-2 border-dashed rounded-2xl h-80 flex flex-col items-center justify-center cursor-pointer transition-colors ${
                 dragOver
-                  ? "border-indigo-500 bg-indigo-50"
-                  : "border-gray-300 bg-white hover:border-indigo-400 hover:bg-gray-50"
+                  ? "border-brand bg-brand-light"
+                  : "border-gray-300 bg-white hover:border-brand hover:bg-gray-50"
               }`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
@@ -166,7 +166,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
               <p className="text-sm text-gray-400 mb-4">
                 PNG, JPG, SVG up to 20MB
               </p>
-              <button className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors">
+              <button className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors">
                 <Upload className="h-4 w-4" />
                 Browse Files
               </button>
@@ -210,7 +210,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
             <div>
               <p className="font-semibold text-gray-900">{product.name}</p>
               <p className="text-sm text-gray-500">{product.category}</p>
-              <p className="text-lg font-bold text-indigo-600 mt-1">
+              <p className="text-lg font-bold text-brand mt-1">
                 {formatPrice(selectedVariant?.price ?? product.price)}
               </p>
             </div>
@@ -229,8 +229,8 @@ export default function CustomiseClient({ product }: { product: Product }) {
                     onClick={() => setSelectedVariant(v)}
                     className={`px-3 py-1.5 text-sm rounded-lg border font-medium transition-all ${
                       selectedVariant?.id === v.id
-                        ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                        : "border-gray-200 text-gray-700 hover:border-indigo-400"
+                        ? "border-brand bg-brand-light text-brand-dark"
+                        : "border-gray-200 text-gray-700 hover:border-brand"
                     }`}
                   >
                     {v.name}
@@ -282,7 +282,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
           <button
             onClick={handleAddToCart}
             disabled={isUploading}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3.5 px-6 rounded-xl hover:bg-indigo-700 transition-colors text-base disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-brand text-white font-semibold py-3.5 px-6 rounded-xl hover:bg-brand-dark transition-colors text-base disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <ShoppingCart className="h-5 w-5" />
             {isUploading ? "Uploading design…" : "Add to Cart"}

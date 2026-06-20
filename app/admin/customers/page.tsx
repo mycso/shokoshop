@@ -40,7 +40,7 @@ export default function AdminCustomersPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center gap-3 mb-8">
-        <Users className="h-6 w-6 text-indigo-600" />
+        <Users className="h-6 w-6 text-brand" />
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
           <p className="text-gray-500 text-sm">
@@ -75,7 +75,7 @@ export default function AdminCustomersPage() {
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-brand-light text-brand-dark font-bold flex items-center justify-center text-sm flex-shrink-0">
                       {customer.name[0].toUpperCase()}
                     </div>
                     <div>

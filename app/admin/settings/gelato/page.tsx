@@ -79,7 +79,7 @@ export default function GelatoSettingsPage() {
               type="password"
               value={form.apiKey}
               onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="gel_live_xxxxxxxxxxxx"
             />
             <p className="text-xs text-gray-400 mt-1.5">
@@ -94,7 +94,7 @@ export default function GelatoSettingsPage() {
               type="text"
               value={form.storeId}
               onChange={(e) => setForm({ ...form, storeId: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="your-store-id"
             />
           </div>
@@ -108,7 +108,7 @@ export default function GelatoSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, webhookSecret: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="whsec_xxxxxxxxxxxx"
             />
             <p className="text-xs text-gray-400 mt-1.5">
@@ -123,7 +123,7 @@ export default function GelatoSettingsPage() {
               type="text"
               value={form.catalogUrl}
               onChange={(e) => setForm({ ...form, catalogUrl: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="https://catalog.gelatoapis.com/v1/your-account/products"
             />
             <p className="text-xs text-gray-400 mt-1.5">
@@ -142,7 +142,7 @@ export default function GelatoSettingsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <input value={manual.price} onChange={(e) => setManual({ ...manual, price: e.target.value })} className="w-32 border rounded-xl px-3 py-2 text-sm" placeholder="Price (cents)" />
-                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm">Add to local products</button>
+                <button type="submit" className="bg-brand text-white px-4 py-2 rounded-xl text-sm">Add to local products</button>
               </div>
             </form>
           </div>
@@ -155,7 +155,7 @@ export default function GelatoSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, defaultShipmentMethod: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             >
               <option value="standard">Standard</option>
               <option value="express">Express</option>
@@ -166,7 +166,7 @@ export default function GelatoSettingsPage() {
 
         <button
           type="submit"
-          className="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 bg-brand text-white font-semibold px-6 py-3 rounded-xl hover:bg-brand-dark transition-colors"
         >
           {saved ? (
             <>

@@ -58,7 +58,7 @@ export default async function AdminOrderDetailPage({
             order.status === "delivered"
               ? "bg-green-100 text-green-700"
               : order.status === "shipped"
-              ? "bg-indigo-100 text-indigo-700"
+              ? "bg-brand-light text-brand-dark"
               : order.status === "processing"
               ? "bg-purple-100 text-purple-700"
               : "bg-yellow-100 text-yellow-700"
@@ -97,8 +97,8 @@ export default async function AdminOrderDetailPage({
             </div>
           )}
           {order.trackingNumber && (
-            <div className="flex items-center gap-2 bg-indigo-50 px-3 py-2 rounded-xl">
-              <Truck className="h-4 w-4 text-indigo-600" />
+            <div className="flex items-center gap-2 bg-brand-light px-3 py-2 rounded-xl">
+              <Truck className="h-4 w-4 text-brand" />
               <div>
                 <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
                   Tracking

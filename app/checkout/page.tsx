@@ -66,7 +66,7 @@ export default function CheckoutPage() {
         </h1>
         <Link
           href="/products"
-          className="text-indigo-600 hover:underline font-medium"
+          className="text-brand hover:underline font-medium"
         >
           Browse products →
         </Link>
@@ -77,6 +77,24 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+
+      {/* Progress steps */}
+      <div className="flex items-center gap-0 mb-10 text-sm">
+        <Link href="/cart" className="flex items-center gap-2 text-gray-400 hover:text-gray-600 transition-colors">
+          <span className="h-6 w-6 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center text-xs font-bold">1</span>
+          <span className="hidden sm:inline">Cart</span>
+        </Link>
+        <div className="flex-1 max-w-[3rem] h-px bg-gray-200 mx-2" />
+        <div className="flex items-center gap-2 text-brand font-medium">
+          <span className="h-6 w-6 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold">2</span>
+          <span className="hidden sm:inline">Details</span>
+        </div>
+        <div className="flex-1 max-w-[3rem] h-px bg-gray-200 mx-2" />
+        <div className="flex items-center gap-2 text-gray-400">
+          <span className="h-6 w-6 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xs font-bold">3</span>
+          <span className="hidden sm:inline">Payment</span>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
         {/* Form */}
@@ -96,7 +114,7 @@ export default function CheckoutPage() {
                 required
                 value={form.email}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 placeholder="you@example.com"
               />
             </div>
@@ -118,7 +136,7 @@ export default function CheckoutPage() {
                   required
                   value={form.firstName}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div>
@@ -131,7 +149,7 @@ export default function CheckoutPage() {
                   required
                   value={form.lastName}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -144,7 +162,7 @@ export default function CheckoutPage() {
                   required
                   value={form.line1}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -156,7 +174,7 @@ export default function CheckoutPage() {
                   name="line2"
                   value={form.line2}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div>
@@ -169,7 +187,7 @@ export default function CheckoutPage() {
                   required
                   value={form.city}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div>
@@ -181,7 +199,7 @@ export default function CheckoutPage() {
                   name="state"
                   value={form.state}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div>
@@ -194,7 +212,7 @@ export default function CheckoutPage() {
                   required
                   value={form.postalCode}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 />
               </div>
               <div>
@@ -206,7 +224,7 @@ export default function CheckoutPage() {
                   required
                   value={form.country}
                   onChange={handleChange}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 >
                   <option value="GB">United Kingdom</option>
                   <option value="US">United States</option>
@@ -231,7 +249,7 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-4 rounded-xl hover:bg-indigo-700 disabled:opacity-60 transition-colors text-base"
+            className="w-full flex items-center justify-center gap-2 bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors text-base"
           >
             {loading ? (
               "Redirecting to payment…"
@@ -261,7 +279,7 @@ export default function CheckoutPage() {
                       fill
                       className="object-cover"
                     />
-                    <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                    <span className="absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                       {item.quantity}
                     </span>
                   </div>

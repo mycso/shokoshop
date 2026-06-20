@@ -50,7 +50,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Package className="h-8 w-8 text-indigo-600" />
+            <Package className="h-8 w-8 text-brand" />
             <span className="text-2xl font-bold text-gray-900">ShokoShop</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
@@ -72,7 +72,7 @@ export default function SignupPage() {
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                 placeholder="Jane Smith"
               />
             </div>
@@ -89,7 +89,7 @@ export default function SignupPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                 placeholder="you@example.com"
               />
             </div>
@@ -109,7 +109,7 @@ export default function SignupPage() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                   placeholder="••••••••"
                 />
                 <button
@@ -157,7 +157,7 @@ export default function SignupPage() {
                 onChange={(e) =>
                   setForm({ ...form, confirmPassword: e.target.value })
                 }
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                 placeholder="••••••••"
               />
             </div>
@@ -171,7 +171,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+              className="w-full bg-brand text-white font-semibold py-3 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors"
             >
               {loading ? "Creating account…" : "Create Account"}
             </button>
@@ -181,7 +181,7 @@ export default function SignupPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="text-indigo-600 font-medium hover:underline"
+              className="text-brand font-medium hover:underline"
             >
               Sign in
             </Link>

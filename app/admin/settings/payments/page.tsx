@@ -40,7 +40,7 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripePublishableKey: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="pk_live_xxxxxxxxxxxx"
             />
           </div>
@@ -54,7 +54,7 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripeSecretKey: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="sk_live_xxxxxxxxxxxx"
             />
           </div>
@@ -68,7 +68,7 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripeWebhookSecret: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="whsec_xxxxxxxxxxxx"
             />
             <p className="text-xs text-gray-400 mt-1.5">
@@ -85,7 +85,7 @@ export default function PaymentSettingsPage() {
             <select
               value={form.currency}
               onChange={(e) => setForm({ ...form, currency: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
             >
               <option value="gbp">GBP – British Pound</option>
               <option value="usd">USD – US Dollar</option>
@@ -98,7 +98,7 @@ export default function PaymentSettingsPage() {
 
         <button
           type="submit"
-          className="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors"
+          className="flex items-center gap-2 bg-brand text-white font-semibold px-6 py-3 rounded-xl hover:bg-brand-dark transition-colors"
         >
           {saved ? (
             <>

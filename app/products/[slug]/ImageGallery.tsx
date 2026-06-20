@@ -23,7 +23,7 @@ export default function ImageGallery({
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="relative h-96 lg:h-[500px] rounded-2xl overflow-hidden bg-gray-100 group">
+      <div className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 group">
         <Image
           src={images[active]}
           alt={`${name} – image ${active + 1}`}

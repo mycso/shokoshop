@@ -31,7 +31,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Package className="h-8 w-8 text-indigo-600" />
+            <Package className="h-8 w-8 text-brand" />
             <span className="text-2xl font-bold text-gray-900">ShokoShop</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
@@ -53,7 +53,7 @@ export default function LoginPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                 placeholder="you@example.com"
               />
             </div>
@@ -73,7 +73,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                   placeholder="••••••••"
                 />
                 <button
@@ -91,7 +91,7 @@ export default function LoginPage() {
               <div className="flex justify-end mt-1.5">
                 <button
                   type="button"
-                  className="text-xs text-indigo-600 hover:underline"
+                  className="text-xs text-brand hover:underline"
                 >
                   Forgot password?
                 </button>
@@ -107,7 +107,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+              className="w-full bg-brand text-white font-semibold py-3 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors"
             >
               {loading ? "Signing in…" : "Sign In"}
             </button>
@@ -117,7 +117,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/signup"
-              className="text-indigo-600 font-medium hover:underline"
+              className="text-brand font-medium hover:underline"
             >
               Sign up free
             </Link>
