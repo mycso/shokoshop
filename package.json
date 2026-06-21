@@ -9,6 +9,9 @@
     "lint": "eslint",
     "sync-prices": "node scripts/sync-prices.mjs"
   },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "dependencies": {
     "@stripe/stripe-js": "^9.4.0",
     "@vercel/blob": "^2.4.1",
