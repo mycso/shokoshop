@@ -144,6 +144,11 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error("❌ ", err.message);
+  console.error("❌ Command failed with error:", err.message);
+  const localPath = path.join(ROOT, ".local-products.json");
+  if (fs.existsSync(localPath)) {
+    console.warn("⚠️  Using existing .local-products.json — Gelato API unavailable during build.");
+    process.exit(0);
+  }
   process.exit(1);
 });
