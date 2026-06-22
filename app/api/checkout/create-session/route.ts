@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     // If Stripe is configured, create a Stripe Checkout session
     if (stripeSecretKey) {
       const stripe = new Stripe(stripeSecretKey, {
-        apiVersion: "2026-04-22.dahlia",
+        apiVersion: "2026-05-27.dahlia",
       });
 
       const baseUrl =
