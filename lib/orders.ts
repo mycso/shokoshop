@@ -1,9 +1,26 @@
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, accessSync, constants } from "fs";
 import { join } from "path";
+import os from "os";
 import { Order } from "@/types";
 
-// File-based persistence. On serverless hosts (Vercel) swap this for a real DB.
-const ORDERS_FILE = join(process.cwd(), ".orders.json");
+// File-based persistence. On serverless hosts (Vercel, AWS Lambda) the project
+// root may be read-only. Respect an explicit `ORDERS_FILE` env var first. If
+// that's not set, try writing to the project root; if that's not writable,
+// fall back to the OS temp directory (which is writable on serverless).
+const ORDERS_FILE = (() => {
+  const envPath = process.env.ORDERS_FILE;
+  if (envPath) return envPath;
+
+  const projectPath = join(process.cwd(), ".orders.json");
+  try {
+    // If we can write to the current working directory, use the project file.
+    accessSync(process.cwd(), constants.W_OK);
+    return projectPath;
+  } catch {
+    // Fallback to OS temp directory (e.g. /tmp on Linux-based serverless)
+    return join(os.tmpdir(), ".orders.json");
+  }
+})();
 
 function readOrders(): Map<string, Order> {
   if (!existsSync(ORDERS_FILE)) return new Map();
