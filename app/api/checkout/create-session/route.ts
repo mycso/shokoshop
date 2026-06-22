@@ -118,9 +118,10 @@ export async function POST(request: Request) {
 
     return Response.json({ orderId });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     console.error("create-session error:", err);
     return Response.json(
-      { error: "Failed to create checkout session" },
+      { error: "Failed to create checkout session", detail: message },
       { status: 500 }
     );
   }
