@@ -9,8 +9,12 @@ export async function POST(request: Request) {
     const {
       cart,
       shippingAddress,
+      currency = "GBP",
+      rate = 1,
     }: {
       cart: Cart;
+      currency?: string;
+      rate?: number;
       shippingAddress: {
         email: string;
         firstName: string;
@@ -65,13 +69,13 @@ export async function POST(request: Request) {
         customer_email: shippingAddress.email,
         line_items: cart.items.map((item) => ({
           price_data: {
-            currency: "gbp",
+            currency: currency.toLowerCase(),
             product_data: {
               name: item.name,
               description: item.variantName ?? undefined,
               images: isSafeImageUrl(item.image) ? [item.image!] : [],
             },
-            unit_amount: item.price,
+            unit_amount: Math.round(item.price * rate),
           },
           quantity: item.quantity,
         })),

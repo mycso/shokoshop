@@ -3,17 +3,12 @@
 import { useState, useMemo } from "react";
 import { ShoppingCart, Check } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useCurrency } from "@/lib/currency-context";
 import { Product, ProductVariantOption } from "@/types";
-
-function formatPrice(pence: number) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(pence / 100);
-}
 
 export default function AddToCartButton({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const { formatPrice } = useCurrency();
   const [added, setAdded] = useState(false);
 
   const options: ProductVariantOption[] = product.productVariantOptions ?? [];

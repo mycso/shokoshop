@@ -6,10 +6,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Lock } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/products";
+import { useCurrency } from "@/lib/currency-context";
 
 export default function CheckoutPage() {
   const { cart } = useCart();
+  const { currency, rate, formatPrice } = useCurrency();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, shippingAddress: form }),
+        body: JSON.stringify({ cart, shippingAddress: form, currency, rate }),
       });
       const data = await res.json();
       if (data.url) {

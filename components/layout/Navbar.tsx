@@ -5,6 +5,7 @@ import { ShoppingCart, User, Menu, X, Package } from "lucide-react";
 import { Bebas_Neue } from "next/font/google";
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
 const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
@@ -46,6 +47,7 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
+            <CurrencySelector />
             <Link
               href="/cart"
               className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"

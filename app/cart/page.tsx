@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/products";
+import { useCurrency } from "@/lib/currency-context";
 
 export default function CartPage() {
   const { cart, removeItem, updateQuantity, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
 
   if (cart.items.length === 0) {
     return (

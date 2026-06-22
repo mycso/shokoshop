@@ -4,14 +4,8 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { ShoppingCart, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
+import { useCurrency } from "@/lib/currency-context";
 import { Product, ProductVariantOption } from "@/types";
-
-function formatPrice(pence: number) {
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "GBP",
-  }).format(pence / 100);
-}
 
 function Gallery({
   images,
@@ -104,6 +98,7 @@ function Gallery({
 
 export default function ProductView({ product }: { product: Product }) {
   const { addItem } = useCart();
+  const { formatPrice } = useCurrency();
   const [added, setAdded] = useState(false);
 
   const options: ProductVariantOption[] = product.productVariantOptions ?? [];

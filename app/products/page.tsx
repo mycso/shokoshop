@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, SlidersHorizontal } from "lucide-react";
-import { formatPrice } from "@/lib/products";
+import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import fs from "fs";
 import path from "path";
 
@@ -208,7 +208,7 @@ export default async function ProductsPage({
               <div className="flex items-center justify-between mt-auto pt-3">
                 <span className="text-lg font-bold text-gray-900">
                   {product.price > 0
-                    ? `From ${formatPrice(product.price)}`
+                    ? <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></>
                     : "View options"}
                 </span>
                 <span className="text-xs font-medium text-brand border border-brand px-2 py-1 rounded-full group-hover:bg-brand group-hover:text-white transition-colors">

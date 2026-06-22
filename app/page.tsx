@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Archivo_Black } from "next/font/google";
 import { ArrowRight, Package, Truck, Star, Zap } from "lucide-react";
-import { formatPrice } from "@/lib/products";
+import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import fs from "fs";
 import path from "path";
 
@@ -191,7 +191,7 @@ export default async function HomePage() {
                   </p>
                   <div className="flex items-center justify-between mt-auto pt-3">
                     <span className="text-xl font-bold text-gray-900">
-                      {product.price > 0 ? `From ${formatPrice(product.price)}` : "View options"}
+                      {product.price > 0 ? <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></> : "View options"}
                     </span>
                     <span className="text-sm font-medium text-brand group-hover:underline">
                       Shop now →
