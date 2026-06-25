@@ -1,15 +1,16 @@
 import { revalidateTag } from "next/cache";
 import { verifyGelatoSignature } from "@/lib/gelato-webhook";
 import { GELATO_PRODUCTS_TAG, getGelatoProducts } from "@/lib/gelato-data";
+import { assignExtraImagesToAllVariants } from "@/lib/gelato-sync.mjs";
 
 const WEBHOOK_SECRET = process.env.GELATO_WEBHOOK_SECRET;
+const API_KEY = process.env.GELATO_API_KEY!;
+const STORE_ID = process.env.GELATO_STORE_ID!;
 
 /**
- * Fires whenever a product is edited in the Gelato dashboard (e.g.
- * store_product_template_updated / store_product_updated / created) —
- * register this URL for those events in Gelato's Developer > Webhooks
- * settings. Invalidates the cached catalog immediately so the next visitor
- * sees the change, then proactively re-warms it so nobody has to wait.
+ * Fires whenever a product is edited in the Gelato dashboard. Invalidates
+ * the cache immediately, auto-assigns any extra mockup images to all variants
+ * (Gelato resets these on every save), then re-warms the cache.
  */
 export async function POST(request: Request) {
   try {
@@ -20,10 +21,21 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid signature" }, { status: 401 });
     }
 
+    const payload = JSON.parse(body);
+    const productId = payload.storeProductId ?? payload.productId ?? payload.product?.id;
+
     revalidateTag(GELATO_PRODUCTS_TAG, { expire: 0 });
-    getGelatoProducts().catch((err) => {
-      console.error("Gelato product webhook: re-warm failed", err);
-    });
+
+    (async () => {
+      try {
+        if (productId) {
+          await assignExtraImagesToAllVariants({ apiKey: API_KEY, storeId: STORE_ID, productId });
+        }
+        await getGelatoProducts();
+      } catch (err) {
+        console.error("Gelato product webhook: post-processing failed", err);
+      }
+    })();
 
     return Response.json({ received: true });
   } catch (err) {

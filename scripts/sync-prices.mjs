@@ -17,7 +17,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { fetchAllProductsWithPricesAndImages } from "../lib/gelato-sync.mjs";
+import { fetchAllProductsWithPricesAndImages, assignExtraImagesToAllVariants } from "../lib/gelato-sync.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -61,6 +61,15 @@ async function main() {
     storeId: STORE_ID,
     onLog: (msg) => console.log(msg),
   });
+
+  for (const product of results) {
+    await assignExtraImagesToAllVariants({
+      apiKey: API_KEY,
+      storeId: STORE_ID,
+      productId: product.gelatoProductId,
+      onLog: (msg) => console.log(msg),
+    });
+  }
 
   console.log(`\n✅  Pre-warmed ${results.length} product(s).`);
 }
