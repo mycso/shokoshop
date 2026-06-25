@@ -159,9 +159,15 @@ export default function ProductView({ product }: { product: Product }) {
   // Falls back to the generic product image(s) if this colour has none yet.
   const selectedColor = selection["Color"];
   const colorImages: string[] = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    // Custom admin-uploaded images always appear first
+    for (const url of product.images ?? []) {
+      const key = imageKey(url);
+      if (!seen.has(key)) { seen.add(key); out.push(url); }
+    }
+    // Then Gelato per-colour mockups
     if (selectedColor) {
-      const seen = new Set<string>();
-      const out: string[] = [];
       for (const v of variants) {
         const vopts = v.variantOptions ?? {};
         if (vopts.Color !== selectedColor) continue;
@@ -170,9 +176,8 @@ export default function ProductView({ product }: { product: Product }) {
           if (!seen.has(key)) { seen.add(key); out.push(url); }
         }
       }
-      if (out.length > 0) return out;
     }
-    return product.images.length > 0 ? product.images : ["/shokoshoplogo.svg"];
+    return out.length > 0 ? out : ["/shokoshoplogo.svg"];
   }, [selectedColor, variants, variantImages, product.images]);
 
   const [activeIndex, setActiveIndex] = useState(0);

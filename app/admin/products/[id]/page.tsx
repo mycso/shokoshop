@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Wand2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon } from "lucide-react";
 
 function formatPrice(pence: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
@@ -43,6 +43,9 @@ export default function EditProductPage({
   const [error, setError] = useState<string | null>(null);
   const [autoFilling, setAutoFilling] = useState(false);
   const [autoFillStatus, setAutoFillStatus] = useState<string | null>(null);
+  const [customImages, setCustomImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -52,7 +55,7 @@ export default function EditProductPage({
         const data = await res.json();
         setProduct(data);
 
-        // Pre-fill existing prices from local store
+        // Pre-fill existing prices and custom images from local store
         const localRes = await fetch("/api/gelato/local-products");
         if (localRes.ok) {
           const localList: any[] = await localRes.json();
@@ -64,6 +67,7 @@ export default function EditProductPage({
             }
             setVariantPrices(pre);
           }
+          if (match?.images?.length) setCustomImages(match.images);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load product");
@@ -116,6 +120,42 @@ export default function EditProductPage({
       setAutoFillStatus(err instanceof Error ? err.message : "Auto-fill failed");
     } finally {
       setAutoFilling(false);
+    }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("productId", id);
+      const res = await fetch("/api/admin/product-images", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setCustomImages(data.images);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleImageDelete(url: string) {
+    try {
+      const res = await fetch("/api/admin/product-images", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: id, url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Delete failed");
+      setCustomImages(data.images);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Delete failed");
     }
   }
 
@@ -205,6 +245,47 @@ export default function EditProductPage({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Custom images */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-semibold text-gray-900">Custom Images</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Lifestyle or editorial photos — shown first in the carousel for all colours.</p>
+            </div>
+            <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "Uploading…" : "Upload"}
+              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploading} />
+            </label>
+          </div>
+          {uploadError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-4">{uploadError}</p>
+          )}
+          {customImages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
+              <ImageIcon className="h-8 w-8 mb-2" />
+              <p className="text-sm">No custom images yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {customImages.map((url) => (
+                <div key={url} className="relative group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt="" className="h-24 w-full object-cover rounded-xl bg-gray-100" />
+                  <button
+                    type="button"
+                    onClick={() => handleImageDelete(url)}
+                    className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <div className="flex items-start justify-between mb-1">
             <div>
