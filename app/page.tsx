@@ -3,8 +3,7 @@ import Image from "next/image";
 import { Archivo_Black } from "next/font/google";
 import { ArrowRight, Package, Truck, Star, Zap } from "lucide-react";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
-import fs from "fs";
-import path from "path";
+import { getGelatoProducts } from "@/lib/gelato-data";
 
 const archivo = Archivo_Black({ weight: ["400"], subsets: ["latin"] });
 
@@ -15,10 +14,7 @@ async function getPopularProducts(limit = 3) {
 
   let localProducts: any[] = [];
   try {
-    const lp = path.resolve(process.cwd(), ".local-products.json");
-    if (fs.existsSync(lp)) {
-      localProducts = JSON.parse(fs.readFileSync(lp, "utf-8") || "[]");
-    }
+    localProducts = await getGelatoProducts();
   } catch { /* ignore */ }
 
   function mergeLocalData(gelatoId: string, slug: string) {

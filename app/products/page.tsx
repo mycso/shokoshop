@@ -2,20 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
-import fs from "fs";
-import path from "path";
+import { getGelatoProducts } from "@/lib/gelato-data";
 
 async function getProducts() {
   const apiKey = process.env.GELATO_API_KEY!;
   const storeId = process.env.GELATO_STORE_ID!;
 
-  // Load locally-saved variant prices
+  // Load live-cached prices/images (Gelato + admin overrides)
   let localProducts: any[] = [];
   try {
-    const lp = path.resolve(process.cwd(), ".local-products.json");
-    if (fs.existsSync(lp)) {
-      localProducts = JSON.parse(fs.readFileSync(lp, "utf-8") || "[]");
-    }
+    localProducts = await getGelatoProducts();
   } catch { /* ignore */ }
 
   function mergePrice(gelatoId: string, slug: string): { price: number; variantPrices: Record<string, number>; localImages: string[] } {

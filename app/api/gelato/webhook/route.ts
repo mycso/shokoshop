@@ -1,5 +1,5 @@
-import { createHmac, timingSafeEqual } from "crypto";
 import { updateOrder } from "@/lib/orders";
+import { verifyGelatoSignature } from "@/lib/gelato-webhook";
 
 const WEBHOOK_SECRET = process.env.GELATO_WEBHOOK_SECRET;
 
@@ -27,21 +27,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.text();
 
-    if (WEBHOOK_SECRET) {
-      const signature = request.headers.get("x-gelato-signature") ?? "";
-      const expected = createHmac("sha256", WEBHOOK_SECRET)
-        .update(body)
-        .digest("hex");
-      let match = false;
-      try {
-        match = timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
-      } catch {
-        match = false;
-      }
-      if (!match) {
-        console.warn("Gelato webhook: invalid signature");
-        return Response.json({ error: "Invalid signature" }, { status: 401 });
-      }
+    if (!verifyGelatoSignature(body, request.headers.get("x-gelato-signature"), WEBHOOK_SECRET)) {
+      console.warn("Gelato webhook: invalid signature");
+      return Response.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const { event, order } = JSON.parse(body) as {

@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import fs from "fs";
-import path from "path";
 import ProductView from "./ProductView";
+import { getGelatoProducts } from "@/lib/gelato-data";
 
 const GELATO_API_KEY = process.env.GELATO_API_KEY;
 const GELATO_STORE_ID = process.env.GELATO_STORE_ID;
@@ -74,23 +73,22 @@ async function fetchGelatoProduct(slug: string) {
   addImg(p.externalPreviewUrl);
   addImg(p.externalThumbnailUrl);
 
-  // Merge prices and images from .local-products.json
+  // Merge prices and images from the live Gelato/admin-overrides cache
   let price = 0;
   let variantPrices: Record<string, number> = {};
+  let variantImages: Record<string, string[]> = {};
   let images: string[] = apiImages;
   try {
-    const lp = path.resolve(process.cwd(), ".local-products.json");
-    if (fs.existsSync(lp)) {
-      const local: any[] = JSON.parse(fs.readFileSync(lp, "utf-8") || "[]");
-      const localMatch = local.find(
-        (l: any) => l.gelatoProductId === p.id || titleToSlug(l.name ?? "") === slug
-      );
-      if (localMatch) {
-        variantPrices = localMatch.variantPrices ?? {};
-        const vpValues = Object.values(variantPrices) as number[];
-        price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
-        if ((localMatch.images ?? []).length > 0) images = localMatch.images;
-      }
+    const local = await getGelatoProducts();
+    const localMatch = local.find(
+      (l) => l.gelatoProductId === p.id || titleToSlug(l.name ?? "") === slug
+    );
+    if (localMatch) {
+      variantPrices = localMatch.variantPrices ?? {};
+      variantImages = localMatch.variantImages ?? {};
+      const vpValues = Object.values(variantPrices) as number[];
+      price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
+      if ((localMatch.images ?? []).length > 0) images = localMatch.images;
     }
   } catch { /* ignore */ }
 
@@ -115,7 +113,7 @@ async function fetchGelatoProduct(slug: string) {
     })),
     productVariantOptions,
     variantPrices,
-    variantImages: {} as Record<string, string>, // No per-variant images available from Gelato API
+    variantImages, // variantId → per-colour mockup image URLs
     gelatoProductId: p.id,
     status: p.status,
   };

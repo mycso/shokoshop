@@ -1,7 +1,14 @@
 /**
  * sync-prices.mjs
- * Fetches real retail prices for every product/variant in your Gelato store
- * and writes them to .local-products.json.
+ * Pre-warms the Blob image cache for every product/variant in your Gelato
+ * store ahead of a deploy, so the first real visitor never pays the
+ * download+upload latency for a brand-new preview image.
+ *
+ * Pricing and the product catalog itself are no longer cached to a local
+ * file — the live site fetches them through lib/gelato-data.ts (an
+ * unstable_cache wrapper, invalidated by the Gelato product webhook), which
+ * works correctly on Vercel's read-only production filesystem. This script
+ * is purely a deploy-time optimization, not a required step.
  *
  * Usage:  node scripts/sync-prices.mjs
  *   or:   npm run sync-prices
@@ -10,6 +17,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { fetchAllProductsWithPricesAndImages } from "../lib/gelato-sync.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -40,115 +48,24 @@ if (!API_KEY || !STORE_ID) {
   process.exit(1);
 }
 
-const HEADERS = { "X-API-KEY": API_KEY, "Content-Type": "application/json" };
-const BASE = `https://ecommerce.gelatoapis.com/v1/stores/${STORE_ID}`;
-
-async function get(url) {
-  const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) throw new Error(`GET ${url} → ${res.status} ${await res.text()}`);
-  return res.json();
-}
-
-async function getGbpRate() {
-  try {
-    const data = await fetch("https://api.exchangerate-api.com/v4/latest/EUR").then(r => r.json());
-    return data.rates.GBP ?? 0.864;
-  } catch {
-    console.warn("⚠️  Could not fetch exchange rate, using fallback 0.864");
-    return 0.864;
-  }
-}
-
-function toSlug(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  console.error("❌  BLOB_READ_WRITE_TOKEN must be set in .env");
+  process.exit(1);
 }
 
 async function main() {
-  console.log("🔄  Syncing Gelato prices…\n");
+  console.log("🔄  Pre-warming Gelato product images on Blob…\n");
 
-  const gbpRate = await getGbpRate();
-  console.log(`EUR → GBP rate: ${gbpRate}\n`);
+  const results = await fetchAllProductsWithPricesAndImages({
+    apiKey: API_KEY,
+    storeId: STORE_ID,
+    onLog: (msg) => console.log(msg),
+  });
 
-  // Load existing local products so we can merge (preserve manual overrides)
-  const localPath = path.join(ROOT, ".local-products.json");
-  let existing = [];
-  try {
-    if (fs.existsSync(localPath)) {
-      existing = JSON.parse(fs.readFileSync(localPath, "utf-8") || "[]");
-    }
-  } catch { /* ignore */ }
-
-  // Fetch all store products
-  const { products = [] } = await get(`${BASE}/products?limit=100`);
-  console.log(`Found ${products.length} product(s) in store.\n`);
-
-  const results = [];
-
-  for (const product of products) {
-    const pid = product.id;
-    const name = product.title ?? product.name ?? "Untitled";
-    const slug = toSlug(name);
-
-    console.log(`📦  ${name}`);
-
-    // Get full detail for variants list
-    const detail = await get(`${BASE}/products/${pid}`);
-    const variants = detail.variants ?? [];
-
-    // Collect images from the detail response
-    const images = [];
-    for (const field of ["previewUrl", "externalPreviewUrl", "externalThumbnailUrl"]) {
-      const url = detail[field];
-      if (typeof url === "string" && url.length > 0 && !images.includes(url)) {
-        images.push(url);
-      }
-    }
-
-    // Check if we already have prices for all variants (skip re-fetch if so)
-    const existingEntry = existing.find(e => e.gelatoProductId === pid);
-    const existingVP = existingEntry?.variantPrices ?? {};
-    const missingVariants = variants.filter(v => !(v.id in existingVP));
-
-    if (missingVariants.length === 0 && Object.keys(existingVP).length > 0) {
-      console.log(`  ✅ Already priced (${variants.length} variants) — skipping\n`);
-      results.push({ ...existingEntry, images });
-      continue;
-    }
-
-    // Fetch price per variant
-    const variantPrices = { ...existingVP };
-    for (const v of variants) {
-      if (v.id in variantPrices) continue; // don't overwrite existing
-      const vdata = await get(`${BASE}/products/${pid}/variants/${v.id}`);
-      const priceEur = vdata.price ?? 0;
-      const priceGbpPence = Math.round(priceEur * gbpRate * 100);
-      console.log(`  ${vdata.title ?? v.id}: EUR ${priceEur} → ${priceGbpPence}p (£${(priceGbpPence/100).toFixed(2)})`);
-      variantPrices[v.id] = priceGbpPence;
-    }
-
-    const minPrice = Math.min(...Object.values(variantPrices));
-
-    results.push({
-      gelatoProductId: pid,
-      name,
-      slug,
-      price: minPrice,
-      variantPrices,
-      images,
-    });
-    console.log(`  → From £${(minPrice / 100).toFixed(2)}\n`);
-  }
-
-  fs.writeFileSync(localPath, JSON.stringify(results, null, 2));
-  console.log(`✅  Saved ${results.length} product(s) to .local-products.json`);
+  console.log(`\n✅  Pre-warmed ${results.length} product(s).`);
 }
 
-main().catch(err => {
-  console.error("❌ Command failed with error:", err.message);
-  const localPath = path.join(ROOT, ".local-products.json");
-  if (fs.existsSync(localPath)) {
-    console.warn("⚠️  Using existing .local-products.json — Gelato API unavailable during build.");
-    process.exit(0);
-  }
-  process.exit(1);
+main().catch((err) => {
+  console.warn("⚠️  Gelato pre-warm failed (non-fatal — the live site fetches its own data):", err.message);
+  process.exit(0);
 });

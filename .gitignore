@@ -45,4 +45,3 @@ next-env.d.ts
 
 # local data files
 .orders.json
-.local-products.json

@@ -7,6 +7,23 @@ import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
 import { Product, ProductVariantOption } from "@/types";
 
+// Images are served via /api/blob-image?path=<blob pathname>, so the
+// distinguishing part lives in the query string, not the route path — unwrap
+// it before comparing. Falls back to stripping any query string for other
+// URLs (e.g. a raw, re-signed Gelato URL, where the path alone identifies it).
+function imageKey(url: string): string {
+  try {
+    const parsed = new URL(url, "http://localhost");
+    if (parsed.pathname === "/api/blob-image") {
+      const inner = parsed.searchParams.get("path");
+      if (inner) return inner;
+    }
+    return parsed.pathname;
+  } catch {
+    return url.split("?")[0];
+  }
+}
+
 function Gallery({
   images,
   name,
@@ -24,6 +41,8 @@ function Gallery({
   function next() {
     onSelect(activeIndex === images.length - 1 ? 0 : activeIndex + 1);
   }
+
+  // console.log("Gallery images:", images);
 
   return (
     <div className="space-y-3">
@@ -100,24 +119,14 @@ export default function ProductView({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const [added, setAdded] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  console.log("ProductView product:", product);
 
   const options: ProductVariantOption[] = product.productVariantOptions ?? [];
   const variants = product.variants ?? [];
   const variantPrices: Record<string, number> = product.variantPrices ?? {};
-  const variantImages: Record<string, string> = product.variantImages ?? {};
-
-  // Build deduplicated image list: product images first, then any extra variant previews
-  const allImages: string[] = useMemo(() => {
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (const img of product.images) {
-      if (!seen.has(img)) { seen.add(img); out.push(img); }
-    }
-    for (const url of Object.values(variantImages)) {
-      if (!seen.has(url)) { seen.add(url); out.push(url); }
-    }
-    return out.length > 0 ? out : ["/shokoshoplogo.svg"];
-  }, [product.images, variantImages]);
+  const variantImages: Record<string, string[]> = product.variantImages ?? {};
 
   // Initial selection: first value of each option
   const initialSelection: Record<string, string> = {};
@@ -145,25 +154,37 @@ export default function ProductView({ product }: { product: Product }) {
 
   const selectedVariant = useMemo(() => findVariant(selection), [selection]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Derive active image index from the selected variant's preview
-  const activeImageIndex = useMemo(() => {
-    if (selectedVariant && variantImages[selectedVariant.id]) {
-      const idx = allImages.indexOf(variantImages[selectedVariant.id]);
-      if (idx !== -1) return idx;
+  // Images for the selected colour only, gathered across all its sizes (a
+  // size missing its own preview still shows the colour via a sibling size).
+  // Falls back to the generic product image(s) if this colour has none yet.
+  const selectedColor = selection["Color"];
+  const colorImages: string[] = useMemo(() => {
+    if (selectedColor) {
+      const seen = new Set<string>();
+      const out: string[] = [];
+      for (const v of variants) {
+        const vopts = v.variantOptions ?? {};
+        if (vopts.Color !== selectedColor) continue;
+        for (const url of variantImages[v.id] ?? []) {
+          const key = imageKey(url);
+          if (!seen.has(key)) { seen.add(key); out.push(url); }
+        }
+      }
+      if (out.length > 0) return out;
     }
-    return 0;
-  }, [selectedVariant, variantImages, allImages]);
+    return product.images.length > 0 ? product.images : ["/shokoshoplogo.svg"];
+  }, [selectedColor, variants, variantImages, product.images]);
 
-  const [manualIndex, setManualIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // When variant changes, reset manual override
-  const [lastVariantId, setLastVariantId] = useState<string | undefined>(selectedVariant?.id);
-  if (selectedVariant?.id !== lastVariantId) {
-    setLastVariantId(selectedVariant?.id);
-    setManualIndex(null);
+  // Reset to the first image whenever the selected colour changes
+  const [lastColor, setLastColor] = useState(selectedColor);
+  if (selectedColor !== lastColor) {
+    setLastColor(selectedColor);
+    setActiveIndex(0);
   }
 
-  const displayIndex = manualIndex ?? activeImageIndex;
+  const displayIndex = Math.min(activeIndex, colorImages.length - 1);
 
   const selectedPrice = useMemo(() => {
     if (selectedVariant && variantPrices[selectedVariant.id]) {
@@ -186,7 +207,7 @@ export default function ProductView({ product }: { product: Product }) {
       name: product.name,
       price: selectedPrice,
       quantity: 1,
-      image: allImages[displayIndex] ?? product.images[0],
+      image: colorImages[displayIndex] ?? product.images[0],
       variantId: selectedVariant?.id,
       variantName: selectedVariant?.name,
       // sku holds the Gelato productUid needed for print ordering
@@ -202,25 +223,40 @@ export default function ProductView({ product }: { product: Product }) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Gallery — driven by selected variant */}
       <Gallery
-        images={allImages}
+        images={colorImages}
         name={product.name}
         activeIndex={displayIndex}
-        onSelect={(i) => setManualIndex(i)}
+        onSelect={(i) => setActiveIndex(i)}
       />
 
       {/* Info + variant picker */}
       <div>
-        <div className="mb-2">
+        {/* <div className="mb-2">
           <span className="text-sm text-brand font-semibold bg-brand-light px-3 py-1 rounded-full">
             {product.category}
           </span>
-        </div>
+        </div> */}
         <h1 className="text-3xl font-bold text-gray-900 mt-3 mb-4">
           {product.name}
         </h1>
-        <p className="text-gray-600 leading-relaxed mb-6">
-          {(product.description ?? "").replace(/<[^>]+>/g, "")}
-        </p>
+        <div className="mb-6">
+          <p
+            className={`text-gray-600 leading-relaxed ${
+              descExpanded ? "" : "line-clamp-6"
+            }`}
+          >
+            {(product.description ?? "").replace(/<[^>]+>/g, "")}
+          </p>
+          {(product.description ?? "").replace(/<[^>]+>/g, "").length > 160 && (
+            <button
+              type="button"
+              onClick={() => setDescExpanded((e) => !e)}
+              className="text-sm font-semibold text-brand hover:text-brand-dark mt-1"
+            >
+              {descExpanded ? "Show less" : "Show more"}
+            </button>
+          )}
+        </div>
 
         {/* Variant pickers */}
         <div className="space-y-5 mb-6">

@@ -15,7 +15,7 @@ export interface Product {
   variants?: ProductVariant[];
   productVariantOptions?: ProductVariantOption[];
   variantPrices?: Record<string, number>; // variantId → price in pence
-  variantImages?: Record<string, string>;  // variantId → preview image URL
+  variantImages?: Record<string, string[]>;  // variantId → mockup image URLs (front/back/side when Gelato has them)
   inStock: boolean;
 }
 
