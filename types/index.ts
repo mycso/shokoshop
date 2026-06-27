@@ -55,6 +55,7 @@ export interface Order {
   status: OrderStatus;
   shippingAddress: ShippingAddress;
   stripeSessionId?: string;
+  stripePaymentIntentId?: string;
   gelatoOrderId?: string;
   trackingNumber?: string;
   trackingUrl?: string;

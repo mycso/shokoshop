@@ -1,5 +1,9 @@
 import Stripe from "stripe";
-import { updateOrder } from "@/lib/orders";
+import { getOrderById, updateOrder } from "@/lib/orders";
+import { submitGelatoOrder } from "@/lib/gelato-order";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -10,9 +14,7 @@ export async function POST(request: Request) {
     return Response.json({ received: true });
   }
 
-  const stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2026-05-27.dahlia",
-  });
+  const stripe = new Stripe(stripeSecretKey, { apiVersion: "2026-05-27.dahlia" });
 
   const body = await request.text();
   const signature = request.headers.get("stripe-signature") ?? "";
@@ -29,30 +31,41 @@ export async function POST(request: Request) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const orderId = session.metadata?.orderId;
+      if (!orderId) break;
 
-      if (orderId) {
-        updateOrder(orderId, { status: "paid" });
+      // Store payment intent ID (needed for Stripe refunds) and mark paid
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : (session.payment_intent as Stripe.PaymentIntent | null)?.id;
 
-        // Trigger Gelato fulfilment
-        const baseUrl =
-          process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-        await fetch(`${baseUrl}/api/gelato/create-order`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId }),
-        }).catch(console.error);
+      updateOrder(orderId, {
+        status: "paid",
+        ...(paymentIntentId ? { stripePaymentIntentId: paymentIntentId } : {}),
+      });
+
+      // Submit directly to Gelato — no HTTP self-call, works in serverless
+      const order = getOrderById(orderId);
+      if (order) {
+        try {
+          const result = await submitGelatoOrder(order);
+          console.log(`Order ${orderId} → Gelato ${result.gelatoOrderId}`);
+        } catch (err) {
+          // Log but return 200 — Stripe retries on non-2xx and duplicate orders are worse
+          console.error(`Gelato submission failed for order ${orderId}:`, err);
+        }
       }
       break;
     }
 
     case "payment_intent.payment_failed": {
       const intent = event.data.object as Stripe.PaymentIntent;
-      console.log("Payment failed:", intent.id);
+      console.warn("Payment failed:", intent.id);
       break;
     }
 
     default:
-      console.log(`Unhandled Stripe event type: ${event.type}`);
+      break;
   }
 
   return Response.json({ received: true });
