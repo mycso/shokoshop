@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 export default function SendToGelatoButton({ orderId }: { orderId: string }) {
-  const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [state, setState] = useState<"idle" | "loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    handleSend();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSend() {
     setState("loading");
