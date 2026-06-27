@@ -27,9 +27,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.text();
 
-    if (!verifyGelatoSignature(body, request.headers.get("x-gelato-signature"), WEBHOOK_SECRET)) {
-      console.warn("Gelato webhook: invalid signature");
-      return Response.json({ error: "Invalid signature" }, { status: 401 });
+    if (!verifyGelatoSignature(body, request.headers.get("x-gelato-secret"), WEBHOOK_SECRET)) {
+      console.warn("Gelato webhook: invalid secret");
+      return Response.json({ error: "Invalid secret" }, { status: 401 });
     }
 
     const { event, order } = JSON.parse(body) as {
