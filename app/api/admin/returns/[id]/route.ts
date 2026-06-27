@@ -12,7 +12,7 @@ export async function PATCH(
     adminNote?: string;
   };
 
-  const returnRequest = getReturnById(id);
+  const returnRequest = await getReturnById(id);
   if (!returnRequest) {
     return NextResponse.json({ error: "Return not found" }, { status: 404 });
   }
@@ -25,7 +25,7 @@ export async function PATCH(
   }
 
   if (action === "reject") {
-    const updated = updateReturn(id, { status: "rejected", adminNote });
+    const updated = await updateReturn(id, { status: "rejected", adminNote });
     return NextResponse.json({ returnRequest: updated });
   }
 
@@ -47,7 +47,7 @@ export async function PATCH(
 
         const refund = await stripe.refunds.create(refundParams);
 
-        const updated = updateReturn(id, {
+        const updated = await updateReturn(id, {
           status: "refunded",
           stripeRefundId: refund.id,
           adminNote,
@@ -63,7 +63,7 @@ export async function PATCH(
     }
 
     // No Stripe key or no payment intent — approve without auto-refund
-    const updated = updateReturn(id, { status: "approved", adminNote });
+    const updated = await updateReturn(id, { status: "approved", adminNote });
     return NextResponse.json({ returnRequest: updated });
   }
 

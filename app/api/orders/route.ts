@@ -6,12 +6,12 @@ export async function GET(request: Request) {
   const email = searchParams.get("email");
 
   if (email) {
-    const orders = getOrdersByEmail(email);
+    const orders = await getOrdersByEmail(email);
     return Response.json({ orders });
   }
 
   // Return all (admin use)
-  const orders = getAllOrders();
+  const orders = await getAllOrders();
   return Response.json({ orders });
 }
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       shippingAddress: ShippingAddress;
     } = await request.json();
 
-    const order = createOrder({
+    const order = await createOrder({
       id: generateOrderId(),
       customerEmail: body.customerEmail,
       customerName: body.customerName,

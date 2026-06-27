@@ -102,7 +102,7 @@ export async function POST(request: Request) {
       });
 
       // Pre-create the order as pending
-      createOrder({
+      await createOrder({
         id: orderId,
         customerEmail: shippingAddress.email,
         customerName,
@@ -119,7 +119,7 @@ export async function POST(request: Request) {
     }
 
     // Demo mode: create the order directly as paid
-    createOrder({
+    await createOrder({
       id: orderId,
       customerEmail: shippingAddress.email,
       customerName,

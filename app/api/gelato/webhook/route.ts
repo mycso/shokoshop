@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       updateData.trackingUrl = order.shipment.trackingUrl;
     }
 
-    updateOrder(order.orderReferenceId, updateData);
+    await updateOrder(order.orderReferenceId, updateData);
 
     console.log(`Gelato webhook: ${event} for order ${order.orderReferenceId} -> ${status}`);
 

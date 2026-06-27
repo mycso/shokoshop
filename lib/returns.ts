@@ -1,68 +1,62 @@
-import { readFileSync, writeFileSync, existsSync, accessSync, constants } from "fs";
-import { join } from "path";
-import os from "os";
+import { get, put } from "@vercel/blob";
 import { ReturnRequest } from "@/types";
 
-const RETURNS_FILE = (() => {
-  const envPath = process.env.RETURNS_FILE;
-  if (envPath) return envPath;
-  const projectPath = join(process.cwd(), ".returns.json");
-  try {
-    accessSync(process.cwd(), constants.W_OK);
-    return projectPath;
-  } catch {
-    return join(os.tmpdir(), ".returns.json");
-  }
-})();
+const RETURNS_PATH = "orders/returns.json";
 
-function readReturns(): Map<string, ReturnRequest> {
-  if (!existsSync(RETURNS_FILE)) return new Map();
+async function readReturns(): Promise<Map<string, ReturnRequest>> {
+  const result = await get(RETURNS_PATH, { access: "private" }).catch(() => null);
+  if (!result?.stream) return new Map();
   try {
-    const raw = JSON.parse(readFileSync(RETURNS_FILE, "utf-8")) as Record<string, ReturnRequest>;
+    const text = await new Response(result.stream).text();
+    const raw = JSON.parse(text || "{}") as Record<string, ReturnRequest>;
     return new Map(Object.entries(raw));
   } catch {
     return new Map();
   }
 }
 
-function persist(returns: Map<string, ReturnRequest>): void {
-  writeFileSync(RETURNS_FILE, JSON.stringify(Object.fromEntries(returns), null, 2));
+async function persist(returns: Map<string, ReturnRequest>): Promise<void> {
+  await put(RETURNS_PATH, JSON.stringify(Object.fromEntries(returns), null, 2), {
+    access: "private",
+    contentType: "application/json",
+    allowOverwrite: true,
+  });
 }
 
-export function createReturn(req: ReturnRequest): ReturnRequest {
-  const returns = readReturns();
+export async function createReturn(req: ReturnRequest): Promise<ReturnRequest> {
+  const returns = await readReturns();
   returns.set(req.id, req);
-  persist(returns);
+  await persist(returns);
   return req;
 }
 
-export function getReturnById(id: string): ReturnRequest | undefined {
-  return readReturns().get(id);
+export async function getReturnById(id: string): Promise<ReturnRequest | undefined> {
+  return (await readReturns()).get(id);
 }
 
-export function getReturnByOrderId(orderId: string): ReturnRequest | undefined {
-  return Array.from(readReturns().values()).find((r) => r.orderId === orderId);
+export async function getReturnByOrderId(orderId: string): Promise<ReturnRequest | undefined> {
+  return Array.from((await readReturns()).values()).find((r) => r.orderId === orderId);
 }
 
-export function getReturnsByEmail(email: string): ReturnRequest[] {
-  return Array.from(readReturns().values())
+export async function getReturnsByEmail(email: string): Promise<ReturnRequest[]> {
+  return Array.from((await readReturns()).values())
     .filter((r) => r.customerEmail === email)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function getAllReturns(): ReturnRequest[] {
-  return Array.from(readReturns().values()).sort(
+export async function getAllReturns(): Promise<ReturnRequest[]> {
+  return Array.from((await readReturns()).values()).sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 }
 
-export function updateReturn(id: string, update: Partial<ReturnRequest>): ReturnRequest | null {
-  const returns = readReturns();
+export async function updateReturn(id: string, update: Partial<ReturnRequest>): Promise<ReturnRequest | null> {
+  const returns = await readReturns();
   const existing = returns.get(id);
   if (!existing) return null;
   const updated = { ...existing, ...update, updatedAt: new Date().toISOString() };
   returns.set(id, updated);
-  persist(returns);
+  await persist(returns);
   return updated;
 }
 

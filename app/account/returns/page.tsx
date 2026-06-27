@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { PackageX, Clock } from "lucide-react";
-import { getAllReturns } from "@/lib/returns";
+import { getReturnsByEmail } from "@/lib/returns";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My Returns – ShokoShop" };
@@ -26,8 +27,22 @@ const RESOLUTION_LABELS: Record<string, string> = {
   store_credit: "Store credit",
 };
 
-export default function ReturnsPage() {
-  const returns = getAllReturns();
+export default async function ReturnsPage() {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get("user_session")?.value;
+  const session = raw
+    ? (() => {
+        try {
+          return JSON.parse(Buffer.from(raw, "base64").toString("utf-8")) as {
+            email: string;
+          };
+        } catch {
+          return null;
+        }
+      })()
+    : null;
+
+  const returns = session?.email ? await getReturnsByEmail(session.email) : [];
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

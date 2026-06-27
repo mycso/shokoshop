@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ orderId: string }> }
 ) {
   const { orderId } = await params;
-  const order = getOrderById(orderId);
+  const order = await getOrderById(orderId);
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ order });
 }

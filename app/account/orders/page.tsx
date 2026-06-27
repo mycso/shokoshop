@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Package, ChevronRight } from "lucide-react";
-import { getAllOrders } from "@/lib/orders";
+import { getOrdersByEmail } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -23,8 +24,22 @@ function formatPrice(pence: number) {
   }).format(pence / 100);
 }
 
-export default function OrdersPage() {
-  const orders = getAllOrders();
+export default async function OrdersPage() {
+  const cookieStore = await cookies();
+  const raw = cookieStore.get("user_session")?.value;
+  const session = raw
+    ? (() => {
+        try {
+          return JSON.parse(Buffer.from(raw, "base64").toString("utf-8")) as {
+            email: string;
+          };
+        } catch {
+          return null;
+        }
+      })()
+    : null;
+
+  const orders = session?.email ? await getOrdersByEmail(session.email) : [];
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

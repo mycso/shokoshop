@@ -39,13 +39,13 @@ export async function POST(request: Request) {
           ? session.payment_intent
           : (session.payment_intent as Stripe.PaymentIntent | null)?.id;
 
-      updateOrder(orderId, {
+      await updateOrder(orderId, {
         status: "paid",
         ...(paymentIntentId ? { stripePaymentIntentId: paymentIntentId } : {}),
       });
 
       // Submit directly to Gelato — no HTTP self-call, works in serverless
-      const order = getOrderById(orderId);
+      const order = await getOrderById(orderId);
       if (order) {
         try {
           const result = await submitGelatoOrder(order);

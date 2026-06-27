@@ -19,12 +19,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    const existing = getReturnByOrderId(orderId);
+    const existing = await getReturnByOrderId(orderId);
     if (existing) {
       return NextResponse.json(
         { error: "A return request already exists for this order" },
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date().toISOString();
-    const returnRequest = createReturn({
+    const returnRequest = await createReturn({
       id: generateReturnId(),
       orderId,
       customerEmail: order.customerEmail,

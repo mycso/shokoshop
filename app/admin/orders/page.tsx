@@ -21,8 +21,8 @@ function formatPrice(pence: number) {
   }).format(pence / 100);
 }
 
-export default function AdminOrdersPage() {
-  const orders = getAllOrders();
+export default async function AdminOrdersPage() {
+  const orders = await getAllOrders();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

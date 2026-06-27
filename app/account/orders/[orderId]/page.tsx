@@ -46,9 +46,9 @@ export default async function OrderDetailPage({
   params: Promise<{ orderId: string }>;
 }) {
   const { orderId } = await params;
-  const order = getOrderById(orderId);
+  const order = await getOrderById(orderId);
   if (!order) notFound();
-  const existingReturn = getReturnByOrderId(orderId);
+  const existingReturn = await getReturnByOrderId(orderId);
 
   const currentStep = STATUS_ORDER.indexOf(order.status);
 

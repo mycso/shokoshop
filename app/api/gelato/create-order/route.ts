@@ -4,7 +4,7 @@ import { submitGelatoOrder } from "@/lib/gelato-order";
 export async function POST(request: Request) {
   try {
     const { orderId }: { orderId: string } = await request.json();
-    const order = getOrderById(orderId);
+    const order = await getOrderById(orderId);
     if (!order) {
       return Response.json({ error: "Order not found" }, { status: 404 });
     }
