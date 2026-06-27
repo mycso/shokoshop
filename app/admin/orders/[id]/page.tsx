@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Truck } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/orders";
+import SendToGelatoButton from "./SendToGelatoButton";
 
 export const dynamic = "force-dynamic";
 
@@ -110,7 +111,10 @@ export default async function AdminOrderDetailPage({
             </div>
           )}
           {!order.gelatoOrderId && (
-            <p className="text-sm text-gray-400">Not yet sent to Gelato.</p>
+            <div className="space-y-3">
+              <p className="text-sm text-gray-400">Not yet sent to Gelato.</p>
+              <SendToGelatoButton orderId={order.id} />
+            </div>
           )}
         </div>
       </div>
