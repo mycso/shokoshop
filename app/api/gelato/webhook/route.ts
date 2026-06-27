@@ -32,33 +32,38 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid secret" }, { status: 401 });
     }
 
-    const { event, order } = JSON.parse(body) as {
+    // Gelato sends order data flat at the root (not nested under "order")
+    const payload = JSON.parse(body) as {
       event: string;
+      orderReferenceId?: string;
+      status?: string;
+      trackingCode?: string;
+      trackingUrl?: string;
+      // older nested format — kept for safety
       order?: {
         orderReferenceId: string;
         status: string;
-        shipment?: {
-          trackingCode: string;
-          trackingUrl: string;
-        };
+        shipment?: { trackingCode: string; trackingUrl: string };
       };
     };
 
-    if (!order?.orderReferenceId) {
-      return Response.json({ received: true });
-    }
+    const orderId = payload.orderReferenceId ?? payload.order?.orderReferenceId;
+    if (!orderId) return Response.json({ received: true });
 
-    const status = mapGelatoStatus(order.status ?? "");
+    const rawStatus = payload.status ?? payload.order?.status ?? "";
+    const status = mapGelatoStatus(rawStatus);
     const updateData: Record<string, string | undefined> = { status };
 
-    if (order.shipment?.trackingCode) {
-      updateData.trackingNumber = order.shipment.trackingCode;
-      updateData.trackingUrl = order.shipment.trackingUrl;
+    const trackingCode = payload.trackingCode ?? payload.order?.shipment?.trackingCode;
+    const trackingUrl  = payload.trackingUrl  ?? payload.order?.shipment?.trackingUrl;
+    if (trackingCode) {
+      updateData.trackingNumber = trackingCode;
+      updateData.trackingUrl = trackingUrl;
     }
 
-    await updateOrder(order.orderReferenceId, updateData);
+    await updateOrder(orderId, updateData);
 
-    console.log(`Gelato webhook: ${event} for order ${order.orderReferenceId} -> ${status}`);
+    console.log(`Gelato webhook: ${payload.event} for order ${orderId} -> ${status}`);
 
     return Response.json({ received: true });
   } catch (err) {
