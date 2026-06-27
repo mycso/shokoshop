@@ -3,15 +3,20 @@ import { submitGelatoOrder } from "@/lib/gelato-order";
 
 export async function POST(request: Request) {
   try {
-    const { orderId }: { orderId: string } = await request.json();
+    const { orderId, force = false }: { orderId: string; force?: boolean } = await request.json();
     const order = await getOrderById(orderId);
     if (!order) {
       return Response.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Idempotency: already submitted
-    if (order.gelatoOrderId) {
+    // Idempotency: skip if already submitted unless admin forces a re-submit
+    if (order.gelatoOrderId && !force) {
       return Response.json({ gelatoOrderId: order.gelatoOrderId, alreadySubmitted: true });
+    }
+
+    // Force re-submit: clear the stale Gelato order ID first
+    if (force && order.gelatoOrderId) {
+      await updateOrder(orderId, { gelatoOrderId: undefined });
     }
 
     // Called from success page after Stripe payment — mark paid if still pending

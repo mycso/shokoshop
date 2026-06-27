@@ -13,7 +13,7 @@ export default function SendToGelatoButton({ orderId }: { orderId: string }) {
       const res = await fetch("/api/gelato/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, force: true }),
       });
       const data = await res.json();
       if (!res.ok) {
