@@ -62,8 +62,9 @@ export async function PATCH(req: Request) {
     const vpValues = Object.values(vp) as number[];
     const price = vpValues.length > 0 ? Math.min(...vpValues) : (body.price ?? 0);
     const category = body.category ? String(body.category) : undefined;
+    const designFilename = body.designFilename ? String(body.designFilename) : undefined;
 
-    await setOverride({ gelatoProductId, variantPrices: vp, price, ...(category ? { category } : {}) });
+    await setOverride({ gelatoProductId, variantPrices: vp, price, ...(category ? { category } : {}), ...(designFilename ? { designFilename } : {}) });
     revalidateTag(GELATO_PRODUCTS_TAG, { expire: 0 });
 
     return NextResponse.json({ ok: true });

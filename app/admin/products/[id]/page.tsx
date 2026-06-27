@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2 } from "lucide-react";
 import { CATEGORIES, detectCategory } from "@/lib/categories";
 
 function formatPrice(pence: number) {
@@ -49,6 +49,9 @@ export default function EditProductPage({
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [designFilename, setDesignFilename] = useState<string | null>(null);
+  const [designUploading, setDesignUploading] = useState(false);
+  const [designUploadError, setDesignUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -72,6 +75,7 @@ export default function EditProductPage({
           }
           if (match?.category) setCategory(match.category);
           if (match?.images?.length) setCustomImages(match.images);
+          if (match?.designFilename) setDesignFilename(match.designFilename);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load product");
@@ -182,6 +186,41 @@ export default function EditProductPage({
     }
   }
 
+  async function handleDesignUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDesignUploading(true);
+    setDesignUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("productId", id);
+      const res = await fetch("/api/admin/design-file", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      setDesignFilename(data.designFilename);
+    } catch (err) {
+      setDesignUploadError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setDesignUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleDesignDelete() {
+    try {
+      const res = await fetch("/api/admin/design-file", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: id }),
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      setDesignFilename(null);
+    } catch (err) {
+      setDesignUploadError(err instanceof Error ? err.message : "Delete failed");
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!product) return;
@@ -268,6 +307,43 @@ export default function EditProductPage({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Design file for print fulfillment */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h2 className="font-semibold text-gray-900">Design File</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Print-ready PNG/JPG sent to Gelato when fulfilling orders. Required for every product.
+              </p>
+            </div>
+            <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${designUploading ? "opacity-60 pointer-events-none" : ""}`}>
+              {designUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload"}
+              <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
+            </label>
+          </div>
+          {designUploadError && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-3">{designUploadError}</p>
+          )}
+          {designFilename ? (
+            <div className="mt-3 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-green-800">Design file set</p>
+                <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
+              </div>
+              <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div className="mt-3 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              <FileImage className="h-5 w-5 text-amber-500 shrink-0" />
+              <p className="text-sm text-amber-700">No design file — orders for this product will fail until one is uploaded.</p>
+            </div>
+          )}
+        </div>
 
         {/* Custom images */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
