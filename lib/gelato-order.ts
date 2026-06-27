@@ -21,16 +21,24 @@ async function resolveVariantId(
       `https://ecommerce.gelatoapis.com/v1/stores/${storeId}/products/${productId}`,
       { headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" } }
     );
-    if (!res.ok) return fallback;
+    if (!res.ok) {
+      console.log(`[gelato-order] product lookup failed ${res.status} for productId=${productId}`);
+      return fallback;
+    }
     const data = await res.json();
     const variants: { id: string; title: string }[] = data.variants ?? [];
+    console.log(`[gelato-order] productId=${productId} variantName="${variantName}" variants=`, JSON.stringify(variants.map(v => ({ id: v.id, title: v.title }))));
     if (variantName) {
       const match = variants.find((v) => v.title === variantName);
-      if (match) return match.id;
+      if (match) {
+        console.log(`[gelato-order] matched variant id=${match.id}`);
+        return match.id;
+      }
+      console.log(`[gelato-order] no title match — falling back to first variant`);
     }
-    // Fall back to first variant if no title match
     return variants[0]?.id ?? fallback;
-  } catch {
+  } catch (err) {
+    console.log(`[gelato-order] resolveVariantId error:`, err);
     return fallback;
   }
 }
