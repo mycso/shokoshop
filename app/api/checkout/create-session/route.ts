@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       };
 
       const session = await stripe.checkout.sessions.create({
-        automatic_payment_methods: { enabled: true },
+        payment_method_types: ["card"],
         mode: "payment",
         customer_email: shippingAddress.email,
         line_items: cart.items.map((item) => ({
