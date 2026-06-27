@@ -19,6 +19,17 @@ function SuccessContent() {
     }
   }, [clearCart, cleared]);
 
+  // Auto-submit to Gelato — fires on every success page load.
+  // The route is idempotent: if already submitted it returns immediately.
+  useEffect(() => {
+    if (!orderId) return;
+    fetch("/api/gelato/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    }).catch(() => {});
+  }, [orderId]);
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <div className="flex justify-center mb-8">

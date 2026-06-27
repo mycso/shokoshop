@@ -1,4 +1,4 @@
-import { getOrderById } from "@/lib/orders";
+import { getOrderById, updateOrder } from "@/lib/orders";
 import { submitGelatoOrder } from "@/lib/gelato-order";
 
 export async function POST(request: Request) {
@@ -7,6 +7,16 @@ export async function POST(request: Request) {
     const order = await getOrderById(orderId);
     if (!order) {
       return Response.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Idempotency: already submitted
+    if (order.gelatoOrderId) {
+      return Response.json({ gelatoOrderId: order.gelatoOrderId, alreadySubmitted: true });
+    }
+
+    // Called from success page after Stripe payment — mark paid if still pending
+    if (order.status === "pending") {
+      await updateOrder(orderId, { status: "paid" });
     }
 
     const result = await submitGelatoOrder(order);
