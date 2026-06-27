@@ -14,7 +14,7 @@ export async function GET(
   }
   return new Response(blob.stream as ReadableStream, {
     headers: {
-      "Content-Type": blob.contentType ?? "image/png",
+      "Content-Type": blob.blob.contentType ?? "image/png",
       "Cache-Control": "public, max-age=31536000, immutable",
     },
   });
