@@ -19,6 +19,8 @@ export interface LocalProductOverride {
   inStock?: boolean;
   variants?: unknown[];
   id?: string;
+  /** Filename of the print-ready design file stored in Vercel Blob under product-designs/ */
+  designFilename?: string;
 }
 
 /**
