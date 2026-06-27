@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
@@ -16,14 +16,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect to account if already logged in
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => { if (r.ok) router.replace("/account"); })
+      .catch(() => {});
+  }, [router]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    // Demo: accept any non-empty credentials
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 600));
     if (form.email && form.password.length >= 6) {
-      router.push("/account/orders");
+      await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+      router.push("/account");
     } else {
       setError("Invalid email or password. Please try again.");
     }
@@ -45,10 +56,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1.5"
-              >
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Email address
               </label>
               <input
@@ -62,10 +70,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1.5"
-              >
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -74,9 +79,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
                   placeholder="••••••••"
                 />
@@ -85,27 +88,18 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               <div className="flex justify-end mt-1.5">
-                <button
-                  type="button"
-                  className="text-xs text-brand hover:underline"
-                >
+                <button type="button" className="text-xs text-brand hover:underline">
                   Forgot password?
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">
-                {error}
-              </div>
+              <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>
             )}
 
             <button
@@ -119,10 +113,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-sm text-gray-500">
             Don&apos;t have an account?{" "}
-            <Link
-              href="/auth/signup"
-              className="text-brand font-medium hover:underline"
-            >
+            <Link href="/auth/signup" className="text-brand font-medium hover:underline">
               Sign up free
             </Link>
           </div>

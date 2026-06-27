@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, User, Menu, X, ChevronDown } from "lucide-react";
+import { ShoppingCart, User, Menu, X, ChevronDown, LogOut } from "lucide-react";
 import { Bebas_Neue } from "next/font/google";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 import { CATEGORIES } from "@/lib/categories";
@@ -12,10 +13,25 @@ const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 export default function Navbar() {
   const { itemCount } = useCart();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [mobileCatOpen, setMobileCatOpen] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => setLoggedIn(r.ok))
+      .catch(() => setLoggedIn(false));
+  }, []);
+
+  async function handleSignOut() {
+    await fetch("/api/auth/login", { method: "DELETE" });
+    setLoggedIn(false);
+    setMobileOpen(false);
+    router.push("/auth/login");
+  }
 
   const navLinks = [
     { href: "/products", label: "Products" },
@@ -90,13 +106,23 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <Link
-              href="/auth/login"
-              className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <User className="h-4 w-4" />
-              Account
-            </Link>
+            {loggedIn ? (
+              <button
+                onClick={handleSignOut}
+                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <User className="h-4 w-4" />
+                Account
+              </Link>
+            )}
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -149,13 +175,23 @@ export default function Navbar() {
                   ))}
                 </div>
               )}
-              <Link
-                href="/auth/login"
-                onClick={() => setMobileOpen(false)}
-                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
-                Account
-              </Link>
+              {loggedIn ? (
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full text-left"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  href="/auth/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+                >
+                  Account
+                </Link>
+              )}
             </div>
           </div>
         )}

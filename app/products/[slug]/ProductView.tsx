@@ -288,13 +288,32 @@ function ReviewsSection({ productId }: { productId: string }) {
   );
 }
 
+const COLOR_MAP: Record<string, string> = {
+  "white": "#FFFFFF", "black": "#111111", "navy": "#1B2A4A", "navy blue": "#1B2A4A",
+  "red": "#CC0000", "royal blue": "#2B64B8", "blue": "#2B64B8",
+  "forest green": "#2D6A2D", "green": "#2D6A2D", "kelly green": "#4CBB17",
+  "grey": "#9E9E9E", "gray": "#9E9E9E", "heather grey": "#B2B2B2", "heather gray": "#B2B2B2",
+  "sport grey": "#C0C0C0", "sport gray": "#C0C0C0", "ash": "#B2BEB5", "charcoal": "#36454F",
+  "dark grey": "#555555", "dark gray": "#555555", "slate": "#708090",
+  "maroon": "#800000", "burgundy": "#800020", "purple": "#6A0DAD", "lavender": "#E6E6FA",
+  "yellow": "#FFD700", "gold": "#C9A800", "orange": "#FF6600", "coral": "#FF6B6B",
+  "pink": "#FF69B4", "blush": "#DE5D83", "hot pink": "#FF1493",
+  "light blue": "#87CEEB", "sky blue": "#87CEEB", "carolina blue": "#56A0D3",
+  "teal": "#008080", "aqua": "#00CED1", "mint": "#98FF98",
+  "sand": "#F4E2C0", "natural": "#F5F5DC", "cream": "#FFFDD0", "off white": "#FAF9F6",
+  "beige": "#F5F5DC", "stone": "#8A8070", "brown": "#8B4513", "tan": "#D2B48C",
+  "olive": "#808000", "vintage white": "#F5F5F0",
+};
+
+function colorHex(name: string): string | null {
+  return COLOR_MAP[name.toLowerCase()] ?? null;
+}
+
 export default function ProductView({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
   const [added, setAdded] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
-
-  console.log("ProductView product:", product);
 
   const options: ProductVariantOption[] = product.productVariantOptions ?? [];
   const variants = product.variants ?? [];
@@ -441,36 +460,73 @@ export default function ProductView({ product }: { product: Product }) {
 
         {/* Variant pickers */}
         <div className="space-y-5 mb-6">
-          {options.map((opt) => (
-            <div key={opt.name}>
-              <span className="block text-sm font-semibold text-gray-700 mb-2">{opt.name}</span>
-              <div className="flex flex-wrap gap-2">
-                {opt.values.map((val) => {
-                  const isSelected = selection[opt.name] === val;
-                  const price = hasPrices ? priceForValue(opt.name, val) : null;
-                  return (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setSelection((s) => ({ ...s, [opt.name]: val }))}
-                      className={`flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
-                        isSelected
-                          ? "border-brand bg-brand-light text-brand-dark"
-                          : "border-gray-200 text-gray-700 hover:border-brand"
-                      }`}
-                    >
-                      <span className="text-sm">{val}</span>
-                      {price != null && price > 0 && (
-                        <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400"}`}>
-                          {formatPrice(price)}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
+          {options.map((opt) => {
+            const isColorOpt = opt.name.toLowerCase() === "color" || opt.name.toLowerCase() === "colour";
+            return (
+              <div key={opt.name}>
+                <span className="block text-sm font-semibold text-gray-700 mb-2">
+                  {opt.name}
+                  {isColorOpt && selection[opt.name] && (
+                    <span className="font-normal text-gray-500 ml-1.5">— {selection[opt.name]}</span>
+                  )}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {opt.values.map((val) => {
+                    const isSelected = selection[opt.name] === val;
+                    const price = hasPrices ? priceForValue(opt.name, val) : null;
+                    const hex = isColorOpt ? colorHex(val) : null;
+
+                    if (hex) {
+                      const isLight = ["#FFFFFF", "#FAF9F6", "#FFFDD0", "#F5F5DC", "#F5F5F0", "#F4E2C0", "#E6E6FA"].includes(hex);
+                      return (
+                        <button
+                          key={val}
+                          type="button"
+                          title={val}
+                          onClick={() => setSelection((s) => ({ ...s, [opt.name]: val }))}
+                          className={`relative w-9 h-9 rounded-full transition-all ${
+                            isSelected
+                              ? "ring-2 ring-offset-2 ring-brand scale-110"
+                              : "hover:scale-105"
+                          } ${isLight ? "border border-gray-300" : ""}`}
+                          style={{ backgroundColor: hex }}
+                        >
+                          {isSelected && (
+                            <span
+                              className="absolute inset-0 flex items-center justify-center text-xs"
+                              style={{ color: isLight ? "#111" : "#fff" }}
+                            >
+                              ✓
+                            </span>
+                          )}
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setSelection((s) => ({ ...s, [opt.name]: val }))}
+                        className={`flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
+                          isSelected
+                            ? "border-brand bg-brand-light text-brand-dark"
+                            : "border-gray-200 text-gray-700 hover:border-brand"
+                        }`}
+                      >
+                        <span className="text-sm">{val}</span>
+                        {price != null && price > 0 && (
+                          <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400"}`}>
+                            {formatPrice(price)}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Selected price */}

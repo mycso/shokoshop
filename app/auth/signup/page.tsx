@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff, Check } from "lucide-react";
@@ -30,6 +30,12 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => { if (r.ok) router.replace("/account"); })
+      .catch(() => {});
+  }, [router]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (form.password !== form.confirmPassword) {
@@ -43,9 +49,13 @@ export default function SignupPage() {
     }
     setLoading(true);
     setError(null);
-    // Demo: simulate sign up
     await new Promise((r) => setTimeout(r, 800));
-    router.push("/account/orders");
+    await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email, name: form.name }),
+    });
+    router.push("/account");
     setLoading(false);
   }
 
@@ -58,7 +68,7 @@ export default function SignupPage() {
             <span className={`${bebas.className} text-2xl text-gray-900`}>ShokoShop</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
-          <p className="text-gray-500 mt-1">Start customising today</p>
+          <p className="text-gray-500 mt-1">Exclusive designs, delivered to your door</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">

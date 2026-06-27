@@ -5,8 +5,18 @@ const COOKIE = "admin_session";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow the login page and login API through
-  if (pathname === "/admin/login" || pathname === "/api/admin/login") {
+  // If already authenticated as admin, skip the login page
+  if (pathname === "/admin/login") {
+    const session = request.cookies.get(COOKIE)?.value;
+    const password = process.env.ADMIN_PASSWORD;
+    if (password && session === password) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Allow the login API through
+  if (pathname === "/api/admin/login") {
     return NextResponse.next();
   }
 

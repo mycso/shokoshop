@@ -15,20 +15,24 @@ async function fetchGelatoProduct(slug: string) {
 
   const headers = { "Content-Type": "application/json", "X-API-KEY": GELATO_API_KEY };
   const fetchOpts = { headers, next: { revalidate: 60 } } as const;
+  const base = `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}`;
 
-  // Step 1: resolve slug → product id
-  const listRes = await fetch(
-    `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}/products?limit=100`,
-    fetchOpts
-  );
+  // Step 1: resolve slug → product id from list
+  const listRes = await fetch(`${base}/products?limit=100`, fetchOpts);
   if (!listRes.ok) return null;
   const listData = await listRes.json();
   const list: any[] = Array.isArray(listData.products) ? listData.products : [];
   const p = list.find((item: any) => titleToSlug(item.title ?? item.name ?? "") === slug);
   if (!p) return null;
 
+  // Step 2: fetch detail for accurate variant IDs — list endpoint may omit them
+  // or use different id formats. gelato-sync.mjs keys variantImages by detail-endpoint IDs,
+  // so we must use the same source here to ensure the lookup aligns.
+  const detailRes = await fetch(`${base}/products/${p.id}`, fetchOpts);
+  const detail = detailRes.ok ? await detailRes.json() : p;
+
   const name = p.title ?? p.name ?? "Untitled product";
-  const productVariants: any[] = p.variants ?? [];
+  const productVariants: any[] = detail.variants ?? p.variants ?? [];
 
   // Parse variantOptions from each variant's title: "Color - Size - PrintType"
   // e.g. "White - S - DTG (Direct-to-garment)" → { Color: "White", Size: "S" }
@@ -80,9 +84,10 @@ async function fetchGelatoProduct(slug: string) {
       seen.add(u); apiImages.push(u);
     }
   }
-  addImg(p.previewUrl);
-  addImg(p.externalPreviewUrl);
-  addImg(p.externalThumbnailUrl);
+  // Prefer detail fields (richer data) then fall back to list fields
+  addImg(detail.previewUrl ?? p.previewUrl);
+  addImg(detail.externalPreviewUrl ?? p.externalPreviewUrl);
+  addImg(detail.externalThumbnailUrl ?? p.externalThumbnailUrl);
 
   // Merge prices and images from the live Gelato/admin-overrides cache
   let price = 0;
@@ -109,7 +114,7 @@ async function fetchGelatoProduct(slug: string) {
     id: p.id,
     slug: titleToSlug(name),
     name,
-    description: p.description ?? "",
+    description: detail.description ?? p.description ?? "",
     price,
     images,
     category: productVariantOptions.map((o) => o.name).join(" / ") || "Apparel",

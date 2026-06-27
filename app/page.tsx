@@ -250,8 +250,8 @@ export default async function HomePage() {
             {[
               {
                 icon: <Zap className="h-6 w-6 text-yellow-500" />,
-                title: "Instant Customisation",
-                desc: "Upload your design in seconds",
+                title: "Exclusive Designs",
+                desc: "Unique artwork you won't find anywhere else",
               },
               {
                 icon: <Star className="h-6 w-6 text-brand" />,
@@ -291,7 +291,7 @@ export default async function HomePage() {
             Ready to create something amazing?
           </h2>
           <p className="text-white/80 text-lg mb-8">
-            Join thousands of customers who trust ShokoShop for custom T-shirts and wall art.
+            Join thousands of customers who trust ShokoShop for premium T-shirts and wall art.
           </p>
           <Link
             href="/products"
