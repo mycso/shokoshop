@@ -84,10 +84,17 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
       const designUrl = `${BASE_URL}/api/designs/${encodeURIComponent(designFilename)}`;
       console.log(`[gelato-order] item ${i}: productUid=${productUid} designUrl=${designUrl}`);
 
+      // Products with 'inlbl_' in the productUid (inner-label Gildan variants) require
+      // both a front design and a neck-inner label file.
+      const files: { type: string; url: string }[] = [{ type: "default", url: designUrl }];
+      if (productUid.includes("inlbl_")) {
+        files.push({ type: "neck-inner", url: `${BASE_URL}/api/designs/neck-label-blank.png` });
+      }
+
       return {
         itemReferenceId: item.id ?? `item_${i}`,
         productUid,
-        files: [{ type: "default", url: designUrl }],
+        files,
         quantity: item.quantity,
       };
     })
