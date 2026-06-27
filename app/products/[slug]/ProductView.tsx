@@ -442,6 +442,12 @@ export default function ProductView({ product }: { product: Product }) {
         <div className="space-y-5 mb-6">
           {options.map((opt) => {
             const isColorOpt = opt.name.toLowerCase() === "color" || opt.name.toLowerCase() === "colour";
+            // Name of the colour option (used to cross-check availability for other options)
+            const colorOptName = options.find(
+              (o) => o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour"
+            )?.name;
+            const selectedColorValue = colorOptName ? selection[colorOptName] : null;
+
             return (
               <div key={opt.name}>
                 <span className="block text-sm font-semibold text-gray-700 mb-2">
@@ -455,6 +461,15 @@ export default function ProductView({ product }: { product: Product }) {
                     const isSelected = selection[opt.name] === val;
                     const price = hasPrices ? priceForValue(opt.name, val) : null;
 
+                    // For non-colour options, hide values with no available variant for the selected colour
+                    if (!isColorOpt && selectedColorValue && colorOptName) {
+                      const available = variants.some((v) => {
+                        const vopts = (v as any).variantOptions ?? {};
+                        return vopts[colorOptName] === selectedColorValue && vopts[opt.name] === val;
+                      });
+                      if (!available) return null;
+                    }
+
                     if (isColorOpt) {
                       const hex = colorHex(val);
                       const isLight = isLightColor(hex);
@@ -463,7 +478,27 @@ export default function ProductView({ product }: { product: Product }) {
                           key={val}
                           type="button"
                           title={val}
-                          onClick={() => setSelection((s) => ({ ...s, [opt.name]: val }))}
+                          onClick={() => {
+                            const newSel: Record<string, string> = { ...selection, [opt.name]: val };
+                            // Reset other options (e.g. Size) to first available value for the new colour
+                            for (const other of options) {
+                              if (other.name === opt.name) continue;
+                              const currentStillValid = variants.some((vr) => {
+                                const vo = (vr as any).variantOptions ?? {};
+                                return vo[opt.name] === val && vo[other.name] === selection[other.name];
+                              });
+                              if (!currentStillValid) {
+                                const firstValid = other.values.find((v2) =>
+                                  variants.some((vr) => {
+                                    const vo = (vr as any).variantOptions ?? {};
+                                    return vo[opt.name] === val && vo[other.name] === v2;
+                                  })
+                                );
+                                if (firstValid) newSel[other.name] = firstValid;
+                              }
+                            }
+                            setSelection(newSel);
+                          }}
                           className={`relative w-9 h-9 rounded-full transition-all ${
                             isSelected
                               ? "ring-2 ring-offset-2 ring-brand scale-110"
