@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import { getGelatoProducts } from "@/lib/gelato-data";
+import { CATEGORIES } from "@/lib/categories";
 
 async function getProducts() {
   const apiKey = process.env.GELATO_API_KEY!;
@@ -56,7 +57,7 @@ async function getProducts() {
       price,
       variantPrices,
       images,
-      category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
+      category: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.category ?? "",
       inStock: true,
       variants: (p.variants ?? []).map((v: any) => ({
         id: v.id,
@@ -85,8 +86,6 @@ export default async function ProductsPage({
 
   const allProducts: any[] = await getProducts();
 
-  const categories: string[] = Array.from(new Set(allProducts.map((p: any) => String(p.category || ""))));
-
   const products = allProducts.filter((p: any) => {
     if (category && p.category !== category) return false;
     if (q) {
@@ -111,46 +110,42 @@ export default async function ProductsPage({
         </p>
       </div>
 
-      {/* Filter bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <form action="/products" method="GET" className="flex-1 relative">
-          {category && <input type="hidden" name="category" value={category} />}
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            name="q"
-            defaultValue={q ?? ""}
-            placeholder="Search products…"
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-          />
-        </form>
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-gray-500" />
-          <span className="text-sm text-gray-600 font-medium">Category:</span>
-          <div className="flex gap-2 flex-wrap">
-            <Link
-              href={q ? `/products?q=${encodeURIComponent(q)}` : "/products"}
-              className={`text-sm px-3 py-1.5 rounded-full font-medium ${
-                !category ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
-              }`}
-            >
-              All
-            </Link>
-            {categories.map((cat) => (
-              <Link
-                key={cat}
-                href={`/products?category=${encodeURIComponent(cat)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-                className={`text-sm px-3 py-1.5 rounded-full transition-colors ${
-                  category === cat
-                    ? "bg-brand text-white font-medium"
-                    : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
-                }`}
-              >
-                {cat}
-              </Link>
-            ))}
-          </div>
-        </div>
+      {/* Search */}
+      <form action="/products" method="GET" className="relative mb-6 max-w-md">
+        {category && <input type="hidden" name="category" value={category} />}
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          name="q"
+          defaultValue={q ?? ""}
+          placeholder="Search products…"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+        />
+      </form>
+
+      {/* Category tabs */}
+      <div className="flex gap-2 flex-wrap mb-8">
+        <Link
+          href={q ? `/products?q=${encodeURIComponent(q)}` : "/products"}
+          className={`text-sm px-4 py-2 rounded-full font-medium transition-colors ${
+            !category ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
+          }`}
+        >
+          All
+        </Link>
+        {CATEGORIES.map((cat) => (
+          <Link
+            key={cat.slug}
+            href={`/products?category=${encodeURIComponent(cat.label)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+            className={`text-sm px-4 py-2 rounded-full font-medium transition-colors ${
+              category === cat.label
+                ? "bg-brand text-white"
+                : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
+            }`}
+          >
+            {cat.emoji} {cat.label}
+          </Link>
+        ))}
       </div>
 
       {products.length === 0 && (
@@ -170,7 +165,11 @@ export default async function ProductsPage({
             href={`/products/${product.slug}`}
             className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"
           >
-            <div className="relative h-52 bg-gray-100 overflow-hidden">
+            <div className={`relative h-52 overflow-hidden ${
+              /shirt|tee|hoodie|sweatshirt|apparel/i.test(product.name) || product.category === "Apparel"
+                ? "bg-gray-300"
+                : "bg-gray-100"
+            }`}>
               <Image
                 src={product.images[0]}
                 alt={product.name}

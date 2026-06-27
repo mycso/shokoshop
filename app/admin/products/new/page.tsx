@@ -101,7 +101,6 @@ export default function NewProductPage() {
               >
                 <option value="">Select category</option>
                 <option value="Apparel">Apparel</option>
-                <option value="Drinkware">Drinkware</option>
                 <option value="Wall Art">Wall Art</option>
                 <option value="Accessories">Accessories</option>
                 <option value="Stationery">Stationery</option>

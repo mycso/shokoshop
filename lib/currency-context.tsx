@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 
-export type CurrencyCode = "GBP" | "USD" | "EUR" | "CAD" | "AUD";
+export type CurrencyCode = "GBP" | "USD" | "EUR" | "CAD" | "AUD" | "AED";
 
 export const CURRENCIES: Record<CurrencyCode, { symbol: string; locale: string; label: string }> = {
   GBP: { symbol: "£", locale: "en-GB", label: "GBP – £" },
@@ -16,11 +16,13 @@ export const CURRENCIES: Record<CurrencyCode, { symbol: string; locale: string; 
   EUR: { symbol: "€", locale: "de-DE", label: "EUR – €" },
   CAD: { symbol: "CA$", locale: "en-CA", label: "CAD – CA$" },
   AUD: { symbol: "A$", locale: "en-AU", label: "AUD – A$" },
+  AED: { symbol: "AED", locale: "ar-AE", label: "AED – د.إ" },
 };
 
 const COUNTRY_CURRENCY: Record<string, CurrencyCode> = {
   GB: "GBP",
   US: "USD", CA: "CAD", AU: "AUD",
+  AE: "AED",
   DE: "EUR", FR: "EUR", ES: "EUR", IT: "EUR",
   NL: "EUR", AT: "EUR", BE: "EUR", PT: "EUR",
   IE: "EUR", FI: "EUR", GR: "EUR", LU: "EUR",

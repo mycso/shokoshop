@@ -7,8 +7,10 @@ import {
   Clock,
   MapPin,
   ExternalLink,
+  PackageX,
 } from "lucide-react";
 import { getOrderById } from "@/lib/orders";
+import { getReturnByOrderId } from "@/lib/returns";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +48,7 @@ export default async function OrderDetailPage({
   const { orderId } = await params;
   const order = getOrderById(orderId);
   if (!order) notFound();
+  const existingReturn = getReturnByOrderId(orderId);
 
   const currentStep = STATUS_ORDER.indexOf(order.status);
 
@@ -89,6 +92,40 @@ export default async function OrderDetailPage({
           {order.status}
         </span>
       </div>
+
+      {/* Return / refund CTA — shown once order is delivered and no return exists yet */}
+      {order.status === "delivered" && !existingReturn && (
+        <div className="bg-gray-50 rounded-2xl border border-gray-100 p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-gray-900 text-sm">Need to return something?</p>
+            <p className="text-xs text-gray-500 mt-0.5">You have 100 days from delivery to request a return.</p>
+          </div>
+          <Link
+            href={`/account/orders/${orderId}/return`}
+            className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-800 font-semibold text-sm px-5 py-2.5 rounded-xl hover:border-brand hover:text-brand transition-colors shrink-0"
+          >
+            <PackageX className="h-4 w-4" />
+            Request Return / Refund
+          </Link>
+        </div>
+      )}
+
+      {existingReturn && (
+        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <p className="font-medium text-gray-900 text-sm">Return request submitted</p>
+            <p className="text-xs text-gray-500 mt-0.5 capitalize">
+              Status: <span className="font-semibold">{existingReturn.status}</span>
+            </p>
+          </div>
+          <Link
+            href="/account/returns"
+            className="inline-flex items-center gap-2 border border-yellow-300 text-yellow-800 font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-yellow-100 transition-colors shrink-0"
+          >
+            View return →
+          </Link>
+        </div>
+      )}
 
       {/* Progress tracker */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">

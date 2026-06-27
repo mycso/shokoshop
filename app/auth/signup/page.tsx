@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Package, Eye, EyeOff, Check } from "lucide-react";
+import Image from "next/image";
+import { Eye, EyeOff, Check } from "lucide-react";
+import { Bebas_Neue } from "next/font/google";
+
+const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 const PASSWORD_RULES = [
   { label: "At least 8 characters", test: (p: string) => p.length >= 8 },
@@ -50,8 +54,8 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Package className="h-8 w-8 text-brand" />
-            <span className="text-2xl font-bold text-gray-900">ShokoShop</span>
+            <Image src="/shokoshoplogo.svg" alt="ShokoShop" width={36} height={36} />
+            <span className={`${bebas.className} text-2xl text-gray-900`}>ShokoShop</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
           <p className="text-gray-500 mt-1">Start customising today</p>

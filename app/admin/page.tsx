@@ -8,6 +8,7 @@ import {
   Settings,
   Plus,
   ArrowRight,
+  PackageX,
 } from "lucide-react";
 
 export const metadata = { title: "Admin Dashboard – ShokoShop" };
@@ -172,6 +173,7 @@ export default function AdminDashboard() {
               { href: "/admin/products", label: "Manage Products", icon: Package },
               { href: "/admin/orders", label: "View Orders", icon: ShoppingBag },
               { href: "/admin/customers", label: "Customers", icon: Users },
+              { href: "/admin/returns", label: "Returns & Refunds", icon: PackageX },
               {
                 href: "/admin/settings/gelato",
                 label: "Gelato Settings",

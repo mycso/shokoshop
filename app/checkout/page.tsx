@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Lock } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
+import { shippingCostPence } from "@/lib/shipping";
 
 export default function CheckoutPage() {
   const { cart } = useCart();
@@ -205,12 +206,12 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postcode *
+                  Postcode{form.country !== "AE" ? " *" : ""}
                 </label>
                 <input
                   type="text"
                   name="postalCode"
-                  required
+                  required={form.country !== "AE"}
                   value={form.postalCode}
                   onChange={handleChange}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
@@ -231,6 +232,7 @@ export default function CheckoutPage() {
                   <option value="US">United States</option>
                   <option value="CA">Canada</option>
                   <option value="AU">Australia</option>
+                  <option value="AE">United Arab Emirates</option>
                   <option value="DE">Germany</option>
                   <option value="FR">France</option>
                   <option value="ES">Spain</option>
@@ -307,11 +309,11 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Shipping</span>
-                <span className="text-green-600 font-medium">TBD</span>
+                <span className="font-medium">{formatPrice(shippingCostPence(form.country))}</span>
               </div>
               <div className="flex justify-between font-bold text-gray-900 text-base pt-1 border-t border-gray-100">
                 <span>Total</span>
-                <span>{formatPrice(cart.total)}</span>
+                <span>{formatPrice(cart.total + shippingCostPence(form.country))}</span>
               </div>
             </div>
           </div>

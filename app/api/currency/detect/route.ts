@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 const COUNTRY_CURRENCY: Record<string, string> = {
   GB: "GBP",
   US: "USD", CA: "CAD", AU: "AUD",
+  AE: "AED",
   DE: "EUR", FR: "EUR", ES: "EUR", IT: "EUR",
   NL: "EUR", AT: "EUR", BE: "EUR", PT: "EUR",
   IE: "EUR", FI: "EUR", GR: "EUR", LU: "EUR",

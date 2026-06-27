@@ -49,3 +49,11 @@ body {
 }
 
 /* Font loading will be handled via next/font in components */
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

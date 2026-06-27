@@ -88,6 +88,39 @@ export interface User {
   createdAt: string;
 }
 
+export type ReturnReason =
+  | "damaged"
+  | "wrong_item"
+  | "not_as_described"
+  | "changed_mind"
+  | "other";
+
+export type ReturnResolution = "refund" | "exchange" | "store_credit";
+export type ReturnStatus = "pending" | "approved" | "rejected" | "refunded";
+
+export interface ReturnRequestItem {
+  itemId: string;
+  name: string;
+  quantity: number;
+}
+
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  customerEmail: string;
+  items: ReturnRequestItem[];
+  reason: ReturnReason;
+  description: string;
+  resolution: ReturnResolution;
+  status: ReturnStatus;
+  refundAmount?: number;          // pence — calculated at submission time
+  stripePaymentIntentId?: string; // retrieved from the Stripe session at submission
+  stripeRefundId?: string;        // set after Stripe refund is issued
+  adminNote?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface GelatoOrderPayload {
   orderReferenceId: string;
   customerReferenceId: string;

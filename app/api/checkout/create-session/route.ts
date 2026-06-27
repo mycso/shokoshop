@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { Cart, ShippingAddress } from "@/types";
 import { createOrder, generateOrderId } from "@/lib/orders";
+import { shippingCostPence, shippingLabel } from "@/lib/shipping";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
       };
 
       const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
+        automatic_payment_methods: { enabled: true },
         mode: "payment",
         customer_email: shippingAddress.email,
         line_items: cart.items.map((item) => ({
@@ -83,8 +84,18 @@ export async function POST(request: Request) {
           orderId,
           customerEmail: shippingAddress.email,
         },
+        shipping_options: [{
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: Math.round(shippingCostPence(shippingAddress.country) * rate),
+              currency: currency.toLowerCase(),
+            },
+            display_name: shippingLabel(shippingAddress.country),
+          },
+        }],
         shipping_address_collection: {
-          allowed_countries: ["GB", "US", "CA", "AU", "DE", "FR", "ES", "IT", "NL"],
+          allowed_countries: ["GB", "US", "CA", "AU", "AE", "DE", "FR", "ES", "IT", "NL"],
         },
         success_url: `${baseUrl}/checkout/success?orderId=${orderId}`,
         cancel_url: `${baseUrl}/checkout`,

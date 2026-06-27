@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download } from "lucide-react";
+import { CATEGORIES, detectCategory } from "@/lib/categories";
 
 function formatPrice(pence: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
@@ -43,8 +44,10 @@ export default function EditProductPage({
   const [error, setError] = useState<string | null>(null);
   const [autoFilling, setAutoFilling] = useState(false);
   const [autoFillStatus, setAutoFillStatus] = useState<string | null>(null);
+  const [category, setCategory] = useState<string>("");
   const [customImages, setCustomImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,6 +70,7 @@ export default function EditProductPage({
             }
             setVariantPrices(pre);
           }
+          if (match?.category) setCategory(match.category);
           if (match?.images?.length) setCustomImages(match.images);
         }
       } catch (err) {
@@ -124,13 +128,13 @@ export default function EditProductPage({
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     setUploading(true);
     setUploadError(null);
     try {
       const form = new FormData();
-      form.append("file", file);
+      for (const file of files) form.append("file", file);
       form.append("productId", id);
       const res = await fetch("/api/admin/product-images", { method: "POST", body: form });
       const data = await res.json();
@@ -141,6 +145,25 @@ export default function EditProductPage({
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleImportFromGelato() {
+    setImporting(true);
+    setUploadError(null);
+    try {
+      const res = await fetch("/api/admin/product-images", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Import failed");
+      setCustomImages(data.images);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -175,7 +198,7 @@ export default function EditProductPage({
       const res = await fetch("/api/gelato/local-products", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gelatoProductId: product.id, variantPrices: vp }),
+        body: JSON.stringify({ gelatoProductId: product.id, variantPrices: vp, category: category || undefined }),
       });
       if (!res.ok) throw new Error("Failed to save");
       setSaved(true);
@@ -253,11 +276,22 @@ export default function EditProductPage({
               <h2 className="font-semibold text-gray-900">Custom Images</h2>
               <p className="text-sm text-gray-500 mt-0.5">Lifestyle or editorial photos — shown first in the carousel for all colours.</p>
             </div>
-            <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {uploading ? "Uploading…" : "Upload"}
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageUpload} disabled={uploading} />
-            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleImportFromGelato}
+                disabled={importing || uploading}
+                className="flex items-center gap-1.5 text-sm font-medium text-brand border border-brand px-3 py-1.5 rounded-xl hover:bg-brand-light disabled:opacity-50 transition-colors"
+              >
+                {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {importing ? "Importing…" : "Import from Gelato"}
+              </button>
+              <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "Uploading…" : "Upload"}
+                <input type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
+              </label>
+            </div>
           </div>
           {uploadError && (
             <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-4">{uploadError}</p>
@@ -284,6 +318,44 @@ export default function EditProductPage({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Category */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="font-semibold text-gray-900">Category</h2>
+            <button
+              type="button"
+              onClick={() => {
+                const text = `${product.title} ${product.description ?? ""}`;
+                const detected = detectCategory(text);
+                if (detected) setCategory(detected);
+              }}
+              className="flex items-center gap-1.5 text-xs font-medium text-brand border border-brand px-2.5 py-1 rounded-lg hover:bg-brand-light transition-colors"
+            >
+              <Wand2 className="h-3 w-3" /> Auto-assign
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">Used for storefront filtering and the homepage category grid.</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setCategory("")}
+              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${!category ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand"}`}
+            >
+              None
+            </button>
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.slug}
+                type="button"
+                onClick={() => setCategory(cat.label)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${category === cat.label ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand"}`}
+              >
+                {cat.emoji} {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-6">

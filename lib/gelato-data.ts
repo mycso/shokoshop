@@ -12,6 +12,8 @@ export interface GelatoLocalProduct {
   variantPrices: Record<string, number>;
   variantImages: Record<string, string[]>;
   images: string[];
+  category?: string;
+  description?: string;
 }
 
 /**

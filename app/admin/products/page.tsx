@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Pencil, RefreshCw } from "lucide-react";
+import { Pencil, RefreshCw, Wand2 } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 
 function toSlug(name: string) {
@@ -15,6 +15,8 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncLog, setSyncLog] = useState<string[]>([]);
+  const [autoAssigning, setAutoAssigning] = useState(false);
+  const [autoAssignResult, setAutoAssignResult] = useState<string | null>(null);
 
   async function loadProducts() {
     setLoading(true);
@@ -33,7 +35,7 @@ export default function AdminProductsPage() {
         const variantPrices: Record<string, number> = local?.variantPrices ?? {};
         const vals = Object.values(variantPrices) as number[];
         const price = vals.length > 0 ? Math.min(...vals) : (local?.price ?? 0);
-        return { ...p, name, slug, price, thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null };
+        return { ...p, name, slug, price, category: local?.category ?? "", thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null };
       }));
     } catch (e) {
       console.error(e);
@@ -57,6 +59,22 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function autoAssignCategories() {
+    setAutoAssigning(true);
+    setAutoAssignResult(null);
+    try {
+      const res = await fetch("/api/admin/auto-assign-categories", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      setAutoAssignResult(`Assigned categories to ${data.assigned} of ${data.total} products.`);
+      await loadProducts();
+    } catch (e: any) {
+      setAutoAssignResult(`Error: ${e.message}`);
+    } finally {
+      setAutoAssigning(false);
+    }
+  }
+
   useEffect(() => { loadProducts(); }, []);
 
   return (
@@ -66,15 +84,31 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-500 text-sm">{products.length} products</p>
         </div>
-        <button
-          onClick={syncPrices}
-          disabled={syncing}
-          className="inline-flex items-center gap-1.5 bg-brand text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-60"
-        >
-          <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
-          {syncing ? "Syncing…" : "Sync Prices from Gelato"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={autoAssignCategories}
+            disabled={autoAssigning || syncing}
+            className="inline-flex items-center gap-1.5 border border-brand text-brand px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-60"
+          >
+            <Wand2 className={`h-4 w-4 ${autoAssigning ? "animate-pulse" : ""}`} />
+            {autoAssigning ? "Assigning…" : "Auto-assign Categories"}
+          </button>
+          <button
+            onClick={syncPrices}
+            disabled={syncing || autoAssigning}
+            className="inline-flex items-center gap-1.5 bg-brand text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-60"
+          >
+            <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync Prices from Gelato"}
+          </button>
+        </div>
       </div>
+
+      {autoAssignResult && (
+        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${autoAssignResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
+          {autoAssignResult}
+        </div>
+      )}
 
       {syncLog.length > 0 && (
         <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
@@ -113,6 +147,9 @@ export default function AdminProductsPage() {
                       <div>
                         <p className="font-medium text-gray-900">{product.name}</p>
                         <p className="text-xs text-gray-400 font-mono">{product.id}</p>
+                        {product.category && (
+                          <span className="text-xs text-brand font-medium">{product.category}</span>
+                        )}
                       </div>
                     </div>
                   </td>

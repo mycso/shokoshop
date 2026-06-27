@@ -52,14 +52,25 @@ async function fetchGelatoProduct(slug: string) {
     }
   }
 
+  const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+  function sizeRank(v: string) {
+    const i = SIZE_ORDER.indexOf(v.toUpperCase());
+    return i === -1 ? 99 : i;
+  }
+
   // Order: Color first, then Size
-  const ORDER = ["Color", "Size"];
+  const OPTION_ORDER = ["Color", "Size"];
   const productVariantOptions = Object.entries(optionMap)
     .sort(([a], [b]) => {
-      return (ORDER.indexOf(a) === -1 ? 99 : ORDER.indexOf(a)) -
-             (ORDER.indexOf(b) === -1 ? 99 : ORDER.indexOf(b));
+      return (OPTION_ORDER.indexOf(a) === -1 ? 99 : OPTION_ORDER.indexOf(a)) -
+             (OPTION_ORDER.indexOf(b) === -1 ? 99 : OPTION_ORDER.indexOf(b));
     })
-    .map(([optName, values]) => ({ name: optName, values: Array.from(values) }));
+    .map(([optName, values]) => ({
+      name: optName,
+      values: optName === "Size"
+        ? Array.from(values).sort((a, b) => sizeRank(a) - sizeRank(b))
+        : Array.from(values),
+    }));
 
   // Images: prefer locally-saved URLs (from sync-prices), fall back to API fields
   const apiImages: string[] = [];

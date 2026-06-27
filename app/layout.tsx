@@ -8,7 +8,7 @@ import Footer from "@/components/layout/Footer";
 export const metadata: Metadata = {
   title: "ShokoShop – T-Shirts & Wall Art",
   description:
-    "Shop custom T-shirts, posters and canvas wall art. Choose a design and have high-quality products delivered to your door.",
+    "Premium T-shirts and wall art exclusive designs delivered to your door.",
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-  <body className="min-h-full flex flex-col bg-gray-50">
+      <body className="min-h-full flex flex-col bg-gray-50">
         <CartProvider>
           <CurrencyProvider>
             <Navbar />

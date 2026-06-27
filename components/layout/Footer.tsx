@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { Package } from "lucide-react";
+import Image from "next/image";
+import { Bebas_Neue } from "next/font/google";
+
+const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 export default function Footer() {
   return (
@@ -8,11 +11,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <Package className="h-6 w-6 text-brand" />
-              <span className="text-lg font-bold text-white">ShokoShop</span>
+              <Image
+                src="/shokoshoplogo.svg"
+                alt="ShokoShop"
+                width={28}
+                height={28}
+                className="brightness-0 invert"
+              />
+              
+              <span className={`${bebas.className} text-xl font-bold text-white`}>ShokoShop</span>
             </div>
             <p className="text-sm text-gray-400 max-w-xs">
-              Shop custom T-shirts and wall art delivered to your door. Choose a design and we&apos;ll handle the rest.
+              Premium T-shirts and wall art exclusive designs delivered straight to your door.
             </p>
           </div>
           <div>
@@ -33,11 +43,6 @@ export default function Footer() {
               <li>
                 <Link href="/products?category=Wall+Art" className="hover:text-white transition-colors">
                   Wall Art
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=Drinkware" className="hover:text-white transition-colors">
-                  Drinkware
                 </Link>
               </li>
             </ul>

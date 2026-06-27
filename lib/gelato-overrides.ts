@@ -57,7 +57,7 @@ export async function setOverride(entry: LocalProductOverride): Promise<void> {
  * variantPrices/images win over the Gelato-derived values; an override with
  * no matching product is appended as a standalone manual entry.
  */
-export function mergeOverrides<T extends { gelatoProductId?: string; variantPrices?: Record<string, number>; price?: number; images?: string[] }>(
+export function mergeOverrides<T extends { gelatoProductId?: string; variantPrices?: Record<string, number>; price?: number; images?: string[]; category?: string }>(
   products: T[],
   overrides: LocalProductOverride[]
 ): T[] {
@@ -74,7 +74,8 @@ export function mergeOverrides<T extends { gelatoProductId?: string; variantPric
       ? [...o.images, ...(p.images ?? []).filter((u) => !o.images!.includes(u))]
       : p.images;
 
-    return { ...p, variantPrices, price, images };
+    const category = o.category ?? p.category;
+    return { ...p, variantPrices, price, images, ...(category ? { category } : {}) };
   });
 
   for (const o of overrides) {

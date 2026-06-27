@@ -11,7 +11,8 @@ import { get } from "@vercel/blob";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const path = searchParams.get("path");
-  if (!path || !path.startsWith("gelato-previews/")) {
+  const ALLOWED_PREFIXES = ["gelato-previews/", "product-images/"];
+  if (!path || !ALLOWED_PREFIXES.some((p) => path.startsWith(p))) {
     return NextResponse.json({ error: "Missing or invalid path" }, { status: 400 });
   }
 

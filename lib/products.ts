@@ -33,7 +33,7 @@ export const MOCK_PRODUCTS: Product[] = [
       "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=800",
       "https://images.unsplash.com/photo-1563621949-4a4a63e8ba34?w=800",
     ],
-    category: "Drinkware",
+    category: "Accessories",
     gelatoProductId: "mug_product_uid",
     inStock: true,
     variants: [

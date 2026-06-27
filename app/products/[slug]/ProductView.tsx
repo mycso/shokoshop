@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { ShoppingCart, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingCart, Check, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
 import { Product, ProductVariantOption } from "@/types";
+import type { Review } from "@/lib/reviews";
 
 // Images are served via /api/blob-image?path=<blob pathname>, so the
 // distinguishing part lives in the query string, not the route path — unwrap
@@ -115,6 +116,178 @@ function Gallery({
   );
 }
 
+function StarRating({ value, onChange }: { value: number; onChange?: (v: number) => void }) {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <button
+          key={i}
+          type={onChange ? "button" : undefined}
+          onClick={() => onChange?.(i)}
+          onMouseEnter={() => onChange && setHovered(i)}
+          onMouseLeave={() => onChange && setHovered(0)}
+          className={onChange ? "cursor-pointer" : "cursor-default"}
+          aria-label={onChange ? `Rate ${i} star${i > 1 ? "s" : ""}` : undefined}
+        >
+          <Star
+            className={`h-5 w-5 transition-colors ${
+              i <= (hovered || value) ? "fill-amber-400 text-amber-400" : "text-gray-300"
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ReviewsSection({ productId }: { productId: string }) {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ name: "", rating: 0, text: "" });
+  const [formError, setFormError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/reviews?productId=${encodeURIComponent(productId)}`)
+      .then((r) => r.json())
+      .then((data) => setReviews(Array.isArray(data) ? data : []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [productId]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (form.rating === 0) { setFormError("Please select a star rating"); return; }
+    if (!form.name.trim() || !form.text.trim()) { setFormError("Name and review text are required"); return; }
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, ...form }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Submit failed");
+      setReviews((prev) => [...prev, data.review]);
+      setSubmitted(true);
+      setShowForm(false);
+      setForm({ name: "", rating: 0, text: "" });
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Submit failed");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const avg = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+
+  return (
+    <div className="mt-16 border-t border-gray-100 pt-12">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2 mt-1">
+              <StarRating value={Math.round(avg)} />
+              <span className="text-sm text-gray-500">
+                {avg.toFixed(1)} out of 5 · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+        </div>
+        {!showForm && !submitted && (
+          <button
+            onClick={() => setShowForm(true)}
+            className="text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
+          >
+            Write a review
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-2xl p-6 mb-8 space-y-4">
+          <h3 className="font-semibold text-gray-900">Your Review</h3>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+            <StarRating value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Your name</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              maxLength={80}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              placeholder="e.g. Sarah M."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Review</label>
+            <textarea
+              value={form.text}
+              onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
+              maxLength={1000}
+              rows={4}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+              placeholder="What did you think of this product?"
+            />
+          </div>
+          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 bg-brand text-white font-semibold py-2.5 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors text-sm"
+            >
+              {submitting ? "Submitting…" : "Submit Review"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {submitted && (
+        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-8 text-sm text-green-700 font-medium">
+          Thanks for your review!
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-sm text-gray-400">Loading reviews…</p>
+      ) : reviews.length === 0 ? (
+        <p className="text-sm text-gray-400">No reviews yet — be the first!</p>
+      ) : (
+        <div className="space-y-6">
+          {[...reviews].reverse().map((r) => (
+            <div key={r.id} className="border-b border-gray-100 pb-6 last:border-0">
+              <div className="flex items-center gap-3 mb-2">
+                <StarRating value={r.rating} />
+                <span className="font-semibold text-gray-900 text-sm">{r.name}</span>
+                <span className="text-xs text-gray-400">
+                  {new Date(r.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                </span>
+              </div>
+              <p className="text-gray-700 text-sm leading-relaxed">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProductView({ product }: { product: Product }) {
   const { addItem } = useCart();
   const { formatPrice } = useCurrency();
@@ -161,12 +334,7 @@ export default function ProductView({ product }: { product: Product }) {
   const colorImages: string[] = useMemo(() => {
     const seen = new Set<string>();
     const out: string[] = [];
-    // Custom admin-uploaded images always appear first
-    for (const url of product.images ?? []) {
-      const key = imageKey(url);
-      if (!seen.has(key)) { seen.add(key); out.push(url); }
-    }
-    // Then Gelato per-colour mockups
+    // Gelato per-colour mockups first — the poster for the selected colour
     if (selectedColor) {
       for (const v of variants) {
         const vopts = v.variantOptions ?? {};
@@ -176,6 +344,11 @@ export default function ProductView({ product }: { product: Product }) {
           if (!seen.has(key)) { seen.add(key); out.push(url); }
         }
       }
+    }
+    // Then product-level images (Gelato poster + any custom uploaded photos)
+    for (const url of product.images ?? []) {
+      const key = imageKey(url);
+      if (!seen.has(key)) { seen.add(key); out.push(url); }
     }
     return out.length > 0 ? out : ["/shokoshoplogo.svg"];
   }, [selectedColor, variants, variantImages, product.images]);
@@ -224,7 +397,10 @@ export default function ProductView({ product }: { product: Product }) {
 
   const hasPrices = Object.keys(variantPrices).length > 0 || product.price > 0;
 
+  const productId = product.gelatoProductId ?? product.id;
+
   return (
+    <div>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
       {/* Gallery — driven by selected variant */}
       <Gallery
@@ -346,6 +522,8 @@ export default function ProductView({ product }: { product: Product }) {
           </div>
         </div>
       </div>
+    </div>
+    <ReviewsSection productId={productId} />
     </div>
   );
 }

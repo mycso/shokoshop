@@ -61,8 +61,9 @@ export async function PATCH(req: Request) {
     const vp: Record<string, number> = variantPrices ?? {};
     const vpValues = Object.values(vp) as number[];
     const price = vpValues.length > 0 ? Math.min(...vpValues) : (body.price ?? 0);
+    const category = body.category ? String(body.category) : undefined;
 
-    await setOverride({ gelatoProductId, variantPrices: vp, price });
+    await setOverride({ gelatoProductId, variantPrices: vp, price, ...(category ? { category } : {}) });
     revalidateTag(GELATO_PRODUCTS_TAG, { expire: 0 });
 
     return NextResponse.json({ ok: true });
