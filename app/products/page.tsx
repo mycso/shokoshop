@@ -2,7 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { PriceDisplay } from "@/components/ui/PriceDisplay";
+import { StarRating } from "@/components/ui/StarRating";
 import { getGelatoProducts } from "@/lib/gelato-data";
+import { getReviewsSummary } from "@/lib/reviews";
+import { colorHex, isLightColor } from "@/lib/colors";
 import { CATEGORIES } from "@/lib/categories";
 
 async function getProducts() {
@@ -15,15 +18,19 @@ async function getProducts() {
     localProducts = await getGelatoProducts();
   } catch { /* ignore */ }
 
-  function mergePrice(gelatoId: string, slug: string): { price: number; variantPrices: Record<string, number>; localImages: string[] } {
+  function mergePrice(gelatoId: string, slug: string, apiPriceEur = 0): { price: number; variantPrices: Record<string, number>; localImages: string[] } {
     const match = localProducts.find(
       (l: any) => l.gelatoProductId === gelatoId || l.slug === slug
     );
-    if (!match) return { price: 0, variantPrices: {}, localImages: [] };
-    const vp: Record<string, number> = match.variantPrices ?? {};
-    const vpValues = Object.values(vp) as number[];
-    const price = vpValues.length > 0 ? Math.min(...vpValues) : (match.price ?? 0);
-    return { price, variantPrices: vp, localImages: match.images ?? [] };
+    if (match) {
+      const vp: Record<string, number> = match.variantPrices ?? {};
+      const vpValues = Object.values(vp) as number[];
+      const price = vpValues.length > 0 ? Math.min(...vpValues) : (match.price ?? 0);
+      return { price, variantPrices: vp, localImages: match.images ?? [] };
+    }
+    // Fallback: convert the Gelato list-API price from EUR to GBP pence
+    const fallback = apiPriceEur > 0 ? Math.round(apiPriceEur * 0.86 * 100) : 0;
+    return { price: fallback, variantPrices: {}, localImages: [] };
   }
 
   const res = await fetch(
@@ -45,7 +52,14 @@ async function getProducts() {
   return list.map((p: any) => {
     const name = p.title ?? p.name ?? "Untitled product";
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const { price, variantPrices, localImages } = mergePrice(p.id, slug);
+    // Best-effort price from the list API variants (EUR → GBP pence fallback)
+    const variantEurPrices: number[] = (p.variants ?? [])
+      .map((v: any) => v.price ?? v.retailPrice ?? 0)
+      .filter((n: number) => n > 0);
+    const apiPriceEur = variantEurPrices.length > 0
+      ? Math.min(...variantEurPrices)
+      : (p.price ?? p.retailPrice ?? 0);
+    const { price, variantPrices, localImages } = mergePrice(p.id, slug, apiPriceEur);
     const apiThumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
     const images = localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"];
 
@@ -85,6 +99,7 @@ export default async function ProductsPage({
   const { category, q } = await searchParams;
 
   const allProducts: any[] = await getProducts();
+  const reviewSummary = await getReviewsSummary(allProducts.map((p: any) => p.id));
 
   const products = allProducts.filter((p: any) => {
     if (category && p.category !== category) return false;
@@ -188,18 +203,43 @@ export default async function ProductsPage({
               <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors">
                 {product.name}
               </h3>
+              {reviewSummary[product.id] && (
+                <div className="mt-1">
+                  <StarRating avg={reviewSummary[product.id].avg} count={reviewSummary[product.id].count} />
+                </div>
+              )}
               <p className="text-gray-400 text-xs mt-1 line-clamp-2">
                 {product.description}
               </p>
-              {(product.productVariantOptions ?? []).map((opt: any) => (
-                <div key={opt.name} className="flex flex-wrap gap-1 mt-2">
-                  {opt.values.map((val: string) => (
-                    <span key={val} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
-                      {val}
-                    </span>
-                  ))}
-                </div>
-              ))}
+              {/* Color swatches */}
+              {(() => {
+                const colorOpt = (product.productVariantOptions ?? []).find(
+                  (o: any) => o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour"
+                );
+                if (!colorOpt || colorOpt.values.length === 0) return null;
+                const MAX = 8;
+                const shown: string[] = colorOpt.values.slice(0, MAX);
+                const extra = colorOpt.values.length - MAX;
+                return (
+                  <div className="flex items-center gap-1 mt-2 flex-wrap">
+                    {shown.map((val: string) => {
+                      const hex = colorHex(val);
+                      const light = isLightColor(hex);
+                      return (
+                        <span
+                          key={val}
+                          title={val}
+                          className={`w-4 h-4 rounded-full inline-block shrink-0 ${light ? "border border-gray-300" : ""}`}
+                          style={{ backgroundColor: hex }}
+                        />
+                      );
+                    })}
+                    {extra > 0 && (
+                      <span className="text-xs text-gray-400 ml-0.5">+{extra}</span>
+                    )}
+                  </div>
+                );
+              })()}
               <div className="flex items-center justify-between mt-auto pt-3">
                 <span className="text-lg font-bold text-gray-900">
                   {product.price > 0

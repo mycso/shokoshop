@@ -36,6 +36,20 @@ export async function addReview(review: Review): Promise<Review[]> {
   return updated;
 }
 
+export async function getReviewsSummary(
+  productIds: string[]
+): Promise<Record<string, { avg: number; count: number }>> {
+  const pairs = await Promise.all(
+    productIds.map(async (id) => {
+      const reviews = await getReviews(id);
+      if (reviews.length === 0) return null;
+      const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
+      return [id, { avg, count: reviews.length }] as const;
+    })
+  );
+  return Object.fromEntries(pairs.filter(Boolean) as [string, { avg: number; count: number }][]);
+}
+
 export async function deleteReview(productId: string, reviewId: string): Promise<Review[]> {
   const existing = await getReviews(productId);
   const updated = existing.filter((r) => r.id !== reviewId);

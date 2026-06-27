@@ -34,6 +34,38 @@ async function fetchGelatoProduct(slug: string) {
   const name = p.title ?? p.name ?? "Untitled product";
   const productVariants: any[] = detail.variants ?? p.variants ?? [];
 
+  // Fetch prices and images from the cache FIRST so we can filter unavailable variants
+  let price = 0;
+  let variantPrices: Record<string, number> = {};
+  let variantImages: Record<string, string[]> = {};
+
+  // Images: prefer locally-saved URLs (from sync-prices), fall back to API fields
+  const apiImages: string[] = [];
+  const seen = new Set<string>();
+  function addImg(u: unknown) {
+    if (typeof u === "string" && u.length > 0 && !seen.has(u)) {
+      seen.add(u); apiImages.push(u);
+    }
+  }
+  addImg(detail.previewUrl ?? p.previewUrl);
+  addImg(detail.externalPreviewUrl ?? p.externalPreviewUrl);
+  addImg(detail.externalThumbnailUrl ?? p.externalThumbnailUrl);
+
+  let images: string[] = apiImages;
+  try {
+    const local = await getGelatoProducts();
+    const localMatch = local.find(
+      (l) => l.gelatoProductId === p.id || titleToSlug(l.name ?? "") === slug
+    );
+    if (localMatch) {
+      variantPrices = localMatch.variantPrices ?? {};
+      variantImages = localMatch.variantImages ?? {};
+      const vpValues = (Object.values(variantPrices) as number[]).filter((n) => n > 0);
+      price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
+      if ((localMatch.images ?? []).length > 0) images = localMatch.images;
+    }
+  } catch { /* ignore */ }
+
   // Parse variantOptions from each variant's title: "Color - Size - PrintType"
   // e.g. "White - S - DTG (Direct-to-garment)" → { Color: "White", Size: "S" }
   function parseVariantTitle(title: string): Record<string, string> {
@@ -44,12 +76,16 @@ async function fetchGelatoProduct(slug: string) {
     return {};
   }
 
-  // Build option values from ACTUAL variants only (not productVariantOptions which may list unavailable colours)
+  const hasPriceData = Object.keys(variantPrices).length > 0;
+
+  // Build option values — skip variants with an explicit price of 0 (unavailable)
   const optionMap: Record<string, Set<string>> = {};
   const variantOptionMap: Record<string, Record<string, string>> = {};
   for (const v of productVariants) {
     const parsed = parseVariantTitle(v.title ?? "");
     variantOptionMap[v.id] = parsed;
+    // If we have price data and this variant is explicitly £0, exclude it from options
+    if (hasPriceData && (variantPrices[v.id] ?? -1) === 0) continue;
     for (const [key, val] of Object.entries(parsed)) {
       if (!optionMap[key]) optionMap[key] = new Set();
       optionMap[key].add(val);
@@ -76,38 +112,6 @@ async function fetchGelatoProduct(slug: string) {
         : Array.from(values),
     }));
 
-  // Images: prefer locally-saved URLs (from sync-prices), fall back to API fields
-  const apiImages: string[] = [];
-  const seen = new Set<string>();
-  function addImg(u: unknown) {
-    if (typeof u === "string" && u.length > 0 && !seen.has(u)) {
-      seen.add(u); apiImages.push(u);
-    }
-  }
-  // Prefer detail fields (richer data) then fall back to list fields
-  addImg(detail.previewUrl ?? p.previewUrl);
-  addImg(detail.externalPreviewUrl ?? p.externalPreviewUrl);
-  addImg(detail.externalThumbnailUrl ?? p.externalThumbnailUrl);
-
-  // Merge prices and images from the live Gelato/admin-overrides cache
-  let price = 0;
-  let variantPrices: Record<string, number> = {};
-  let variantImages: Record<string, string[]> = {};
-  let images: string[] = apiImages;
-  try {
-    const local = await getGelatoProducts();
-    const localMatch = local.find(
-      (l) => l.gelatoProductId === p.id || titleToSlug(l.name ?? "") === slug
-    );
-    if (localMatch) {
-      variantPrices = localMatch.variantPrices ?? {};
-      variantImages = localMatch.variantImages ?? {};
-      const vpValues = Object.values(variantPrices) as number[];
-      price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
-      if ((localMatch.images ?? []).length > 0) images = localMatch.images;
-    }
-  } catch { /* ignore */ }
-
   if (images.length === 0) images = ["/shokoshoplogo.svg"];
 
   return {
@@ -119,14 +123,16 @@ async function fetchGelatoProduct(slug: string) {
     images,
     category: productVariantOptions.map((o) => o.name).join(" / ") || "Apparel",
     inStock: true,
-    variants: productVariants.map((v: any) => ({
-      id: v.id,
-      name: v.title,
-      price: variantPrices[v.id] ?? price,
-      sku: v.productUid ?? v.id,
-      productUid: v.productUid,
-      variantOptions: variantOptionMap[v.id] ?? {},
-    })),
+    variants: productVariants
+      .filter((v: any) => !hasPriceData || (variantPrices[v.id] ?? -1) !== 0)
+      .map((v: any) => ({
+        id: v.id,
+        name: v.title,
+        price: variantPrices[v.id] ?? price,
+        sku: v.productUid ?? v.id,
+        productUid: v.productUid,
+        variantOptions: variantOptionMap[v.id] ?? {},
+      })),
     productVariantOptions,
     variantPrices,
     variantImages, // variantId → per-colour mockup image URLs

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Pencil, RefreshCw, Wand2 } from "lucide-react";
@@ -17,30 +17,62 @@ export default function AdminProductsPage() {
   const [syncLog, setSyncLog] = useState<string[]>([]);
   const [autoAssigning, setAutoAssigning] = useState(false);
   const [autoAssignResult, setAutoAssignResult] = useState<string | null>(null);
+  const autoSyncedRef = useRef(false);
 
   async function loadProducts() {
     setLoading(true);
     try {
-      const res = await fetch("/api/gelato/store-products");
-      const data = await res.json();
+      const [storeRes, lpRes] = await Promise.all([
+        fetch("/api/gelato/store-products"),
+        fetch("/api/gelato/local-products"),
+      ]);
+      const data = await storeRes.json();
       const list = Array.isArray(data.products) ? data.products : [];
-
-      const lpRes = await fetch("/api/gelato/local-products");
       const localProducts: any[] = await lpRes.json();
 
-      setProducts(list.map((p: any) => {
+      const mapped = list.map((p: any) => {
         const name = p.title ?? p.name ?? "Untitled";
         const slug = toSlug(name);
         const local = localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug);
         const variantPrices: Record<string, number> = local?.variantPrices ?? {};
         const vals = Object.values(variantPrices) as number[];
-        const price = vals.length > 0 ? Math.min(...vals) : (local?.price ?? 0);
+        let price = vals.length > 0 ? Math.min(...vals) : (local?.price ?? 0);
+
+        // Fallback: derive price from Gelato list-API variant data (EUR → GBP pence)
+        if (price === 0) {
+          const eurPrices: number[] = (p.variants ?? [])
+            .map((v: any) => v.price ?? v.retailPrice ?? 0)
+            .filter((n: number) => n > 0);
+          const minEur = eurPrices.length > 0 ? Math.min(...eurPrices) : (p.price ?? p.retailPrice ?? 0);
+          if (minEur > 0) price = Math.round(minEur * 0.86 * 100);
+        }
+
         return { ...p, name, slug, price, category: local?.category ?? "", thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null };
-      }));
+      });
+
+      setProducts(mapped);
+
+      // Auto-sync once if any product still has no price after the fallback
+      if (!autoSyncedRef.current && mapped.some((p: any) => p.price === 0)) {
+        autoSyncedRef.current = true;
+        syncPricesInBackground();
+      }
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function syncPricesInBackground() {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/gelato/sync-prices", { method: "POST" });
+      const data = await res.json();
+      setSyncLog(data.log ?? []);
+      await loadProducts();
+    } catch { /* silent */ } finally {
+      setSyncing(false);
     }
   }
 
@@ -58,6 +90,7 @@ export default function AdminProductsPage() {
       setSyncing(false);
     }
   }
+
 
   async function autoAssignCategories() {
     setAutoAssigning(true);
@@ -163,7 +196,9 @@ export default function AdminProductsPage() {
                   <td className="px-6 py-4 font-semibold text-gray-900">
                     {product.price > 0
                       ? `From ${formatPrice(product.price)}`
-                      : <span className="text-gray-400 font-normal">No price — sync needed</span>}
+                      : syncing
+                        ? <span className="text-gray-400 font-normal text-xs">Syncing…</span>
+                        : <span className="text-gray-400 font-normal text-xs">—</span>}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">
