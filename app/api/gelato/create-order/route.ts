@@ -9,14 +9,19 @@ export async function POST(request: Request) {
       return Response.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Idempotency: skip if already submitted unless admin forces a re-submit
+    // Idempotency: skip if already submitted unless admin explicitly forces a re-submit
     if (order.gelatoOrderId && !force) {
       return Response.json({ gelatoOrderId: order.gelatoOrderId, alreadySubmitted: true });
     }
 
-    // Force re-submit: clear the stale Gelato order ID first
+    // Force re-submit: only allow if order is not currently being processed
     if (force && order.gelatoOrderId) {
       await updateOrder(orderId, { gelatoOrderId: undefined });
+    }
+
+    // Non-force: also block if already paid and processing (webhook already handled it)
+    if (!force && order.status === "processing") {
+      return Response.json({ skipped: true, reason: "already processing" });
     }
 
     // Called from success page after Stripe payment — mark paid if still pending
