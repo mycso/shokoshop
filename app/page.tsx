@@ -297,7 +297,7 @@ export default async function HomePage() {
             href="/products"
             className="inline-flex items-center gap-2 bg-white text-brand-dark font-semibold px-10 py-4 rounded-full hover:bg-blue-50 transition-colors text-base shadow-lg"
           >
-            Start Creating <ArrowRight className="h-5 w-5" />
+            Check it out! <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
       </section>
