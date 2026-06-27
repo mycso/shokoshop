@@ -20,18 +20,20 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
   const lastName = rest.join(" ") || firstName;
 
   const items = order.items.map((item, i) => ({
-    id: item.id ?? `item_${i}`,
-    // variantId is the Gelato store variant UUID (set at add-to-cart time)
+    itemReferenceId: item.id ?? `item_${i}`,
+    // variantId is the Gelato store variant UUID (set at add-to-cart time).
+    // Pairing storeProductVariantId with storeId tells Gelato to pull the
+    // artwork from the store product — no separate print file needed.
     storeProductVariantId: item.variantId ?? item.gelatoProductId ?? item.productId,
     quantity: item.quantity,
   }));
 
   const payload = {
-    orderType: "order",
-    id: order.id,
-    channel: "api",
+    orderReferenceId: order.id,
+    customerReferenceId: order.customerEmail,
+    storeId: GELATO_STORE_ID,
     currency: "GBP",
-    items,
+    shipmentMethodUid: "standard",
     shippingAddress: {
       firstName,
       lastName,
@@ -42,19 +44,17 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
       country: order.shippingAddress.country,
       email: order.customerEmail,
     },
+    items,
   };
 
-  const res = await fetch(
-    `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}/orders`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-KEY": GELATO_API_KEY,
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  const res = await fetch(`https://order.gelatoapis.com/v4/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": GELATO_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
     const text = await res.text();
