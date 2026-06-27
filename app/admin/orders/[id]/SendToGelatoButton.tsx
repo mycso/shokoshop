@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
-export default function SendToGelatoButton({ orderId }: { orderId: string }) {
+export default function SendToGelatoButton({ orderId, hasExisting = false }: { orderId: string; hasExisting?: boolean }) {
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -50,7 +50,7 @@ export default function SendToGelatoButton({ orderId }: { orderId: string }) {
         ) : (
           <Send className="h-4 w-4" />
         )}
-        {state === "loading" ? "Sending…" : "Send to Gelato"}
+        {state === "loading" ? "Sending…" : hasExisting ? "Re-send to Gelato" : "Send to Gelato"}
       </button>
       {state === "error" && (
         <div className="flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs">

@@ -98,7 +98,7 @@ export default async function AdminOrderDetailPage({
             </div>
           )}
           {order.trackingNumber && (
-            <div className="flex items-center gap-2 bg-brand-light px-3 py-2 rounded-xl">
+            <div className="flex items-center gap-2 bg-brand-light px-3 py-2 rounded-xl mb-3">
               <Truck className="h-4 w-4 text-brand" />
               <div>
                 <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">
@@ -110,12 +110,7 @@ export default async function AdminOrderDetailPage({
               </div>
             </div>
           )}
-          {!order.gelatoOrderId && (
-            <div className="space-y-3">
-              <p className="text-sm text-gray-400">Not yet sent to Gelato.</p>
-              <SendToGelatoButton orderId={order.id} />
-            </div>
-          )}
+          <SendToGelatoButton orderId={order.id} hasExisting={!!order.gelatoOrderId} />
         </div>
       </div>
 
