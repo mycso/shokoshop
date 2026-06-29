@@ -419,7 +419,7 @@ export default function EditProductPage({
               <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${designUploading ? "opacity-60 pointer-events-none" : ""}`}>
                 {designUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload override"}
-                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
+                <input type="file" accept="image/png,image/jpeg,image/webp,application/pdf" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
               </label>
             </div>
           </div>

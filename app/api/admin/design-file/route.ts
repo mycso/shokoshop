@@ -9,8 +9,8 @@ export async function POST(request: Request) {
   if (!file || !productId) {
     return Response.json({ error: "file and productId are required" }, { status: 400 });
   }
-  if (!file.type.startsWith("image/")) {
-    return Response.json({ error: "Only image files are allowed" }, { status: 400 });
+  if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+    return Response.json({ error: "Only image or PDF files are allowed" }, { status: 400 });
   }
 
   const ext = file.name.split(".").pop() ?? "png";
