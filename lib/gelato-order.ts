@@ -46,10 +46,13 @@ async function resolveProductUid(
 }
 
 /**
- * Submits a paid order to Gelato using the direct order API (v4).
- * Uses productUid + a hosted design file URL instead of storeProductVariantId,
- * which is required for manual API stores where products are never "published"
- * to an external storefront.
+ * Submits a paid order to Gelato using the ecommerce store orders API.
+ * Uses storeProductVariantId so orders work for every product regardless of
+ * whether a custom design file has been uploaded in the admin. When a design
+ * file IS configured, it is sent as the print file and overrides the product
+ * template. When not, Gelato falls back to the design baked into the product
+ * template — so products are fulfillable straight away without any extra admin
+ * step. Neck-inner label files are added automatically for Gildan inlbl_ SKUs.
  */
 export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: string }> {
   if (!GELATO_API_KEY || !GELATO_STORE_ID) {
@@ -64,37 +67,34 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
 
   const items = await Promise.all(
     order.items.map(async (item, i) => {
-      const productUid = await resolveProductUid(
-        item.productId,
-        item.variantName,
-        item.variantId ?? item.productId,
-        GELATO_API_KEY!,
-        GELATO_STORE_ID!
-      );
-
       const override = overrides.find((o) => o.gelatoProductId === item.productId);
       const designFilename = override?.designFilename;
-      if (!designFilename) {
-        throw new Error(
-          `No design file configured for product ${item.productId} ("${item.name}"). ` +
-          `Set designFilename in the admin product editor.`
+
+      const files: { type: string; url: string }[] = [];
+
+      if (designFilename) {
+        const designUrl = `${BASE_URL}/api/designs/${encodeURIComponent(designFilename)}`;
+        files.push({ type: "default", url: designUrl });
+
+        // Gildan inner-label variants need a neck label file alongside the front design
+        const productUid = await resolveProductUid(
+          item.productId, item.variantName,
+          item.variantId ?? item.productId,
+          GELATO_API_KEY!, GELATO_STORE_ID!
         );
-      }
+        if (productUid.includes("inlbl_")) {
+          files.push({ type: "neck-inner", url: `${BASE_URL}/api/designs/neck-label-blank.png` });
+        }
 
-      const designUrl = `${BASE_URL}/api/designs/${encodeURIComponent(designFilename)}`;
-      console.log(`[gelato-order] item ${i}: productUid=${productUid} designUrl=${designUrl}`);
-
-      // Products with 'inlbl_' in the productUid (inner-label Gildan variants) require
-      // both a front design and a neck-inner label file.
-      const files: { type: string; url: string }[] = [{ type: "default", url: designUrl }];
-      if (productUid.includes("inlbl_")) {
-        files.push({ type: "neck-inner", url: `${BASE_URL}/api/designs/neck-label-blank.png` });
+        console.log(`[gelato-order] item ${i}: variant=${item.variantId} designUrl=${designUrl}`);
+      } else {
+        console.log(`[gelato-order] item ${i}: variant=${item.variantId} — no design file, using product template`);
       }
 
       return {
         itemReferenceId: item.id ?? `item_${i}`,
-        productUid,
-        files,
+        storeProductVariantId: item.variantId ?? item.productId,
+        ...(files.length > 0 ? { files } : {}),
         quantity: item.quantity,
       };
     })
@@ -118,16 +118,16 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
     items,
   };
 
-  console.log(`[gelato-order] submitting direct order:`, JSON.stringify(payload, null, 2));
+  console.log(`[gelato-order] submitting store order:`, JSON.stringify(payload, null, 2));
 
-  const res = await fetch(`https://order.gelatoapis.com/v4/orders`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-KEY": GELATO_API_KEY,
-    },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}/orders`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-KEY": GELATO_API_KEY },
+      body: JSON.stringify(payload),
+    }
+  );
 
   if (!res.ok) {
     const text = await res.text();

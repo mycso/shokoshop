@@ -62,11 +62,14 @@ export default function EditProductPage({
         setProduct(data);
 
         // Pre-fill existing prices and custom images from local store
+        let hasPrices = false;
+        let hasImages = false;
         const localRes = await fetch("/api/gelato/local-products");
         if (localRes.ok) {
           const localList: any[] = await localRes.json();
           const match = localList.find((l: any) => l.gelatoProductId === id);
-          if (match?.variantPrices) {
+          if (match?.variantPrices && Object.keys(match.variantPrices).length > 0) {
+            hasPrices = true;
             const pre: Record<string, string> = {};
             for (const [k, v] of Object.entries(match.variantPrices)) {
               pre[k] = String((v as number) / 100);
@@ -74,8 +77,56 @@ export default function EditProductPage({
             setVariantPrices(pre);
           }
           if (match?.category) setCategory(match.category);
-          if (match?.images?.length) setCustomImages(match.images);
+          if (match?.images?.length) { hasImages = true; setCustomImages(match.images); }
           if (match?.designFilename) setDesignFilename(match.designFilename);
+        }
+
+        // Auto-fill prices from Gelato when none are saved yet
+        if (!hasPrices && data.variants?.length) {
+          try {
+            const priceRes = await fetch("/api/gelato/variant-prices", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productId: id, variants: data.variants.map((v: any) => ({ id: v.id })) }),
+            });
+            if (priceRes.ok) {
+              const priceData = await priceRes.json();
+              const gelatoPrices: Record<string, number> = priceData.prices ?? {};
+              const newPrices: Record<string, string> = {};
+              const newPricesPence: Record<string, number> = {};
+              for (const v of data.variants) {
+                const p = gelatoPrices[v.id];
+                if (p && p > 0) {
+                  newPrices[v.id] = String((p / 100).toFixed(2));
+                  newPricesPence[v.id] = p;
+                }
+              }
+              if (Object.keys(newPrices).length > 0) {
+                setVariantPrices(newPrices);
+                // Persist so the storefront picks them up
+                await fetch("/api/gelato/local-products", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ gelatoProductId: id, variantPrices: newPricesPence }),
+                });
+              }
+            }
+          } catch { /* non-fatal — admin can fill manually */ }
+        }
+
+        // Auto-import Gelato mockup images when none are saved yet
+        if (!hasImages) {
+          try {
+            const imgRes = await fetch("/api/admin/product-images", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productId: id }),
+            });
+            if (imgRes.ok) {
+              const imgData = await imgRes.json();
+              if (imgData.images?.length) setCustomImages(imgData.images);
+            }
+          } catch { /* non-fatal */ }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load product");
