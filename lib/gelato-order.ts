@@ -72,23 +72,27 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
 
       const files: { type: string; url: string }[] = [];
 
+      // Resolve productUid to detect inner-label (inlbl_) variants
+      const productUid = await resolveProductUid(
+        item.productId, item.variantName,
+        item.variantId ?? item.productId,
+        GELATO_API_KEY!, GELATO_STORE_ID!
+      );
+      const isInnerLabel = productUid.includes("inlbl_");
+
       if (designFilename) {
         const designUrl = `${BASE_URL}/api/designs/${encodeURIComponent(designFilename)}`;
         files.push({ type: "default", url: designUrl });
-
-        // Gildan inner-label variants need a neck label file alongside the front design
-        const productUid = await resolveProductUid(
-          item.productId, item.variantName,
-          item.variantId ?? item.productId,
-          GELATO_API_KEY!, GELATO_STORE_ID!
-        );
-        if (productUid.includes("inlbl_")) {
-          files.push({ type: "neck-inner", url: `${BASE_URL}/api/designs/neck-label-blank.png` });
-        }
-
         console.log(`[gelato-order] item ${i}: variant=${item.variantId} designUrl=${designUrl}`);
       } else {
         console.log(`[gelato-order] item ${i}: variant=${item.variantId} — no design file, using product template`);
+      }
+
+      // Always send the blank neck label for inner-label variants so it is never
+      // accidentally omitted when there is no custom design file override.
+      if (isInnerLabel) {
+        files.push({ type: "neck-inner", url: `${BASE_URL}/api/designs/neck-label-blank.png` });
+        console.log(`[gelato-order] item ${i}: inlbl_ variant — adding neck-inner label`);
       }
 
       return {
