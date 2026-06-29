@@ -185,7 +185,7 @@ async function fetchGelatoProduct(slug: string) {
     price,
     images,
     category: productVariantOptions.map((o) => o.name).join(" / ") || "Apparel",
-    inStock: true,
+    inStock: productVariants.some((v: any) => v.connectionStatus === "connected"),
     variants: productVariants
       .filter((v: any) => !hasPriceData || (variantPrices[v.id] ?? -1) !== 0)
       .map((v: any) => ({

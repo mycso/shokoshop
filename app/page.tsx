@@ -111,6 +111,7 @@ async function getPopularProducts(limit = 20) {
         images: localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"],
         category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
         productVariantOptions: p.productVariantOptions ?? [],
+        inStock: (p.variants ?? []).some((v: any) => v.connectionStatus === "connected"),
         sales: salesByProductId[p.id] ?? 0,
       };
     });
@@ -232,6 +233,11 @@ export default async function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     unoptimized
                   />
+                  {!product.inStock && (
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-gray-600">Out of Stock</span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg group-hover:text-brand transition-colors">
