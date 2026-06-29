@@ -66,6 +66,45 @@ async function fetchGelatoProduct(slug: string) {
     }
   } catch { /* ignore */ }
 
+  // Supplement with live Gelato productImages from the detail API response.
+  // When variantImages is empty (sync hasn't run yet, or a new product), build
+  // a per-variant map from the raw productImages so the carousel has content
+  // immediately. For products where sync has run, only add images not already
+  // covered (avoids cross-contaminating blob URLs with signed Gelato URLs).
+  {
+    const urlBase = (u: string) => {
+      try { return new URL(u).pathname; } catch { return u.split("?")[0]; }
+    };
+    const coveredImages = new Set(images.map(urlBase));
+    const extraImages: string[] = [];
+    const syncHasVariantImages = Object.keys(variantImages).length > 0;
+    const fallbackVI: Record<string, string[]> = {};
+
+    for (const img of (detail.productImages ?? []) as any[]) {
+      const url: string = img.fileUrl ?? img.url ?? img.previewUrl ?? "";
+      if (!url || img.isPrimary) continue;
+      const key = urlBase(url);
+
+      // Add to product-level images for the carousel "remaining images" slot
+      if (!coveredImages.has(key)) { coveredImages.add(key); extraImages.push(url); }
+
+      // Only build per-variant fallback when sync has no variantImages at all
+      if (!syncHasVariantImages) {
+        const ids: string[] = img.productVariantIds ?? [];
+        const targets = ids.length > 0 ? ids : productVariants.map((v: any) => v.id);
+        for (const vid of targets) {
+          fallbackVI[vid] ??= [];
+          if (!fallbackVI[vid].some((u: string) => urlBase(u) === key)) fallbackVI[vid].push(url);
+        }
+      }
+    }
+
+    if (extraImages.length > 0) images = [...images, ...extraImages];
+    if (!syncHasVariantImages && Object.keys(fallbackVI).length > 0) {
+      variantImages = fallbackVI;
+    }
+  }
+
   // Parse variantOptions from each variant's title: "Color - Size - PrintType"
   // e.g. "White - S - DTG (Direct-to-garment)" → { Color: "White", Size: "S" }
   function parseVariantTitle(title: string): Record<string, string> {

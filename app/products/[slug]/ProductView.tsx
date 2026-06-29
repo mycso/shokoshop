@@ -343,11 +343,23 @@ export default function ProductView({ product }: { product: Product }) {
       out.push(heroImage);
     }
     // Gelato per-colour mockups next — the poster for the selected colour
+    let colorHasImages = false;
     if (selectedColor) {
       for (const v of variants) {
         const vopts = v.variantOptions ?? {};
         if (vopts.Color !== selectedColor) continue;
         for (const url of variantImages[v.id] ?? []) {
+          const key = imageKey(url);
+          if (!seen.has(key)) { seen.add(key); out.push(url); colorHasImages = true; }
+        }
+      }
+    }
+    // If the selected colour has no specific mockups, show all variant images so
+    // the carousel is never empty — covers cases where Gelato scoped images to
+    // only one colour or the sync hasn't assigned them to every variant yet.
+    if (!colorHasImages) {
+      for (const imgs of Object.values(variantImages)) {
+        for (const url of imgs) {
           const key = imageKey(url);
           if (!seen.has(key)) { seen.add(key); out.push(url); }
         }
