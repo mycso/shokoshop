@@ -6,9 +6,6 @@ import Image from "next/image";
 import { Pencil, RefreshCw, Wand2, FileDown } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 
-function toSlug(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -24,37 +21,12 @@ export default function AdminProductsPage() {
   async function loadProducts() {
     setLoading(true);
     try {
-      const [storeRes, lpRes] = await Promise.all([
-        fetch("/api/gelato/store-products"),
-        fetch("/api/gelato/local-products"),
-      ]);
-      const data = await storeRes.json();
-      const list = Array.isArray(data.products) ? data.products : [];
-      const localProducts: any[] = await lpRes.json();
-
-      const mapped = list.map((p: any) => {
-        const name = p.title ?? p.name ?? "Untitled";
-        const slug = toSlug(name);
-        const local = localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug);
-        const variantPrices: Record<string, number> = local?.variantPrices ?? {};
-        const vals = Object.values(variantPrices) as number[];
-        let price = vals.length > 0 ? Math.min(...vals) : (local?.price ?? 0);
-
-        // Fallback: derive price from Gelato list-API variant data (EUR → GBP pence)
-        if (price === 0) {
-          const eurPrices: number[] = (p.variants ?? [])
-            .map((v: any) => v.price ?? v.retailPrice ?? 0)
-            .filter((n: number) => n > 0);
-          const minEur = eurPrices.length > 0 ? Math.min(...eurPrices) : (p.price ?? p.retailPrice ?? 0);
-          if (minEur > 0) price = Math.round(minEur * 0.86 * 100);
-        }
-
-        return { ...p, name, slug, price, category: local?.category ?? "", thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null };
-      });
-
+      const res = await fetch("/api/admin/products");
+      const data = await res.json();
+      const mapped: any[] = data.products ?? [];
       setProducts(mapped);
 
-      // Auto-sync once if any product still has no price after the fallback
+      // Auto-sync once if any product still has no price
       if (!autoSyncedRef.current && mapped.some((p: any) => p.price === 0)) {
         autoSyncedRef.current = true;
         syncPricesInBackground();
