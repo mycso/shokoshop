@@ -117,13 +117,23 @@ async function fetchGelatoProduct(slug: string) {
     }
   }
 
-  // Parse variantOptions from each variant's title: "Color - Size - PrintType"
-  // e.g. "White - S - DTG (Direct-to-garment)" → { Color: "White", Size: "S" }
+  // Use the API's productVariantOptions to determine option names in order,
+  // then parse each variant title by splitting on " - " and matching positionally.
+  // e.g. apparel: options=["Color","Size"], title="White - M - DTG" → {Color:"White",Size:"M"}
+  // e.g. poster:  options=["Size","Coating"],  title="30x40 cm - Matte"  → {Size:"30x40 cm",Coating:"Matte"}
+  const apiOptionNames: string[] = (detail.productVariantOptions ?? []).map((o: any) => String(o.name));
+
   function parseVariantTitle(title: string): Record<string, string> {
     const parts = title.split(" - ");
-    if (parts.length >= 2) {
-      return { Color: parts[0].trim(), Size: parts[1].trim() };
+    if (apiOptionNames.length > 0) {
+      const result: Record<string, string> = {};
+      apiOptionNames.forEach((name, i) => {
+        if (parts[i] !== undefined) result[name] = parts[i].trim();
+      });
+      return result;
     }
+    // Fallback when API doesn't return option names
+    if (parts.length >= 2) return { Color: parts[0].trim(), Size: parts[1].trim() };
     return {};
   }
 
@@ -143,24 +153,26 @@ async function fetchGelatoProduct(slug: string) {
     }
   }
 
-  const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+  const APPAREL_SIZE_ORDER = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
   function sizeRank(v: string) {
-    const i = SIZE_ORDER.indexOf(v.toUpperCase());
-    return i === -1 ? 99 : i;
+    const i = APPAREL_SIZE_ORDER.indexOf(v.toUpperCase());
+    if (i !== -1) return i;
+    // Dimension sort for poster sizes like "21x29.7 cm", "30x40 cm" — sort by area
+    const dim = v.match(/^(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)/i);
+    if (dim) return parseFloat(dim[1]) * parseFloat(dim[2]);
+    return 99;
   }
 
-  // Order: Color first, then Size
-  const OPTION_ORDER = ["Color", "Size"];
+  // Preserve the API's declared option order; fall back to Color-first for apparel
+  const OPTION_ORDER = apiOptionNames.length > 0 ? apiOptionNames : ["Color", "Size"];
   const productVariantOptions = Object.entries(optionMap)
     .sort(([a], [b]) => {
-      return (OPTION_ORDER.indexOf(a) === -1 ? 99 : OPTION_ORDER.indexOf(a)) -
-             (OPTION_ORDER.indexOf(b) === -1 ? 99 : OPTION_ORDER.indexOf(b));
+      const ai = OPTION_ORDER.indexOf(a); const bi = OPTION_ORDER.indexOf(b);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     })
     .map(([optName, values]) => ({
       name: optName,
-      values: optName === "Size"
-        ? Array.from(values).sort((a, b) => sizeRank(a) - sizeRank(b))
-        : Array.from(values),
+      values: Array.from(values).sort((a, b) => sizeRank(a) - sizeRank(b)),
     }));
 
   if (images.length === 0) images = ["/shokoshoplogo.svg"];
