@@ -6,6 +6,7 @@ import { PriceDisplay } from "@/components/ui/PriceDisplay";
 import { StarRating } from "@/components/ui/StarRating";
 import { getGelatoProducts } from "@/lib/gelato-data";
 import { getReviewsSummary } from "@/lib/reviews";
+import { getAllOrders } from "@/lib/orders";
 import { colorHex, isLightColor } from "@/lib/colors";
 import { CATEGORIES } from "@/lib/categories";
 
@@ -38,10 +39,24 @@ const BANNER_IMAGES = [
   },
 ];
 
-async function getPopularProducts(limit = 3) {
+async function getPopularProducts(limit = 20) {
   const apiKey = process.env.GELATO_API_KEY;
   const storeId = process.env.GELATO_STORE_ID;
   if (!apiKey || !storeId) return [];
+
+  // Count units sold per productId from fulfilled orders
+  const salesByProductId: Record<string, number> = {};
+  try {
+    const orders = await getAllOrders();
+    for (const order of orders) {
+      if (order.status === "pending" || order.status === "cancelled") continue;
+      for (const item of order.items) {
+        if (item.productId) {
+          salesByProductId[item.productId] = (salesByProductId[item.productId] ?? 0) + item.quantity;
+        }
+      }
+    }
+  } catch { /* ignore */ }
 
   let localProducts: any[] = [];
   try {
@@ -66,7 +81,7 @@ async function getPopularProducts(limit = 3) {
 
   try {
     const res = await fetch(
-      `https://ecommerce.gelatoapis.com/v1/stores/${storeId}/products?limit=${limit}&order=desc&orderBy=createdAt`,
+      `https://ecommerce.gelatoapis.com/v1/stores/${storeId}/products?limit=100&order=desc&orderBy=createdAt`,
       {
         headers: { "Content-Type": "application/json", "X-API-KEY": apiKey },
         next: { revalidate: 60 },
@@ -74,9 +89,9 @@ async function getPopularProducts(limit = 3) {
     );
     if (!res.ok) return [];
     const data = await res.json();
-    const list: any[] = Array.isArray(data.products) ? data.products.slice(0, limit) : [];
+    const list: any[] = Array.isArray(data.products) ? data.products : [];
 
-    return list.map((p: any) => {
+    const mapped = list.map((p: any) => {
       const name = p.title ?? p.name ?? "Untitled product";
       const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       const variantEurPrices: number[] = (p.variants ?? [])
@@ -96,15 +111,20 @@ async function getPopularProducts(limit = 3) {
         images: localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"],
         category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
         productVariantOptions: p.productVariantOptions ?? [],
+        sales: salesByProductId[p.id] ?? 0,
       };
     });
+
+    // Sort by units sold descending, then newest first as tiebreaker
+    mapped.sort((a, b) => b.sales - a.sales);
+    return mapped.slice(0, limit);
   } catch {
     return [];
   }
 }
 
 export default async function HomePage() {
-  const featured = await getPopularProducts(3);
+  const featured = await getPopularProducts(20);
   const reviewSummary = await getReviewsSummary(featured.map((p) => p.id));
 
   return (
@@ -193,14 +213,14 @@ export default async function HomePage() {
               View all <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featured.map((product) => (
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
                 className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"
               >
-                <div className={`relative h-80 overflow-hidden ${
+                <div className={`relative h-64 overflow-hidden ${
                   /shirt|tee|hoodie|sweatshirt|apparel/i.test(product.name) || product.category === "Apparel"
                     ? "bg-gray-300"
                     : "bg-gray-100"
