@@ -295,7 +295,9 @@ export default function ProductView({ product }: { product: Product }) {
   const [added, setAdded] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
 
-  const options: ProductVariantOption[] = product.productVariantOptions ?? [];
+  const isPoster = /print|poster|wall\s*art|canvas|aluminum|aluminium|metal|framed/i.test(product.name);
+  const options: ProductVariantOption[] = (product.productVariantOptions ?? [])
+    .filter((o) => !(isPoster && (o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour")));
   const variants = product.variants ?? [];
   const variantPrices: Record<string, number> = product.variantPrices ?? {};
   const variantImages: Record<string, string[]> = product.variantImages ?? {};
