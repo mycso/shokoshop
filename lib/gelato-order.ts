@@ -93,13 +93,16 @@ export async function submitGelatoOrder(order: Order, { retry = false }: { retry
         console.log(`[gelato-order] item ${i}: inlbl_ variant — adding neck-inner label`);
       }
 
+      // When we have a design file, use productUid so Gelato is forced to use
+      // our supplied files. storeProductVariantId only uses the product template
+      // design and ignores the files array — so products without a template
+      // design (most of ours) would show "not connected" even with files sent.
+      const useProductUid = files.some(f => f.type === "default");
       return {
         itemReferenceId: item.id ?? `item_${i}`,
-        // storeProductVariantId lets Gelato use the product template design
-        // automatically; productUid is only needed when explicitly overriding
-        // the design with custom files (which we still send via `files` below).
-        storeProductVariantId: item.variantId ?? item.productId,
-        ...(files.length > 0 ? { files } : {}),
+        ...(useProductUid
+          ? { productUid, files }
+          : { storeProductVariantId: item.variantId ?? item.productId, ...(files.length > 0 ? { files } : {}) }),
         quantity: item.quantity,
       };
     })
