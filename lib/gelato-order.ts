@@ -46,13 +46,11 @@ async function resolveProductUid(
 }
 
 /**
- * Submits a paid order to Gelato using the ecommerce store orders API.
- * Uses storeProductVariantId so orders work for every product regardless of
- * whether a custom design file has been uploaded in the admin. When a design
- * file IS configured, it is sent as the print file and overrides the product
- * template. When not, Gelato falls back to the design baked into the product
- * template — so products are fulfillable straight away without any extra admin
- * step. Neck-inner label files are added automatically for Gildan inlbl_ SKUs.
+ * Submits a paid order to Gelato using the direct Order API (order.gelatoapis.com/v4/orders).
+ * Uses productUid (resolved from the variant) so the correct blank product SKU is printed.
+ * When a custom design file is configured it is sent as the print file; when not, Gelato
+ * uses the design saved in the product template automatically.
+ * Neck-inner label files are always sent for Gildan inlbl_ SKUs.
  */
 export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: string }> {
   if (!GELATO_API_KEY || !GELATO_STORE_ID) {
@@ -97,7 +95,7 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
 
       return {
         itemReferenceId: item.id ?? `item_${i}`,
-        storeProductVariantId: item.variantId ?? item.productId,
+        productUid,
         ...(files.length > 0 ? { files } : {}),
         quantity: item.quantity,
       };
@@ -122,10 +120,10 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
     items,
   };
 
-  console.log(`[gelato-order] submitting store order:`, JSON.stringify(payload, null, 2));
+  console.log(`[gelato-order] submitting order:`, JSON.stringify(payload, null, 2));
 
   const res = await fetch(
-    `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}/orders`,
+    `https://order.gelatoapis.com/v4/orders`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-API-KEY": GELATO_API_KEY },

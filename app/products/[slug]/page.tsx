@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ProductView from "./ProductView";
 import { getGelatoProducts } from "@/lib/gelato-data";
+import { getOverrides } from "@/lib/gelato-overrides";
 
 const GELATO_API_KEY = process.env.GELATO_API_KEY;
 const GELATO_STORE_ID = process.env.GELATO_STORE_ID;
@@ -53,7 +54,10 @@ async function fetchGelatoProduct(slug: string) {
 
   let images: string[] = apiImages;
   try {
-    const local = await getGelatoProducts();
+    // Read override images directly from blob — always fresh, not affected by the
+    // getGelatoProducts cache which can lag behind webhook updates.
+    const [overrides, local] = await Promise.all([getOverrides(), getGelatoProducts()]);
+    const override = overrides.find((o) => o.gelatoProductId === p.id);
     const localMatch = local.find(
       (l) => l.gelatoProductId === p.id || titleToSlug(l.name ?? "") === slug
     );
@@ -62,8 +66,10 @@ async function fetchGelatoProduct(slug: string) {
       variantImages = localMatch.variantImages ?? {};
       const vpValues = (Object.values(variantPrices) as number[]).filter((n) => n > 0);
       price = vpValues.length > 0 ? Math.min(...vpValues) : (localMatch.price ?? 0);
-      if ((localMatch.images ?? []).length > 0) images = localMatch.images;
     }
+    // Prefer override images (direct blob read) over cached localMatch images
+    const overrideImages = override?.images ?? localMatch?.images ?? [];
+    if (overrideImages.length > 0) images = overrideImages;
   } catch { /* ignore */ }
 
   // Add ALL non-primary productImages from the live Gelato API to product.images
