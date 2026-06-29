@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2, ArrowUp } from "lucide-react";
 import { CATEGORIES, detectCategory } from "@/lib/categories";
 
 function formatPrice(pence: number) {
@@ -184,6 +184,18 @@ export default function EditProductPage({
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Delete failed");
     }
+  }
+
+  async function handleImageMoveFirst(url: string) {
+    const reordered = [url, ...customImages.filter((u) => u !== url)];
+    setCustomImages(reordered);
+    try {
+      await fetch("/api/admin/product-images", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: id, images: reordered }),
+      });
+    } catch { /* ignore — optimistic update already applied */ }
   }
 
   async function handleDesignUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -379,17 +391,34 @@ export default function EditProductPage({
             </div>
           ) : (
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-              {customImages.map((url) => (
+              {customImages.map((url, idx) => (
                 <div key={url} className="relative group">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt="" className="h-24 w-full object-cover rounded-xl bg-gray-100" />
-                  <button
-                    type="button"
-                    onClick={() => handleImageDelete(url)}
-                    className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
+                  {idx === 0 && (
+                    <span className="absolute bottom-1 left-1 bg-brand text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none">
+                      First
+                    </span>
+                  )}
+                  <div className="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {idx !== 0 && (
+                      <button
+                        type="button"
+                        title="Move to first"
+                        onClick={() => handleImageMoveFirst(url)}
+                        className="bg-black/60 hover:bg-brand text-white rounded-full p-0.5"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleImageDelete(url)}
+                      className="bg-black/60 hover:bg-red-600 text-white rounded-full p-0.5"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

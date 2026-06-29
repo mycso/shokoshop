@@ -71,11 +71,12 @@ export function mergeOverrides<T extends { gelatoProductId?: string; variantPric
     const priceValues = Object.values(variantPrices) as number[];
     const price = priceValues.length > 0 ? Math.min(...priceValues) : o.price ?? p.price;
 
-    // Keep the Gelato primary flatlay first, then admin extras, then remaining Gelato images
+    // Admin images come first (in the order saved), then any Gelato images not already included
     const gelatoImages = p.images ?? [];
-    const adminImages = (o.images ?? []).filter((u) => !gelatoImages.includes(u));
+    const adminImages = o.images ?? [];
+    const gelatoExtras = gelatoImages.filter((u) => !adminImages.includes(u));
     const images = adminImages.length > 0
-      ? [gelatoImages[0], ...adminImages, ...gelatoImages.slice(1)].filter(Boolean) as string[]
+      ? [...adminImages, ...gelatoExtras].filter(Boolean) as string[]
       : gelatoImages;
 
     const category = o.category ?? p.category;

@@ -132,6 +132,22 @@ export async function PUT(request: Request) {
   }
 }
 
+// PATCH /api/admin/product-images — save a new image order for a product
+export async function PATCH(request: Request) {
+  try {
+    const { productId, images } = await request.json();
+    if (!productId || !Array.isArray(images)) {
+      return NextResponse.json({ error: "productId and images array are required" }, { status: 400 });
+    }
+    await setOverride({ gelatoProductId: productId, images });
+    revalidateTag(GELATO_PRODUCTS_TAG, { expire: 0 });
+    return NextResponse.json({ ok: true, images });
+  } catch (err) {
+    console.error("[product-images PATCH]", err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Reorder failed" }, { status: 500 });
+  }
+}
+
 // DELETE /api/admin/product-images — remove an image from a product
 export async function DELETE(request: Request) {
   try {
