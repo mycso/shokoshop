@@ -171,7 +171,9 @@ export default function AdminProductsPage() {
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading products…</div>
+        <div className="flex justify-center py-20">
+          <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-brand animate-spin" />
+        </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <table className="w-full text-sm">
