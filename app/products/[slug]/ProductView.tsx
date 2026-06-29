@@ -10,16 +10,25 @@ import type { Review } from "@/lib/reviews";
 import { colorHex, isLightColor } from "@/lib/colors";
 
 // Images are served via /api/blob-image?path=<blob pathname>, so the
-// distinguishing part lives in the query string, not the route path — unwrap
-// it before comparing. Falls back to stripping any query string for other
-// URLs (e.g. a raw, re-signed Gelato URL, where the path alone identifies it).
+// Return a stable identity key for an image URL so that the same underlying
+// image is never shown twice in the carousel, regardless of whether it is
+// served as a private-blob proxy URL or as a raw signed Gelato CDN URL.
+//
+// Blob proxy:   /api/blob-image?path=gelato-previews/{uuid}.jpg  → "{uuid}"
+// Gelato CDN:   https://…/store_product_image/{uuid}/…?sig=…     → "{uuid}"
+// Admin upload: /api/blob-image?path=product-images/…            → full path
+// Other:        strip query string, use pathname
 function imageKey(url: string): string {
   try {
     const parsed = new URL(url, "http://localhost");
     if (parsed.pathname === "/api/blob-image") {
-      const inner = parsed.searchParams.get("path");
-      if (inner) return inner;
+      const inner = parsed.searchParams.get("path") ?? "";
+      const m = inner.match(/gelato-previews\/([a-f0-9-]+)/i);
+      if (m) return m[1];
+      return inner;
     }
+    const m = parsed.pathname.match(/store_product_image\/([a-f0-9-]+)/i);
+    if (m) return m[1];
     return parsed.pathname;
   } catch {
     return url.split("?")[0];
