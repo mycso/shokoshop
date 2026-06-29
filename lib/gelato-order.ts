@@ -95,7 +95,10 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
 
       return {
         itemReferenceId: item.id ?? `item_${i}`,
-        productUid,
+        // storeProductVariantId lets Gelato use the product template design
+        // automatically; productUid is only needed when explicitly overriding
+        // the design with custom files (which we still send via `files` below).
+        storeProductVariantId: item.variantId ?? item.productId,
         ...(files.length > 0 ? { files } : {}),
         quantity: item.quantity,
       };
