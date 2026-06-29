@@ -9,6 +9,27 @@ import { persistImageToBlob } from "@/lib/gelato-sync.mjs";
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_SIZE = 20 * 1024 * 1024;
 
+const GELATO_API_KEY = process.env.GELATO_API_KEY;
+const GELATO_STORE_ID = process.env.GELATO_STORE_ID;
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://shokoshop.com";
+
+/** Push a publicly-accessible image URL to Gelato's product images API. */
+async function pushImageToGelato(productId: string, publicUrl: string): Promise<void> {
+  if (!GELATO_API_KEY || !GELATO_STORE_ID) return;
+  const res = await fetch(
+    `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}/products/${productId}/images`,
+    {
+      method: "POST",
+      headers: { "X-API-KEY": GELATO_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ fileUrl: publicUrl, isPrimary: false, productVariantIds: [], skipPublishing: false }),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.error(`[product-images] Gelato image push failed ${res.status}: ${text}`);
+  }
+}
+
 // POST /api/admin/product-images — upload one or more images and attach to a product
 export async function POST(request: Request) {
   try {
@@ -42,6 +63,10 @@ export async function POST(request: Request) {
       });
       // Store as proxy URL so the private blob is served through our /api/blob-image route
       uploadedUrls.push(`/api/blob-image?path=${blob.pathname}`);
+
+      // Push to Gelato so the image appears on the product in Gelato's platform
+      const publicUrl = `${BASE_URL}/api/blob-image?path=${encodeURIComponent(blob.pathname)}`;
+      await pushImageToGelato(productId, publicUrl);
     }
 
     const overrides = await getOverrides();
