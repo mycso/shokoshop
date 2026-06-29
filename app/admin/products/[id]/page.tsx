@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2, ArrowUp } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2, ArrowUp, FileDown } from "lucide-react";
 import { CATEGORIES, detectCategory } from "@/lib/categories";
 
 function formatPrice(pence: number) {
