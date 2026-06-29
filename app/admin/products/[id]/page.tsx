@@ -80,7 +80,13 @@ export default function EditProductPage({
           }
           if (match?.category) setCategory(match.category);
           if (match?.images?.length) { hasImages = true; setCustomImages(match.images); }
-          if (match?.designFilename) setDesignFilename(match.designFilename);
+        }
+
+        // designFilename lives in overrides, not local-products — fetch separately
+        const dfRes = await fetch(`/api/admin/design-file?productId=${id}`);
+        if (dfRes.ok) {
+          const dfData = await dfRes.json();
+          if (dfData.designFilename) setDesignFilename(dfData.designFilename);
         }
 
         // Auto-fill prices from Gelato when none are saved yet
