@@ -3,30 +3,6 @@ import { Cart, ShippingAddress } from "@/types";
 import { createOrder, generateOrderId } from "@/lib/orders";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
 
-const GELATO_API_KEY = process.env.GELATO_API_KEY;
-const GELATO_STORE_ID = process.env.GELATO_STORE_ID;
-
-/** Returns the name of any cart item whose Gelato variant is not "connected" (out of stock). */
-async function findOutOfStockItem(items: Cart["items"]): Promise<string | null> {
-  if (!GELATO_API_KEY || !GELATO_STORE_ID) return null;
-  const base = `https://ecommerce.gelatoapis.com/v1/stores/${GELATO_STORE_ID}`;
-  const headers = { "X-API-KEY": GELATO_API_KEY, "Content-Type": "application/json" };
-
-  for (const item of items) {
-    if (!item.productId || !item.variantId) continue;
-    try {
-      const res = await fetch(`${base}/products/${item.productId}`, { headers });
-      if (!res.ok) continue;
-      const data = await res.json();
-      const variant = (data.variants ?? []).find((v: any) => v.id === item.variantId);
-      if (variant && variant.connectionStatus !== "connected") {
-        return item.name;
-      }
-    } catch { /* network error — don't block */ }
-  }
-  return null;
-}
-
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 export async function POST(request: Request) {
@@ -55,14 +31,6 @@ export async function POST(request: Request) {
 
     if (!cart?.items?.length) {
       return Response.json({ error: "Cart is empty" }, { status: 400 });
-    }
-
-    const outOfStockItem = await findOutOfStockItem(cart.items);
-    if (outOfStockItem) {
-      return Response.json(
-        { error: `"${outOfStockItem}" is currently out of stock and cannot be purchased. Please remove it from your cart.` },
-        { status: 409 }
-      );
     }
 
     const orderId = generateOrderId();
