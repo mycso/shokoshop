@@ -66,43 +66,35 @@ async function fetchGelatoProduct(slug: string) {
     }
   } catch { /* ignore */ }
 
-  // Supplement with live Gelato productImages from the detail API response.
-  // When variantImages is empty (sync hasn't run yet, or a new product), build
-  // a per-variant map from the raw productImages so the carousel has content
-  // immediately. For products where sync has run, only add images not already
-  // covered (avoids cross-contaminating blob URLs with signed Gelato URLs).
+  // Build per-variant fallback from the live Gelato productImages for any
+  // variant not already covered by the sync cache. This covers two cases:
+  //   1. New product — sync hasn't run yet, variantImages is entirely empty
+  //   2. Gelato reset productVariantIds to one colour after a dashboard edit —
+  //      some variants have images, others don't
+  // We never touch `images` here to avoid mixing signed Gelato URLs with blob
+  // URLs (they have different URL shapes so dedup would miss them).
   {
-    const urlBase = (u: string) => {
-      try { return new URL(u).pathname; } catch { return u.split("?")[0]; }
-    };
-    const coveredImages = new Set(images.map(urlBase));
-    const extraImages: string[] = [];
-    const syncHasVariantImages = Object.keys(variantImages).length > 0;
+    const urlBase = (u: string) => { try { return new URL(u).pathname; } catch { return u.split("?")[0]; } };
     const fallbackVI: Record<string, string[]> = {};
 
     for (const img of (detail.productImages ?? []) as any[]) {
       const url: string = img.fileUrl ?? img.url ?? img.previewUrl ?? "";
       if (!url || img.isPrimary) continue;
       const key = urlBase(url);
-
-      // Add to product-level images for the carousel "remaining images" slot
-      if (!coveredImages.has(key)) { coveredImages.add(key); extraImages.push(url); }
-
-      // Only build per-variant fallback when sync has no variantImages at all
-      if (!syncHasVariantImages) {
-        const ids: string[] = img.productVariantIds ?? [];
-        const targets = ids.length > 0 ? ids : productVariants.map((v: any) => v.id);
-        for (const vid of targets) {
-          fallbackVI[vid] ??= [];
-          if (!fallbackVI[vid].some((u: string) => urlBase(u) === key)) fallbackVI[vid].push(url);
-        }
+      const ids: string[] = img.productVariantIds ?? [];
+      const targets = ids.length > 0 ? ids : productVariants.map((v: any) => v.id);
+      for (const vid of targets) {
+        fallbackVI[vid] ??= [];
+        if (!fallbackVI[vid].some((u: string) => urlBase(u) === key)) fallbackVI[vid].push(url);
       }
     }
 
-    if (extraImages.length > 0) images = [...images, ...extraImages];
-    if (!syncHasVariantImages && Object.keys(fallbackVI).length > 0) {
-      variantImages = fallbackVI;
+    // Merge: sync blob URLs take priority; use fallback only where sync has nothing
+    const merged: Record<string, string[]> = { ...variantImages };
+    for (const [vid, urls] of Object.entries(fallbackVI)) {
+      if (!merged[vid] || merged[vid].length === 0) merged[vid] = urls;
     }
+    variantImages = merged;
   }
 
   // Parse variantOptions from each variant's title: "Color - Size - PrintType"
