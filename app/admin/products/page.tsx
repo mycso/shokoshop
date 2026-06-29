@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Pencil, RefreshCw, Wand2, FileDown } from "lucide-react";
+import { Pencil, RefreshCw, Wand2, FileDown, ChevronDown } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 
 
@@ -12,6 +12,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncLog, setSyncLog] = useState<string[]>([]);
+  const [syncLogOpen, setSyncLogOpen] = useState(false);
   const [autoAssigning, setAutoAssigning] = useState(false);
   const [autoAssignResult, setAutoAssignResult] = useState<string | null>(null);
   const [syncingDesigns, setSyncingDesigns] = useState(false);
@@ -152,11 +153,20 @@ export default function AdminProductsPage() {
       )}
 
       {syncLog.length > 0 && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-800">
-          <p className="font-semibold mb-1">Sync complete:</p>
-          <ul className="list-disc list-inside space-y-0.5">
-            {syncLog.map((l, i) => <li key={i}>{l}</li>)}
-          </ul>
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setSyncLogOpen((o) => !o)}
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-green-100 transition-colors text-left"
+          >
+            <span className="font-semibold">Sync complete — {syncLog.length} products</span>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${syncLogOpen ? "rotate-180" : ""}`} />
+          </button>
+          {syncLogOpen && (
+            <ul className="list-disc list-inside space-y-0.5 px-4 pb-3">
+              {syncLog.map((l, i) => <li key={i}>{l}</li>)}
+            </ul>
+          )}
         </div>
       )}
 
