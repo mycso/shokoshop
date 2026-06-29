@@ -191,7 +191,7 @@ async function fetchGelatoProduct(slug: string) {
     price,
     images,
     category: productVariantOptions.map((o) => o.name).join(" / ") || "Apparel",
-    inStock: productVariants.some((v: any) => v.connectionStatus === "connected"),
+    inStock: p.status !== "inactive" && p.status !== "deleted",
     variants: productVariants
       .filter((v: any) => !hasPriceData || (variantPrices[v.id] ?? -1) !== 0)
       .map((v: any) => ({
@@ -201,7 +201,7 @@ async function fetchGelatoProduct(slug: string) {
         sku: v.productUid ?? v.id,
         productUid: v.productUid,
         variantOptions: variantOptionMap[v.id] ?? {},
-        inStock: v.connectionStatus === "connected",
+        inStock: true,
       })),
     productVariantOptions,
     variantPrices,

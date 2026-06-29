@@ -72,7 +72,7 @@ async function getProducts() {
       variantPrices,
       images,
       category: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.category ?? "",
-      inStock: (p.variants ?? []).some((v: any) => v.connectionStatus === "connected"),
+      inStock: p.status !== "inactive" && p.status !== "deleted",
       variants: (p.variants ?? []).map((v: any) => ({
         id: v.id,
         name: v.title,

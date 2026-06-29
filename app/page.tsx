@@ -111,7 +111,7 @@ async function getPopularProducts(limit = 20) {
         images: localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"],
         category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
         productVariantOptions: p.productVariantOptions ?? [],
-        inStock: (p.variants ?? []).some((v: any) => v.connectionStatus === "connected"),
+        inStock: p.status !== "inactive" && p.status !== "deleted",
         sales: salesByProductId[p.id] ?? 0,
       };
     });
