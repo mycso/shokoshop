@@ -377,12 +377,12 @@ export default function EditProductPage({
             <div>
               <h2 className="font-semibold text-gray-900">Design File</h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Print-ready PNG/JPG sent to Gelato when fulfilling orders. Required for every product.
+                Optional override. When not set, Gelato uses the design already saved in the product template — including the neck label for inner-label products.
               </p>
             </div>
             <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${designUploading ? "opacity-60 pointer-events-none" : ""}`}>
               {designUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload"}
+              {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload override"}
               <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
             </label>
           </div>
@@ -393,7 +393,7 @@ export default function EditProductPage({
             <div className="mt-3 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
               <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-800">Design file set</p>
+                <p className="text-sm font-medium text-green-800">Custom design override set</p>
                 <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
               </div>
               <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
@@ -401,9 +401,9 @@ export default function EditProductPage({
               </button>
             </div>
           ) : (
-            <div className="mt-3 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
-              <FileImage className="h-5 w-5 text-amber-500 shrink-0" />
-              <p className="text-sm text-amber-700">No design file — orders for this product will fail until one is uploaded.</p>
+            <div className="mt-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+              <CheckCircle2 className="h-5 w-5 text-blue-500 shrink-0" />
+              <p className="text-sm text-blue-700">Using Gelato template design — main print file and neck label are provided automatically from the product template.</p>
             </div>
           )}
         </div>
