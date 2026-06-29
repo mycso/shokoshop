@@ -333,7 +333,13 @@ export default function ProductView({ product }: { product: Product }) {
   const colorImages: string[] = useMemo(() => {
     const seen = new Set<string>();
     const out: string[] = [];
-    // Gelato per-colour mockups first — the poster for the selected colour
+    // Lead with the same image shown on product cards so the carousel is consistent
+    const heroImage = product.images?.[0];
+    if (heroImage) {
+      seen.add(imageKey(heroImage));
+      out.push(heroImage);
+    }
+    // Gelato per-colour mockups next — the poster for the selected colour
     if (selectedColor) {
       for (const v of variants) {
         const vopts = v.variantOptions ?? {};
@@ -344,7 +350,7 @@ export default function ProductView({ product }: { product: Product }) {
         }
       }
     }
-    // Then product-level images (Gelato poster + any custom uploaded photos)
+    // Then remaining product-level images
     for (const url of product.images ?? []) {
       const key = imageKey(url);
       if (!seen.has(key)) { seen.add(key); out.push(url); }
