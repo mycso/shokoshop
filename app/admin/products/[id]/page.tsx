@@ -429,15 +429,29 @@ export default function EditProductPage({
             </p>
           )}
           {designFilename ? (
-            <div className="mt-3 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-800">Design file set</p>
-                <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
+            <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3">
+              <div className="flex items-center gap-3 mb-2">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-green-800">Design file set</p>
+                  <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
+                </div>
+                <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
-                <X className="h-4 w-4" />
-              </button>
+              {/\.(png|jpe?g|webp)$/i.test(designFilename) ? (
+                <img
+                  src={`/api/designs/${encodeURIComponent(designFilename)}`}
+                  alt="Design preview"
+                  className="w-full max-h-64 object-contain rounded-lg bg-white border border-green-100"
+                />
+              ) : (
+                <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-green-100 text-sm text-gray-600">
+                  <FileDown className="h-5 w-5 text-red-500 shrink-0" />
+                  PDF design file
+                </div>
+              )}
             </div>
           ) : (
             <div className="mt-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
