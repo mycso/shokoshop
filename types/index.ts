@@ -25,6 +25,7 @@ export interface ProductVariant {
   price: number;
   sku: string;
   variantOptions?: Record<string, string>; // e.g. { Color: "White", Size: "M" }
+  inStock?: boolean;
 }
 
 export interface CartItem {

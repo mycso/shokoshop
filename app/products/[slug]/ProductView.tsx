@@ -325,6 +325,7 @@ export default function ProductView({ product }: { product: Product }) {
   }
 
   const selectedVariant = useMemo(() => findVariant(selection), [selection]); // eslint-disable-line react-hooks/exhaustive-deps
+  const selectedVariantInStock = selectedVariant ? (selectedVariant.inStock !== false) : true;
 
   // Images for the selected colour only, gathered across all its sizes (a
   // size missing its own preview still shows the colour via a sibling size).
@@ -524,23 +525,33 @@ export default function ProductView({ product }: { product: Product }) {
                       );
                     }
 
+                    // Check if this specific option value results in an out-of-stock variant
+                    const hypotheticalVariant = findVariant({ ...selection, [opt.name]: val });
+                    const optionInStock = hypotheticalVariant ? (hypotheticalVariant.inStock !== false) : true;
+
                     return (
                       <button
                         key={val}
                         type="button"
-                        onClick={() => setSelection((s) => ({ ...s, [opt.name]: val }))}
-                        className={`flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
-                          isSelected
+                        onClick={() => optionInStock && setSelection((s) => ({ ...s, [opt.name]: val }))}
+                        disabled={!optionInStock}
+                        title={!optionInStock ? "Out of stock" : undefined}
+                        className={`relative flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
+                          !optionInStock
+                            ? "border-gray-200 text-gray-300 cursor-not-allowed opacity-50"
+                            : isSelected
                             ? "border-brand bg-brand-light text-brand-dark"
                             : "border-gray-200 text-gray-700 hover:border-brand"
                         }`}
                       >
                         <span className="text-sm">{val}</span>
-                        {price != null && price > 0 && (
+                        {!optionInStock ? (
+                          <span className="text-xs mt-0.5 text-gray-400">Out of stock</span>
+                        ) : price != null && price > 0 ? (
                           <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400"}`}>
                             {formatPrice(price)}
                           </span>
-                        )}
+                        ) : null}
                       </button>
                     );
                   })}
@@ -563,11 +574,18 @@ export default function ProductView({ product }: { product: Product }) {
         {/* Add to cart */}
         <button
           onClick={handleAdd}
+          disabled={!selectedVariantInStock}
           className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-base transition-all ${
-            added ? "bg-green-500 text-white" : "bg-brand text-white hover:bg-brand-dark"
+            !selectedVariantInStock
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : added
+              ? "bg-green-500 text-white"
+              : "bg-brand text-white hover:bg-brand-dark"
           }`}
         >
-          {added ? (
+          {!selectedVariantInStock ? (
+            "Out of Stock"
+          ) : added ? (
             <><Check className="h-5 w-5" /> Added to cart!</>
           ) : (
             <><ShoppingCart className="h-5 w-5" /> Add to Cart</>

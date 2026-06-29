@@ -132,6 +132,7 @@ async function fetchGelatoProduct(slug: string) {
         sku: v.productUid ?? v.id,
         productUid: v.productUid,
         variantOptions: variantOptionMap[v.id] ?? {},
+        inStock: v.connectionStatus === "connected",
       })),
     productVariantOptions,
     variantPrices,
