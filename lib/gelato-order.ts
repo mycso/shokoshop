@@ -52,7 +52,7 @@ async function resolveProductUid(
  * uses the design saved in the product template automatically.
  * Neck-inner label files are always sent for Gildan inlbl_ SKUs.
  */
-export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: string }> {
+export async function submitGelatoOrder(order: Order, { retry = false }: { retry?: boolean } = {}): Promise<{ gelatoOrderId: string }> {
   if (!GELATO_API_KEY || !GELATO_STORE_ID) {
     await updateOrder(order.id, { status: "processing" });
     throw new Error("GELATO_API_KEY or GELATO_STORE_ID not configured");
@@ -106,7 +106,7 @@ export async function submitGelatoOrder(order: Order): Promise<{ gelatoOrderId: 
   );
 
   const payload = {
-    orderReferenceId: order.id,
+    orderReferenceId: retry ? `${order.id}_r${Date.now()}` : order.id,
     customerReferenceId: order.customerEmail,
     currency: "GBP",
     shipmentMethodUid: "standard",

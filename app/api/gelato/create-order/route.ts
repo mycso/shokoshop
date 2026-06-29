@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       await updateOrder(orderId, { status: "paid" });
     }
 
-    const result = await submitGelatoOrder(order);
+    const result = await submitGelatoOrder(order, { retry: !!force });
     return Response.json(result);
   } catch (err) {
     console.error("Gelato create-order error:", err);
