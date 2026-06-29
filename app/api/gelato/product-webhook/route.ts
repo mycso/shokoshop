@@ -10,6 +10,38 @@ const STORE_ID = process.env.GELATO_STORE_ID!;
 const BASE = `https://ecommerce.gelatoapis.com/v1/stores/${STORE_ID}`;
 const HEADERS = { "X-API-KEY": API_KEY, "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" };
 
+function extractFileUrl(data: unknown, depth = 0): string | null {
+  if (depth > 8 || !data) return null;
+  if (typeof data === "string") {
+    const lower = data.toLowerCase();
+    if (lower.startsWith("http") && (lower.includes(".pdf") || lower.includes(".png") || lower.includes(".jpg") || lower.includes(".jpeg") || lower.includes(".zip") || lower.includes("download") || lower.includes("file") || lower.includes("design"))) return data;
+    return null;
+  }
+  if (Array.isArray(data)) { for (const item of data) { const f = extractFileUrl(item, depth + 1); if (f) return f; } return null; }
+  if (typeof data === "object" && data !== null) {
+    const obj = data as Record<string, unknown>;
+    for (const key of ["downloadUrl", "fileUrl", "designUrl", "printFileUrl", "outputUrl", "outputFileUrl", "url"]) {
+      if (typeof obj[key] === "string") { const f = extractFileUrl(obj[key], depth + 1); if (f) return f; }
+    }
+    for (const key of ["templates", "designFiles", "files", "pages", "layers"]) {
+      if (obj[key]) { const f = extractFileUrl(obj[key], depth + 1); if (f) return f; }
+    }
+  }
+  return null;
+}
+
+async function fetchGelatoDesignUrl(productId: string): Promise<string | null> {
+  const base = `${BASE}/products/${productId}`;
+  for (const endpoint of [`${base}/templates`, `${base}/design-files`, `${base}?expand=templates`]) {
+    const res = await fetch(endpoint, { headers: HEADERS }).catch(() => null);
+    if (!res?.ok) continue;
+    const data = await res.json().catch(() => null);
+    const url = extractFileUrl(endpoint.includes("expand") ? (data?.templates ?? data) : data);
+    if (url) return url;
+  }
+  return null;
+}
+
 /**
  * Fires whenever a product is created or edited in the Gelato dashboard.
  * Responds immediately, then in the background:
@@ -95,14 +127,35 @@ export async function POST(request: Request) {
           if (!mergedImages.includes(url)) mergedImages.push(url);
         }
 
+        // 5. Try to fetch the design file from Gelato (skips if already set)
+        let designFilename = existing?.designFilename;
+        if (!designFilename) {
+          const designUrl = await fetchGelatoDesignUrl(productId);
+          if (designUrl) {
+            try {
+              const fileRes = await fetch(designUrl);
+              if (fileRes.ok) {
+                const blob = await fileRes.blob();
+                const rawExt = designUrl.split("?")[0].split(".").pop()?.toLowerCase() ?? "bin";
+                const ext = ["pdf", "png", "jpg", "jpeg", "zip"].includes(rawExt) ? rawExt : "bin";
+                const { put } = await import("@vercel/blob");
+                const filename = `product-designs/${productId}.${ext}`;
+                await put(filename, blob, { access: "private", contentType: blob.type || "application/octet-stream", allowOverwrite: true });
+                designFilename = filename;
+              }
+            } catch { /* skip, orders will use template */ }
+          }
+        }
+
         const update: Parameters<typeof setOverride>[0] = { gelatoProductId: productId };
         if (Object.keys(variantPrices).length > 0) update.variantPrices = variantPrices;
         if (mergedImages.length > 0) update.images = mergedImages;
+        if (designFilename) update.designFilename = designFilename;
         await setOverride(update);
 
         revalidateTag(GELATO_PRODUCTS_TAG, { expire: 0 });
         await getGelatoProducts();
-        console.log(`[product-webhook] synced product ${productId}: ${Object.keys(variantPrices).length} prices, ${importedUrls.length} images`);
+        console.log(`[product-webhook] synced product ${productId}: ${Object.keys(variantPrices).length} prices, ${importedUrls.length} images, design=${designFilename ?? "none"}`);
       } catch (err) {
         console.error("Gelato product webhook: post-processing failed", err);
       }
