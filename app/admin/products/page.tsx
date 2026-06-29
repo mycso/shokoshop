@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Pencil, RefreshCw, Wand2 } from "lucide-react";
+import { Pencil, RefreshCw, Wand2, FileDown } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 
 function toSlug(name: string) {
@@ -17,6 +17,8 @@ export default function AdminProductsPage() {
   const [syncLog, setSyncLog] = useState<string[]>([]);
   const [autoAssigning, setAutoAssigning] = useState(false);
   const [autoAssignResult, setAutoAssignResult] = useState<string | null>(null);
+  const [syncingDesigns, setSyncingDesigns] = useState(false);
+  const [designSyncResult, setDesignSyncResult] = useState<string | null>(null);
   const autoSyncedRef = useRef(false);
 
   async function loadProducts() {
@@ -92,6 +94,26 @@ export default function AdminProductsPage() {
   }
 
 
+  async function syncAllDesigns() {
+    setSyncingDesigns(true);
+    setDesignSyncResult(null);
+    try {
+      const res = await fetch("/api/admin/sync-designs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      const { summary } = data;
+      setDesignSyncResult(
+        summary
+          ? `Done — ${summary.succeeded} fetched, ${summary.already} already set, ${summary.failed} not found (of ${summary.total} products).`
+          : "Done."
+      );
+    } catch (e: any) {
+      setDesignSyncResult(`Error: ${e.message}`);
+    } finally {
+      setSyncingDesigns(false);
+    }
+  }
+
   async function autoAssignCategories() {
     setAutoAssigning(true);
     setAutoAssignResult(null);
@@ -117,10 +139,18 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-500 text-sm">{products.length} products</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={syncAllDesigns}
+            disabled={syncingDesigns || syncing || autoAssigning}
+            className="inline-flex items-center gap-1.5 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+          >
+            <FileDown className={`h-4 w-4 ${syncingDesigns ? "animate-pulse" : ""}`} />
+            {syncingDesigns ? "Fetching Designs…" : "Fetch Designs from Gelato"}
+          </button>
           <button
             onClick={autoAssignCategories}
-            disabled={autoAssigning || syncing}
+            disabled={autoAssigning || syncing || syncingDesigns}
             className="inline-flex items-center gap-1.5 border border-brand text-brand px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-light transition-colors disabled:opacity-60"
           >
             <Wand2 className={`h-4 w-4 ${autoAssigning ? "animate-pulse" : ""}`} />
@@ -128,7 +158,7 @@ export default function AdminProductsPage() {
           </button>
           <button
             onClick={syncPrices}
-            disabled={syncing || autoAssigning}
+            disabled={syncing || autoAssigning || syncingDesigns}
             className="inline-flex items-center gap-1.5 bg-brand text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors disabled:opacity-60"
           >
             <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
@@ -140,6 +170,12 @@ export default function AdminProductsPage() {
       {autoAssignResult && (
         <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${autoAssignResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
           {autoAssignResult}
+        </div>
+      )}
+
+      {designSyncResult && (
+        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${designSyncResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
+          {designSyncResult}
         </div>
       )}
 

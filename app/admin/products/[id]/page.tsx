@@ -52,6 +52,8 @@ export default function EditProductPage({
   const [designFilename, setDesignFilename] = useState<string | null>(null);
   const [designUploading, setDesignUploading] = useState(false);
   const [designUploadError, setDesignUploadError] = useState<string | null>(null);
+  const [fetchingDesign, setFetchingDesign] = useState(false);
+  const [fetchDesignMsg, setFetchDesignMsg] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -284,6 +286,30 @@ export default function EditProductPage({
     }
   }
 
+  async function handleFetchDesignFromGelato() {
+    setFetchingDesign(true);
+    setFetchDesignMsg(null);
+    setDesignUploadError(null);
+    try {
+      const res = await fetch("/api/admin/sync-designs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: id }),
+      });
+      const data = await res.json();
+      if (data.success && data.designFilename) {
+        setDesignFilename(data.designFilename);
+        setFetchDesignMsg("Design fetched and saved from Gelato.");
+      } else {
+        setFetchDesignMsg(data.message ?? data.error ?? "No design file available from Gelato.");
+      }
+    } catch (err: any) {
+      setFetchDesignMsg(`Error: ${err.message}`);
+    } finally {
+      setFetchingDesign(false);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!product) return;
@@ -380,20 +406,33 @@ export default function EditProductPage({
                 Optional override. When not set, Gelato uses the design already saved in the product template — including the neck label for inner-label products.
               </p>
             </div>
-            <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${designUploading ? "opacity-60 pointer-events-none" : ""}`}>
-              {designUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload override"}
-              <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
-            </label>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleFetchDesignFromGelato}
+                disabled={fetchingDesign || designUploading}
+                className={`flex items-center gap-1.5 text-sm font-medium border px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 ${fetchingDesign ? "border-gray-200 text-gray-400" : "border-brand text-brand hover:bg-brand-light"}`}
+              >
+                {fetchingDesign ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {fetchingDesign ? "Fetching…" : "Fetch from Gelato"}
+              </button>
+              <label className={`flex items-center gap-1.5 text-sm font-medium text-white bg-brand px-3 py-1.5 rounded-xl hover:bg-brand-dark transition-colors cursor-pointer ${designUploading ? "opacity-60 pointer-events-none" : ""}`}>
+                {designUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {designUploading ? "Uploading…" : designFilename ? "Replace" : "Upload override"}
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleDesignUpload} disabled={designUploading} />
+              </label>
+            </div>
           </div>
-          {designUploadError && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-3">{designUploadError}</p>
+          {(designUploadError || fetchDesignMsg) && (
+            <p className={`text-sm rounded-xl px-3 py-2 mt-3 border ${(designUploadError ?? fetchDesignMsg ?? "").startsWith("Error") || designUploadError ? "bg-red-50 text-red-600 border-red-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+              {designUploadError ?? fetchDesignMsg}
+            </p>
           )}
           {designFilename ? (
             <div className="mt-3 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
               <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-green-800">Custom design override set</p>
+                <p className="text-sm font-medium text-green-800">Design file set</p>
                 <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
               </div>
               <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
