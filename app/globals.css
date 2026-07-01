@@ -26,6 +26,7 @@
 .text-brand-dark { color: var(--brand-dark); }
 .text-accent { color: var(--accent); }
 .border-brand { border-color: var(--brand); }
+.border-t-brand { border-top-color: var(--brand); }
 .border-accent { border-color: var(--accent); }
 .ring-brand { --tw-ring-color: var(--brand); }
 .hover\:bg-brand-dark:hover { background-color: var(--brand-dark); }
