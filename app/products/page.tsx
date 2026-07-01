@@ -62,6 +62,25 @@ async function getProducts() {
     const { price, variantPrices, localImages } = mergePrice(p.id, slug, apiPriceEur);
     const apiThumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
     const images = localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"];
+    const rawOpts: any[] = p.productVariantOptions ?? [];
+    const hasColorOpt = rawOpts.some(
+      (o: any) => o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour"
+    );
+    const productVariantOptions = hasColorOpt ? rawOpts : (() => {
+      const seen = new Set<string>();
+      const colorVals: string[] = [];
+      for (const v of (p.variants ?? [])) {
+        const title: string = v.title ?? v.name ?? "";
+        const part = title.split(" - ")[0].trim();
+        if (part && !seen.has(part) && colorHex(part) !== "#9E9E9E") {
+          seen.add(part);
+          colorVals.push(part);
+        }
+      }
+      return colorVals.length > 0
+        ? [...rawOpts, { name: "Color", values: colorVals }]
+        : rawOpts;
+    })();
 
     return {
       id: p.id,
@@ -80,7 +99,7 @@ async function getProducts() {
         sku: v.productUid ?? v.id,
         productUid: v.productUid,
       })),
-      productVariantOptions: p.productVariantOptions ?? [],
+      productVariantOptions,
       gelatoProductId: p.id,
     };
   });

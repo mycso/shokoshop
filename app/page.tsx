@@ -102,6 +102,25 @@ async function getPopularProducts(limit = 20) {
         : (p.price ?? p.retailPrice ?? 0);
       const { price, localImages } = mergeLocalData(p.id, slug, apiPriceEur);
       const apiThumbnail = p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null;
+      const rawOpts: any[] = p.productVariantOptions ?? [];
+      const hasColorOpt = rawOpts.some(
+        (o: any) => o.name.toLowerCase() === "color" || o.name.toLowerCase() === "colour"
+      );
+      const productVariantOptions = hasColorOpt ? rawOpts : (() => {
+        const seen = new Set<string>();
+        const colorVals: string[] = [];
+        for (const v of (p.variants ?? [])) {
+          const title: string = v.title ?? v.name ?? "";
+          const part = title.split(" - ")[0].trim();
+          if (part && !seen.has(part) && colorHex(part) !== "#9E9E9E") {
+            seen.add(part);
+            colorVals.push(part);
+          }
+        }
+        return colorVals.length > 0
+          ? [...rawOpts, { name: "Color", values: colorVals }]
+          : rawOpts;
+      })();
       return {
         id: p.id,
         slug,
@@ -109,8 +128,8 @@ async function getPopularProducts(limit = 20) {
         description: (p.description ?? "").replace(/<[^>]+>/g, ""),
         price,
         images: localImages.length > 0 ? localImages : apiThumbnail ? [apiThumbnail] : ["/shokoshoplogo.svg"],
-        category: p.productVariantOptions?.map((o: any) => o.name).join(" / ") || "Apparel",
-        productVariantOptions: p.productVariantOptions ?? [],
+        category: rawOpts.map((o: any) => o.name).join(" / ") || "Apparel",
+        productVariantOptions,
         inStock: p.status !== "inactive" && p.status !== "deleted",
         sales: salesByProductId[p.id] ?? 0,
       };
