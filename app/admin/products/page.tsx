@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Pencil, RefreshCw, Wand2, FileDown, ChevronDown } from "lucide-react";
+import { Pencil, RefreshCw, Wand2, FileDown, ChevronDown, Search } from "lucide-react";
 import { formatPrice } from "@/lib/products";
 
+const PAGE_SIZE = 30;
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -17,7 +18,37 @@ export default function AdminProductsPage() {
   const [autoAssignResult, setAutoAssignResult] = useState<string | null>(null);
   const [syncingDesigns, setSyncingDesigns] = useState(false);
   const [designSyncResult, setDesignSyncResult] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const autoSyncedRef = useRef(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const filteredProducts = products.filter((p) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.id?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q)
+    );
+  });
+  const visibleProducts = filteredProducts.slice(0, visibleCount);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setVisibleCount((c) => Math.min(c + PAGE_SIZE, filteredProducts.length));
+      }
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [filteredProducts.length]);
 
   async function loadProducts() {
     setLoading(true);
@@ -110,7 +141,9 @@ export default function AdminProductsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-500 text-sm">{products.length} products</p>
+          <p className="text-gray-500 text-sm">
+            {search ? `${filteredProducts.length} of ${products.length} products` : `${products.length} products`}
+          </p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
@@ -170,6 +203,17 @@ export default function AdminProductsPage() {
         </div>
       )}
 
+      <div className="relative mb-4 max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search products…"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+        />
+      </div>
+
       {loading ? (
         <div className="flex justify-center py-20">
           <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-brand animate-spin" />
@@ -186,7 +230,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {products.map((product) => (
+              {visibleProducts.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -234,6 +278,14 @@ export default function AdminProductsPage() {
               ))}
             </tbody>
           </table>
+          {filteredProducts.length === 0 && (
+            <p className="text-center text-gray-400 text-sm py-10">No products match your search.</p>
+          )}
+          {visibleCount < filteredProducts.length && (
+            <div ref={sentinelRef} className="flex justify-center py-6">
+              <div className="h-5 w-5 rounded-full border-2 border-gray-200 border-t-brand animate-spin" />
+            </div>
+          )}
         </div>
       )}
     </div>
