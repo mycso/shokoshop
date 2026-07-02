@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import { setOverride, getOverrides } from "@/lib/gelato-overrides";
 
 export async function GET(request: Request) {
@@ -23,8 +23,13 @@ export async function POST(request: Request) {
   }
 
   const ext = file.name.split(".").pop() ?? "png";
-  const filename = `${productId}.${ext}`;
+  // Unique per upload (not just per product) so replacing a design gets a fresh URL —
+  // the serving route caches responses as "immutable" for a year, keyed on this filename.
+  const filename = `${productId}-${Date.now()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  const overrides = await getOverrides();
+  const previousFilename = overrides.find((o) => o.gelatoProductId === productId)?.designFilename;
 
   await put(`product-designs/${filename}`, buffer, {
     access: "private",
@@ -33,6 +38,12 @@ export async function POST(request: Request) {
   });
 
   await setOverride({ gelatoProductId: productId, designFilename: filename });
+
+  if (previousFilename && previousFilename !== filename) {
+    await del(`product-designs/${previousFilename}`).catch(() => {
+      // Best-effort cleanup — a leftover orphaned blob isn't harmful.
+    });
+  }
 
   return Response.json({ ok: true, designFilename: filename });
 }
