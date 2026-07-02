@@ -98,16 +98,16 @@ export default function CustomiseClient({ product }: { product: Product }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2">
-        <Link href="/products" className="hover:text-gray-700">
+      <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
+        <Link href="/products" className="hover:text-gray-700 shrink-0">
           Products
         </Link>
-        <span>/</span>
-        <Link href={`/products/${product.slug}`} className="hover:text-gray-700">
+        <span className="shrink-0">/</span>
+        <Link href={`/products/${product.slug}`} className="hover:text-gray-700 shrink-0">
           {product.name}
         </Link>
-        <span>/</span>
-        <span className="text-gray-900 font-medium">Customise</span>
+        <span className="shrink-0">/</span>
+        <span className="text-gray-900 font-medium shrink-0">Customise</span>
       </nav>
 
       <h1 className="text-3xl font-bold text-gray-900 mb-2">

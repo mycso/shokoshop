@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Package, PackageX, User, LogOut, ChevronRight } from "lucide-react";
+import { Package, PackageX, User, LogOut, ChevronRight, ShieldCheck } from "lucide-react";
 
 const MENU = [
   {
@@ -21,6 +21,14 @@ const MENU = [
     desc: "Manage return requests",
     color: "text-red-500",
     bg: "bg-red-50",
+  },
+  {
+    href: "/account/security",
+    icon: ShieldCheck,
+    label: "Security",
+    desc: "Password and two-factor authentication",
+    color: "text-green-600",
+    bg: "bg-green-50",
   },
 ];
 

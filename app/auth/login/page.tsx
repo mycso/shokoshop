@@ -27,17 +27,22 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    await new Promise((r) => setTimeout(r, 600));
-    if (form.email && form.password.length >= 6) {
-      await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email }),
-      });
-      router.push("/account");
-    } else {
-      setError("Invalid email or password. Please try again.");
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: form.email, password: form.password }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      setError(data?.error ?? "Invalid email or password. Please try again.");
+      setLoading(false);
+      return;
     }
+    if (data?.twoFactorRequired) {
+      router.push("/auth/verify-2fa");
+      return;
+    }
+    router.push("/account");
     setLoading(false);
   }
 
@@ -92,9 +97,9 @@ export default function LoginPage() {
                 </button>
               </div>
               <div className="flex justify-end mt-1.5">
-                <button type="button" className="text-xs text-brand hover:underline">
+                <Link href="/auth/forgot-password" className="text-xs text-brand hover:underline">
                   Forgot password?
-                </button>
+                </Link>
               </div>
             </div>
 

@@ -49,12 +49,17 @@ export default function SignupPage() {
     }
     setLoading(true);
     setError(null);
-    await new Promise((r) => setTimeout(r, 800));
-    await fetch("/api/auth/login", {
+    const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: form.email, name: form.name }),
+      body: JSON.stringify({ email: form.email, name: form.name, password: form.password }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? "Something went wrong. Please try again.");
+      setLoading(false);
+      return;
+    }
     router.push("/account");
     setLoading(false);
   }

@@ -2,6 +2,8 @@ import Stripe from "stripe";
 import { Cart, ShippingAddress } from "@/types";
 import { createOrder, generateOrderId } from "@/lib/orders";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
+import { sendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { sendAdminOrderNotificationEmail } from "@/lib/email/send-admin-order-notification";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
@@ -119,7 +121,7 @@ export async function POST(request: Request) {
     }
 
     // Demo mode: create the order directly as paid
-    await createOrder({
+    const order = await createOrder({
       id: orderId,
       customerEmail: shippingAddress.email,
       customerName,
@@ -130,6 +132,13 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
+
+    await sendOrderConfirmationEmail(order).catch((err) =>
+      console.error(`Order confirmation email failed for order ${orderId}:`, err)
+    );
+    await sendAdminOrderNotificationEmail(order).catch((err) =>
+      console.error(`Admin order notification email failed for order ${orderId}:`, err)
+    );
 
     return Response.json({ orderId });
   } catch (err) {

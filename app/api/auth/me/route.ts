@@ -1,14 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/dal";
 
-const COOKIE = "user_session";
+export const runtime = "nodejs";
 
-export async function GET(req: NextRequest) {
-  const raw = req.cookies.get(COOKIE)?.value;
-  if (!raw) return NextResponse.json({ user: null }, { status: 401 });
-  try {
-    const user = JSON.parse(Buffer.from(raw, "base64").toString("utf-8"));
-    return NextResponse.json({ user });
-  } catch {
+export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
     return NextResponse.json({ user: null }, { status: 401 });
   }
+  return NextResponse.json({ user });
 }

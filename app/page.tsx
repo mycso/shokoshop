@@ -252,11 +252,16 @@ export default async function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                     unoptimized
                   />
-                  {!product.inStock && (
+                  {!product.inStock ? (
                     <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                       <span className="text-sm font-semibold text-gray-600">Out of Stock</span>
                     </div>
-                  )}
+                  ) : product.price === 0 ? (
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
+                      <span className="text-sm font-semibold text-gray-600">Syncing…</span>
+                    </div>
+                  ) : null}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg group-hover:text-brand transition-colors">
@@ -299,9 +304,14 @@ export default async function HomePage() {
                   })()}
                   <div className="flex items-center justify-between mt-auto pt-3">
                     <span className="text-xl font-bold text-gray-900">
-                      {product.price > 0
-                        ? <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></>
-                        : "View options"}
+                      {product.price > 0 ? (
+                        <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-500">
+                          <span className="h-3 w-3 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
+                          Syncing…
+                        </span>
+                      )}
                     </span>
                     <span className="text-sm font-medium text-brand group-hover:underline">Shop now →</span>
                   </div>

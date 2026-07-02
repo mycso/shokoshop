@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { getOrderById, updateOrder } from "@/lib/orders";
 import { submitGelatoOrder } from "@/lib/gelato-order";
+import { sendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
+import { sendAdminOrderNotificationEmail } from "@/lib/email/send-admin-order-notification";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -54,6 +56,13 @@ export async function POST(request: Request) {
           // Log but return 200 — Stripe retries on non-2xx and duplicate orders are worse
           console.error(`Gelato submission failed for order ${orderId}:`, err);
         }
+
+        await sendOrderConfirmationEmail(order).catch((err) =>
+          console.error(`Order confirmation email failed for order ${orderId}:`, err)
+        );
+        await sendAdminOrderNotificationEmail(order).catch((err) =>
+          console.error(`Admin order notification email failed for order ${orderId}:`, err)
+        );
       }
       break;
     }

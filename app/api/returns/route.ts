@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { createReturn, generateReturnId, getReturnByOrderId } from "@/lib/returns";
 import { getOrderById } from "@/lib/orders";
 import { ReturnReason, ReturnResolution } from "@/types";
+import { sendReturnRequestReceivedEmail } from "@/lib/email/send-return-request";
+import { sendAdminReturnNotificationEmail } from "@/lib/email/send-admin-return-notification";
 
 export async function POST(req: NextRequest) {
   try {
@@ -67,6 +69,13 @@ export async function POST(req: NextRequest) {
       createdAt: now,
       updatedAt: now,
     });
+
+    await sendReturnRequestReceivedEmail(returnRequest).catch((err) =>
+      console.error(`Return request email failed for return ${returnRequest.id}:`, err)
+    );
+    await sendAdminReturnNotificationEmail(returnRequest).catch((err) =>
+      console.error(`Admin return notification email failed for return ${returnRequest.id}:`, err)
+    );
 
     return NextResponse.json({ returnRequest }, { status: 201 });
   } catch {
