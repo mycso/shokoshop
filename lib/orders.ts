@@ -35,9 +35,9 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
 }
 
 export async function getOrdersByEmail(email: string): Promise<Order[]> {
-  return Array.from((await readOrders()).values()).filter(
-    (o) => o.customerEmail === email
-  );
+  return Array.from((await readOrders()).values())
+    .filter((o) => o.customerEmail === email)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function updateOrder(id: string, update: Partial<Order>): Promise<Order | null> {
