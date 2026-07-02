@@ -754,9 +754,6 @@ export default function ProductView({ product }: { product: Product }) {
         {/* Trust badges */}
         <div className="mt-6 flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 pt-6">
           <div className="flex items-center gap-1">
-            <ShoppingCart className="h-4 w-4" /> Free shipping over £50
-          </div>
-          <div className="flex items-center gap-1">
             <Check className="h-4 w-4" /> Produced by Gelato
           </div>
         </div>
