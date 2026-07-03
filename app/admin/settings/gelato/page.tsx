@@ -37,8 +37,7 @@ export default function GelatoSettingsPage() {
     }
   }
 
-  async function handleAddManual(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleAddManual() {
     try {
       const res = await fetch('/api/gelato/local-products', {
         method: 'POST',
@@ -132,7 +131,8 @@ export default function GelatoSettingsPage() {
           </div>
           <div className="mt-4 border-t pt-4 dark:border-gray-800">
             <h3 className="text-sm font-semibold mb-2 dark:text-white">Quick add product (manual)</h3>
-            <form onSubmit={handleAddManual} className="space-y-3">
+            {/* Not a nested <form> — forms can't nest in valid HTML, and this sits inside the settings form above. */}
+            <div className="space-y-3">
               <div>
                 <input value={manual.gelatoProductId} onChange={(e) => setManual({ ...manual, gelatoProductId: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Product UID (e.g. apparel_product_...)" />
               </div>
@@ -142,9 +142,9 @@ export default function GelatoSettingsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <input value={manual.price} onChange={(e) => setManual({ ...manual, price: e.target.value })} className="w-32 border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Price (cents)" />
-                <button type="submit" className="bg-brand text-white px-4 py-2 rounded-xl text-sm">Add to local products</button>
+                <button type="button" onClick={handleAddManual} className="bg-brand text-white px-4 py-2 rounded-xl text-sm">Add to local products</button>
               </div>
-            </form>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">

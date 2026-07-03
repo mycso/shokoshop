@@ -1,4 +1,18 @@
-import { Column, Hr, Row, Section, Text } from "@react-email/components";
+import {
+  Body,
+  Column,
+  Container,
+  Head,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Row,
+  Section,
+  Text,
+} from "@react-email/components";
+import type { ReactNode } from "react";
 import type { Order, ReturnReason, ReturnRequest, ReturnResolution } from "@/types";
 
 export const RETURN_REASON_LABELS: Record<ReturnReason, string> = {
@@ -18,10 +32,15 @@ export const RETURN_RESOLUTION_LABELS: Record<ReturnResolution, string> = {
 export const BRAND = "#52a9ff";
 export const BRAND_DARK = "#1a8ff5";
 export const BRAND_LIGHT = "#e8f4ff";
+export const ACCENT = "#e70a9b";
+export const TEXT = "#111827";
+export const MUTED = "#6b7280";
+export const BORDER = "#e5e7eb";
 
 export function logoUrl(): string {
   const base = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  return `${base}/shokoshoplogo.svg`;
+  // PNG, not the site's SVG — Outlook desktop doesn't render inline SVG images.
+  return `${base}/shokoshoplogo-email.png`;
 }
 
 export function baseUrl(): string {
@@ -30,6 +49,112 @@ export function baseUrl(): string {
 
 export function money(pence: number): string {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
+}
+
+/**
+ * Shared chrome for every outbound email — branded header, card body, footer.
+ * Individual templates only need to supply the preview text and body content.
+ */
+export function EmailLayout({
+  preview,
+  footerNote,
+  children,
+}: {
+  preview: string;
+  footerNote?: string;
+  children: ReactNode;
+}) {
+  const year = new Date().getFullYear();
+  return (
+    <Html>
+      <Head />
+      <Preview>{preview}</Preview>
+      <Body style={{ backgroundColor: "#f4f5f7", fontFamily: "Helvetica, Arial, sans-serif", margin: 0, padding: "32px 16px" }}>
+        <Container style={{ maxWidth: "560px", margin: "0 auto" }}>
+          {/* Header */}
+          <Section style={{ textAlign: "center", padding: "8px 0 20px" }}>
+            <Img
+              src={logoUrl()}
+              width="40"
+              height="40"
+              alt="ShokoShop"
+              style={{ margin: "0 auto 10px", display: "block" }}
+            />
+            <Text
+              style={{
+                margin: 0,
+                fontSize: "18px",
+                fontWeight: 800,
+                letterSpacing: "1.5px",
+                color: TEXT,
+              }}
+            >
+              SHOKOSHOP
+            </Text>
+          </Section>
+
+          {/* Card */}
+          <Section
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "16px",
+              border: `1px solid ${BORDER}`,
+              padding: "36px 32px",
+            }}
+          >
+            {children}
+          </Section>
+
+          {/* Footer */}
+          <Section style={{ textAlign: "center", padding: "24px 12px 0" }}>
+            <Text style={{ margin: "0 0 8px", color: MUTED, fontSize: "13px" }}>
+              <Link href={`${baseUrl()}/products`} style={{ color: MUTED, textDecoration: "underline" }}>Shop</Link>
+              {"  ·  "}
+              <Link href={`${baseUrl()}/account/orders`} style={{ color: MUTED, textDecoration: "underline" }}>My Orders</Link>
+              {"  ·  "}
+              <Link href={`${baseUrl()}/account/returns`} style={{ color: MUTED, textDecoration: "underline" }}>My Returns</Link>
+            </Text>
+            {footerNote && (
+              <Text style={{ margin: "0 0 4px", color: "#9ca3af", fontSize: "12px" }}>{footerNote}</Text>
+            )}
+            <Text style={{ margin: 0, color: "#9ca3af", fontSize: "12px" }}>
+              © {year} ShokoShop. All rights reserved.
+            </Text>
+          </Section>
+        </Container>
+      </Body>
+    </Html>
+  );
+}
+
+export function EmailHeading({ children }: { children: ReactNode }) {
+  return (
+    <Text style={{ margin: "0 0 12px", fontSize: "22px", fontWeight: 700, color: TEXT }}>
+      {children}
+    </Text>
+  );
+}
+
+export function EmailButton({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Section style={{ marginTop: "24px" }}>
+      <Link
+        href={href}
+        style={{
+          backgroundColor: BRAND,
+          color: "#ffffff",
+          padding: "13px 24px",
+          borderRadius: "999px",
+          fontWeight: 600,
+          fontSize: "14px",
+          textDecoration: "none",
+          display: "inline-block",
+        }}
+      >
+        {children}
+      </Link>
+    </Section>
+  );
 }
 
 export function OrderSummary({ order }: { order: Order }) {

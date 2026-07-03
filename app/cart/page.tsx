@@ -121,8 +121,10 @@ export default function CartPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-gray-600 dark:text-gray-300">
                 <span>
-                  Subtotal ({cart.items.reduce((s, i) => s + i.quantity, 0)}{" "}
-                  items)
+                  {(() => {
+                    const count = cart.items.reduce((s, i) => s + i.quantity, 0);
+                    return `Subtotal (${count} item${count === 1 ? "" : "s"})`;
+                  })()}
                 </span>
                 <span className="font-medium">{formatPrice(cart.total)}</span>
               </div>
