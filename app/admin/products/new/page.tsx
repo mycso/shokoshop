@@ -36,18 +36,18 @@ export default function NewProductPage() {
       <div className="flex items-center gap-3 mb-8">
         <Link
           href="/admin/products"
-          className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+          className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">New Product</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">New Product</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
-          <h2 className="font-semibold text-gray-900">Product Details</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5 dark:bg-gray-900 dark:border-gray-800">
+          <h2 className="font-semibold text-gray-900 dark:text-white">Product Details</h2>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Product Name *
             </label>
             <input
@@ -56,11 +56,11 @@ export default function NewProductPage() {
               required
               value={form.name}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Description *
             </label>
             <textarea
@@ -69,12 +69,12 @@ export default function NewProductPage() {
               rows={4}
               value={form.description}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light resize-none"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light resize-none dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
                 Price (pence) *
               </label>
               <input
@@ -84,12 +84,12 @@ export default function NewProductPage() {
                 min="0"
                 value={form.price}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                 placeholder="e.g. 2999 = £29.99"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
                 Category *
               </label>
               <select
@@ -97,7 +97,7 @@ export default function NewProductPage() {
                 required
                 value={form.category}
                 onChange={handleChange}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               >
                 <option value="">Select category</option>
                 <option value="Apparel">Apparel</option>
@@ -108,7 +108,7 @@ export default function NewProductPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Gelato Product UID
             </label>
             <input
@@ -116,7 +116,7 @@ export default function NewProductPage() {
               name="gelatoProductId"
               value={form.gelatoProductId}
               onChange={handleChange}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="e.g. apparel_product_uid"
             />
           </div>
@@ -133,7 +133,7 @@ export default function NewProductPage() {
           </button>
           <Link
             href="/admin/products"
-            className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center"
+            className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             Cancel
           </Link>

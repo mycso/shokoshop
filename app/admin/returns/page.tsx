@@ -6,10 +6,10 @@ import { PackageX, Check, X, RefreshCw } from "lucide-react";
 import { ReturnRequest } from "@/types";
 
 const STATUS_COLORS: Record<string, string> = {
-  pending:  "bg-yellow-100 text-yellow-700",
-  approved: "bg-blue-100 text-blue-700",
-  rejected: "bg-red-100 text-red-700",
-  refunded: "bg-green-100 text-green-700",
+  pending:  "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  approved: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  rejected: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  refunded: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
 };
 
 const REASON_LABELS: Record<string, string> = {
@@ -68,50 +68,50 @@ export default function AdminReturnsPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-red-50 rounded-xl">
+          <div className="p-2.5 bg-red-50 rounded-xl dark:bg-red-900/30">
             <PackageX className="h-6 w-6 text-red-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Returns &amp; Refunds</h1>
-            <p className="text-sm text-gray-500">Approve to trigger an automatic Stripe refund</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Returns &amp; Refunds</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Approve to trigger an automatic Stripe refund</p>
           </div>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors dark:text-gray-400 dark:hover:text-white dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-6">
+        <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-6 dark:bg-red-900/30 dark:text-red-300">
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">Loading…</div>
+        <div className="text-center py-20 text-gray-400 dark:text-gray-500">Loading…</div>
       ) : returns.length === 0 ? (
         <div className="text-center py-20">
-          <PackageX className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No return requests yet.</p>
+          <PackageX className="h-12 w-12 text-gray-300 mx-auto mb-4 dark:text-gray-600" />
+          <p className="text-gray-500 dark:text-gray-400">No return requests yet.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {returns.map((r) => (
             <div
               key={r.id}
-              className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm"
+              className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm dark:bg-gray-900 dark:border-gray-800"
             >
               <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                 {/* Left: details */}
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-sm text-gray-500">
+                    <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
                       #{r.id.slice(-8).toUpperCase()}
                     </span>
-                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${STATUS_COLORS[r.status] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${STATUS_COLORS[r.status] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"}`}>
                       {r.status}
                     </span>
                     <Link
@@ -122,41 +122,41 @@ export default function AdminReturnsPage() {
                     </Link>
                   </div>
 
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
                     <span className="font-medium">{r.customerEmail}</span>
-                    <span className="text-gray-400 mx-1.5">·</span>
+                    <span className="text-gray-400 mx-1.5 dark:text-gray-500">·</span>
                     {REASON_LABELS[r.reason] ?? r.reason}
-                    <span className="text-gray-400 mx-1.5">·</span>
+                    <span className="text-gray-400 mx-1.5 dark:text-gray-500">·</span>
                     {RESOLUTION_LABELS[r.resolution] ?? r.resolution}
                   </p>
 
                   <div className="flex flex-wrap gap-1">
                     {r.items.map((item) => (
-                      <span key={item.itemId} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      <span key={item.itemId} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full dark:bg-gray-800 dark:text-gray-300">
                         {item.name} ×{item.quantity}
                       </span>
                     ))}
                   </div>
 
                   {r.description && (
-                    <p className="text-xs text-gray-500 italic">&ldquo;{r.description}&rdquo;</p>
+                    <p className="text-xs text-gray-500 italic dark:text-gray-400">&ldquo;{r.description}&rdquo;</p>
                   )}
 
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
                     <span>
-                      Refund amount: <span className="font-semibold text-gray-700">{formatPrice(r.refundAmount)}</span>
+                      Refund amount: <span className="font-semibold text-gray-700 dark:text-gray-200">{formatPrice(r.refundAmount)}</span>
                     </span>
                     {r.stripePaymentIntentId ? (
-                      <span className="text-green-600 font-medium">✓ Stripe PI linked</span>
+                      <span className="text-green-600 font-medium dark:text-green-400">✓ Stripe PI linked</span>
                     ) : (
-                      <span className="text-orange-500">No Stripe PI — manual refund needed</span>
+                      <span className="text-orange-500 dark:text-orange-400">No Stripe PI — manual refund needed</span>
                     )}
                     {r.stripeRefundId && (
-                      <span className="font-mono text-gray-500">Refund: {r.stripeRefundId}</span>
+                      <span className="font-mono text-gray-500 dark:text-gray-400">Refund: {r.stripeRefundId}</span>
                     )}
                   </div>
 
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
                     Submitted {new Date(r.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
                   </p>
                 </div>
@@ -175,7 +175,7 @@ export default function AdminReturnsPage() {
                     <button
                       onClick={() => handle(r.id, "reject")}
                       disabled={!!acting}
-                      className="flex items-center gap-1.5 border border-red-200 text-red-600 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      className="flex items-center gap-1.5 border border-red-200 text-red-600 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-red-50 disabled:opacity-50 transition-colors dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30"
                     >
                       <X className="h-4 w-4" />
                       {acting === r.id + "reject" ? "Rejecting…" : "Reject"}

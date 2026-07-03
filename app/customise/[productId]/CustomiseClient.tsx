@@ -98,29 +98,29 @@ export default function CustomiseClient({ product }: { product: Product }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-        <Link href="/products" className="hover:text-gray-700 shrink-0">
+      <nav className="text-sm text-gray-500 dark:text-gray-400 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <Link href="/products" className="hover:text-gray-700 dark:hover:text-white shrink-0">
           Products
         </Link>
         <span className="shrink-0">/</span>
-        <Link href={`/products/${product.slug}`} className="hover:text-gray-700 shrink-0">
+        <Link href={`/products/${product.slug}`} className="hover:text-gray-700 dark:hover:text-white shrink-0">
           {product.name}
         </Link>
         <span className="shrink-0">/</span>
-        <span className="text-gray-900 font-medium shrink-0">Customise</span>
+        <span className="text-gray-900 dark:text-white font-medium shrink-0">Customise</span>
       </nav>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
         Customise Your {product.name}
       </h1>
-      <p className="text-gray-500 mb-10">
+      <p className="text-gray-500 dark:text-gray-400 mb-10">
         Upload your design and personalise your order below.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         {/* Upload zone */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Upload Your Design
           </h2>
 
@@ -152,18 +152,18 @@ export default function CustomiseClient({ product }: { product: Product }) {
               className={`border-2 border-dashed rounded-2xl h-80 flex flex-col items-center justify-center cursor-pointer transition-colors ${
                 dragOver
                   ? "border-brand bg-brand-light"
-                  : "border-gray-300 bg-white hover:border-brand hover:bg-gray-50"
+                  : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-brand hover:bg-gray-50 dark:hover:bg-gray-800"
               }`}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <ImageIcon className="h-12 w-12 text-gray-300 mb-4" />
-              <p className="text-gray-600 font-medium mb-1">
+              <ImageIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
+              <p className="text-gray-600 dark:text-gray-300 font-medium mb-1">
                 Drag & drop your image here
               </p>
-              <p className="text-sm text-gray-400 mb-4">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
                 PNG, JPG, SVG up to 20MB
               </p>
               <button className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-dark transition-colors">
@@ -184,7 +184,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
             }}
           />
 
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
             Tip: Use high-resolution images (at least 300 DPI) for the best
             product quality.
           </p>
@@ -192,13 +192,13 @@ export default function CustomiseClient({ product }: { product: Product }) {
 
         {/* Product options */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Product Options
           </h2>
 
           {/* Product preview */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex gap-4 items-center">
-            <div className="relative h-20 w-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 mb-6 flex gap-4 items-center">
+            <div className="relative h-20 w-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
               <Image
                 src={product.images[0]}
                 alt={product.name}
@@ -208,8 +208,8 @@ export default function CustomiseClient({ product }: { product: Product }) {
               />
             </div>
             <div>
-              <p className="font-semibold text-gray-900">{product.name}</p>
-              <p className="text-sm text-gray-500">{product.category}</p>
+              <p className="font-semibold text-gray-900 dark:text-white">{product.name}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{product.category}</p>
               <p className="text-lg font-bold text-brand mt-1">
                 {formatPrice(selectedVariant?.price ?? product.price)}
               </p>
@@ -219,7 +219,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
           {/* Variant picker */}
           {product.variants && product.variants.length > 0 && (
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                 Options
               </label>
               <div className="flex flex-wrap gap-2">
@@ -230,7 +230,7 @@ export default function CustomiseClient({ product }: { product: Product }) {
                     className={`px-3 py-1.5 text-sm rounded-lg border font-medium transition-all ${
                       selectedVariant?.id === v.id
                         ? "border-brand bg-brand-light text-brand-dark"
-                        : "border-gray-200 text-gray-700 hover:border-brand"
+                        : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand"
                     }`}
                   >
                     {v.name}
@@ -242,20 +242,20 @@ export default function CustomiseClient({ product }: { product: Product }) {
 
           {/* Quantity */}
           <div className="mb-8">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
               Quantity
             </label>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="h-9 w-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold"
+                className="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-bold"
               >
                 −
               </button>
-              <span className="w-10 text-center font-semibold">{quantity}</span>
+              <span className="w-10 text-center font-semibold dark:text-white">{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="h-9 w-9 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors font-bold"
+                className="h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-bold"
               >
                 +
               </button>
@@ -263,18 +263,18 @@ export default function CustomiseClient({ product }: { product: Product }) {
           </div>
 
           {/* Order summary */}
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 mb-6">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300 mb-1">
               <span>
                 {quantity} × {formatPrice(selectedVariant?.price ?? product.price)}
               </span>
-              <span className="font-semibold text-gray-900">
+              <span className="font-semibold text-gray-900 dark:text-white">
                 {formatPrice((selectedVariant?.price ?? product.price) * quantity)}
               </span>
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
               <span>Shipping</span>
-              <span className="text-green-600 font-medium">Calculated at checkout</span>
+              <span className="text-green-600 dark:text-green-400 font-medium">Calculated at checkout</span>
             </div>
           </div>
 
@@ -290,11 +290,11 @@ export default function CustomiseClient({ product }: { product: Product }) {
           </button>
 
           {uploadError && (
-            <p className="text-sm text-red-600 text-center mt-3">{uploadError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 text-center mt-3">{uploadError}</p>
           )}
 
           {!uploadedImage && (
-            <p className="text-sm text-amber-600 text-center mt-3">
+            <p className="text-sm text-amber-600 dark:text-amber-400 text-center mt-3">
               ⚠ Upload a design to personalise your product
             </p>
           )}

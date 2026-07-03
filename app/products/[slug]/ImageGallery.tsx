@@ -23,7 +23,7 @@ export default function ImageGallery({
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 group">
+      <div className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 group">
         <Image
           src={images[active]}
           alt={`${name} – image ${active + 1}`}
@@ -38,17 +38,17 @@ export default function ImageGallery({
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Previous image"
             >
-              <ChevronLeft className="h-5 w-5 text-gray-700" />
+              <ChevronLeft className="h-5 w-5 text-gray-700 dark:text-gray-200" />
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
               aria-label="Next image"
             >
-              <ChevronRight className="h-5 w-5 text-gray-700" />
+              <ChevronRight className="h-5 w-5 text-gray-700 dark:text-gray-200" />
             </button>
 
             {/* Dot indicators */}
@@ -75,10 +75,10 @@ export default function ImageGallery({
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`relative h-20 rounded-xl overflow-hidden bg-gray-100 border-2 transition-colors ${
+              className={`relative h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 transition-colors ${
                 i === active
                   ? "border-brand"
-                  : "border-transparent hover:border-gray-300"
+                  : "border-transparent hover:border-gray-300 dark:hover:border-gray-700"
               }`}
             >
               <Image

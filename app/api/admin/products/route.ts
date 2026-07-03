@@ -63,7 +63,7 @@ export async function GET() {
         slug,
         status: p.status ?? "unknown",
         price,
-        category: local?.category ?? (p as any).category ?? "",
+        categories: local?.categories ?? [],
         thumbnail: p.previewUrl ?? p.externalPreviewUrl ?? p.externalThumbnailUrl ?? null,
       };
     });

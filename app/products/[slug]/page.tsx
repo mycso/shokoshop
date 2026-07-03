@@ -244,12 +244,12 @@ export default async function ProductDetailPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Breadcrumb */}
-      <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap">
-        <Link href="/" className="hover:text-gray-700 shrink-0">Home</Link>
+      <nav className="text-sm text-gray-500 dark:text-gray-400 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+        <Link href="/" className="hover:text-gray-700 dark:hover:text-white shrink-0">Home</Link>
         <span className="shrink-0">/</span>
-        <Link href="/products" className="hover:text-gray-700 shrink-0">Products</Link>
+        <Link href="/products" className="hover:text-gray-700 dark:hover:text-white shrink-0">Products</Link>
         <span className="shrink-0">/</span>
-        <span className="text-gray-900 font-medium shrink-0">{product.name}</span>
+        <span className="text-gray-900 dark:text-white font-medium shrink-0">{product.name}</span>
       </nav>
 
       <ProductView product={product as any} />

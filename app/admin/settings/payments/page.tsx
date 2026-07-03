@@ -21,17 +21,17 @@ export default function PaymentSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">
         Payment Settings
       </h1>
-      <p className="text-gray-500 text-sm mb-8">
+      <p className="text-gray-500 text-sm mb-8 dark:text-gray-400">
         Configure your Stripe payment integration.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5 dark:bg-gray-900 dark:border-gray-800">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Stripe Publishable Key
             </label>
             <input
@@ -40,12 +40,12 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripePublishableKey: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="pk_live_xxxxxxxxxxxx"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Stripe Secret Key
             </label>
             <input
@@ -54,12 +54,12 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripeSecretKey: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="sk_live_xxxxxxxxxxxx"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Stripe Webhook Secret
             </label>
             <input
@@ -68,24 +68,24 @@ export default function PaymentSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, stripeWebhookSecret: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="whsec_xxxxxxxxxxxx"
             />
-            <p className="text-xs text-gray-400 mt-1.5">
+            <p className="text-xs text-gray-400 mt-1.5 dark:text-gray-500">
               Webhook endpoint:{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs dark:bg-gray-800 dark:text-gray-300">
                 /api/stripe/webhook
               </code>
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Currency
             </label>
             <select
               value={form.currency}
               onChange={(e) => setForm({ ...form, currency: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             >
               <option value="gbp">GBP – British Pound</option>
               <option value="usd">USD – US Dollar</option>

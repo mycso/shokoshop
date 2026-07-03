@@ -155,7 +155,7 @@ function Gallery({
         {/* Main image with hover zoom + click to open modal */}
         <div
           ref={imgRef}
-          className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 group cursor-zoom-in"
+          className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 group cursor-zoom-in"
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setLens(null)}
           onClick={() => setModalOpen(true)}
@@ -191,17 +191,17 @@ function Gallery({
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); prev(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="h-5 w-5 text-gray-700" />
+                <ChevronLeft className="h-5 w-5 text-gray-700 dark:text-gray-200" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-900/80 hover:bg-white dark:hover:bg-gray-900 rounded-full p-2 shadow opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Next image"
               >
-                <ChevronRight className="h-5 w-5 text-gray-700" />
+                <ChevronRight className="h-5 w-5 text-gray-700 dark:text-gray-200" />
               </button>
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                 {images.map((_, i) => (
@@ -225,10 +225,10 @@ function Gallery({
               <button
                 key={i}
                 onClick={() => onSelect(i)}
-                className={`relative h-20 rounded-xl overflow-hidden bg-gray-100 border-2 transition-colors ${
+                className={`relative h-20 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 border-2 transition-colors ${
                   i === activeIndex
                     ? "border-brand"
-                    : "border-transparent hover:border-gray-300"
+                    : "border-transparent hover:border-gray-300 dark:hover:border-gray-700"
                 }`}
               >
                 <Image
@@ -317,14 +317,14 @@ function ReviewsSection({ productId }: { productId: string }) {
   const avg = reviews.length > 0 ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
 
   return (
-    <div className="mt-16 border-t border-gray-100 pt-12">
+    <div className="mt-16 border-t border-gray-100 dark:border-gray-800 pt-12">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Customer Reviews</h2>
           {reviews.length > 0 && (
             <div className="flex items-center gap-2 mt-1">
               <StarRating value={Math.round(avg)} />
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 {avg.toFixed(1)} out of 5 · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -341,35 +341,35 @@ function ReviewsSection({ productId }: { productId: string }) {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-gray-50 rounded-2xl p-6 mb-8 space-y-4">
-          <h3 className="font-semibold text-gray-900">Your Review</h3>
+        <form onSubmit={handleSubmit} className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 mb-8 space-y-4">
+          <h3 className="font-semibold text-gray-900 dark:text-white">Your Review</h3>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Rating</label>
             <StarRating value={form.rating} onChange={(v) => setForm((f) => ({ ...f, rating: v }))} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Your name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Your name</label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               maxLength={80}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
               placeholder="e.g. Sarah M."
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Review</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Review</label>
             <textarea
               value={form.text}
               onChange={(e) => setForm((f) => ({ ...f, text: e.target.value }))}
               maxLength={1000}
               rows={4}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"
+              className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand resize-none"
               placeholder="What did you think of this product?"
             />
           </div>
-          {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {formError && <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>}
           <div className="flex gap-3">
             <button
               type="submit"
@@ -381,7 +381,7 @@ function ReviewsSection({ productId }: { productId: string }) {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm hover:bg-gray-50"
+              className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </button>
@@ -390,27 +390,27 @@ function ReviewsSection({ productId }: { productId: string }) {
       )}
 
       {submitted && (
-        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-8 text-sm text-green-700 font-medium">
+        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-8 text-sm text-green-700 font-medium dark:bg-green-900/30 dark:border-green-800 dark:text-green-300">
           Thanks for your review!
         </div>
       )}
 
       {loading ? (
-        <p className="text-sm text-gray-400">Loading reviews…</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">Loading reviews…</p>
       ) : reviews.length === 0 ? (
-        <p className="text-sm text-gray-400">No reviews yet — be the first!</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500">No reviews yet — be the first!</p>
       ) : (
         <div className="space-y-6">
           {[...reviews].reverse().map((r) => (
-            <div key={r.id} className="border-b border-gray-100 pb-6 last:border-0">
+            <div key={r.id} className="border-b border-gray-100 dark:border-gray-800 pb-6 last:border-0">
               <div className="flex items-center gap-3 mb-2">
                 <StarRating value={r.rating} />
-                <span className="font-semibold text-gray-900 text-sm">{r.name}</span>
-                <span className="text-xs text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-white text-sm">{r.name}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">
                   {new Date(r.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
                 </span>
               </div>
-              <p className="text-gray-700 text-sm leading-relaxed">{r.text}</p>
+              <p className="text-gray-700 dark:text-gray-200 text-sm leading-relaxed">{r.text}</p>
             </div>
           ))}
         </div>
@@ -567,12 +567,12 @@ export default function ProductView({ product }: { product: Product }) {
             {product.category}
           </span>
         </div> */}
-        <h1 className="text-3xl font-bold text-gray-900 mt-3 mb-4">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-3 mb-4">
           {product.name}
         </h1>
         <div className="mb-6">
           <p
-            className={`text-gray-600 leading-relaxed ${
+            className={`text-gray-600 dark:text-gray-300 leading-relaxed ${
               descExpanded ? "" : "line-clamp-6"
             }`}
           >
@@ -601,10 +601,10 @@ export default function ProductView({ product }: { product: Product }) {
 
             return (
               <div key={opt.name}>
-                <span className="block text-sm font-semibold text-gray-700 mb-2">
+                <span className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
                   {opt.name}
                   {isColorOpt && selection[opt.name] && (
-                    <span className="font-normal text-gray-500 ml-1.5">— {selection[opt.name]}</span>
+                    <span className="font-normal text-gray-500 dark:text-gray-400 ml-1.5">— {selection[opt.name]}</span>
                   )}
                 </span>
                 <div className="flex flex-wrap gap-2">
@@ -654,7 +654,7 @@ export default function ProductView({ product }: { product: Product }) {
                             isSelected
                               ? "ring-2 ring-offset-2 ring-brand scale-110"
                               : "hover:scale-105"
-                          } ${isLight ? "border border-gray-300" : ""}`}
+                          } ${isLight ? "border border-gray-300 dark:border-gray-600" : ""}`}
                           style={{ backgroundColor: hex }}
                         >
                           {isSelected && (
@@ -682,17 +682,17 @@ export default function ProductView({ product }: { product: Product }) {
                         title={!optionInStock ? "Out of stock" : undefined}
                         className={`relative flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
                           !optionInStock
-                            ? "border-gray-200 text-gray-300 cursor-not-allowed opacity-50"
+                            ? "border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50"
                             : isSelected
                             ? "border-brand bg-brand-light text-brand-dark"
-                            : "border-gray-200 text-gray-700 hover:border-brand"
+                            : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand"
                         }`}
                       >
                         <span className="text-sm">{val}</span>
                         {!optionInStock ? (
-                          <span className="text-xs mt-0.5 text-gray-400">Out of stock</span>
+                          <span className="text-xs mt-0.5 text-gray-400 dark:text-gray-500">Out of stock</span>
                         ) : price != null && price > 0 ? (
-                          <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400"}`}>
+                          <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400 dark:text-gray-500"}`}>
                             {formatPrice(price)}
                           </span>
                         ) : null}
@@ -707,10 +707,10 @@ export default function ProductView({ product }: { product: Product }) {
 
         {/* Selected price */}
         {selectedPrice > 0 && (
-          <div className="flex items-baseline gap-2 pt-1 border-t border-gray-100 mb-5">
-            <span className="text-2xl font-bold text-gray-900">{formatPrice(selectedPrice)}</span>
+          <div className="flex items-baseline gap-2 pt-1 border-t border-gray-100 dark:border-gray-800 mb-5">
+            <span className="text-2xl font-bold text-gray-900 dark:text-white">{formatPrice(selectedPrice)}</span>
             {selectedVariant && (
-              <span className="text-sm text-gray-500">{selectedVariant.name}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">{selectedVariant.name}</span>
             )}
           </div>
         )}
@@ -721,7 +721,7 @@ export default function ProductView({ product }: { product: Product }) {
           disabled={!selectedVariantInStock}
           className={`w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-base transition-all ${
             !selectedVariantInStock
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
               : added
               ? "bg-green-500 text-white"
               : "bg-brand text-white hover:bg-brand-dark"
@@ -744,7 +744,7 @@ export default function ProductView({ product }: { product: Product }) {
             "Produced & fulfilled by Gelato",
             "Satisfaction guaranteed",
           ].map((perk) => (
-            <li key={perk} className="flex items-center gap-2 text-sm text-gray-600">
+            <li key={perk} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
               {perk}
             </li>
@@ -752,7 +752,7 @@ export default function ProductView({ product }: { product: Product }) {
         </ul>
 
         {/* Trust badges */}
-        <div className="mt-6 flex items-center gap-4 text-xs text-gray-500 border-t border-gray-100 pt-6">
+        <div className="mt-6 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-6">
           <div className="flex items-center gap-1">
             <Check className="h-4 w-4" /> Produced by Gelato
           </div>

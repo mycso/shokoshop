@@ -62,7 +62,7 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm text-gray-600 dark:text-gray-300">
         This reset link is invalid or has expired.{" "}
         <Link href="/auth/forgot-password" className="text-brand font-medium hover:underline">
           Request a new one
@@ -74,7 +74,7 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="text-center text-sm text-gray-600">
+      <div className="text-center text-sm text-gray-600 dark:text-gray-300">
         Your password has been reset. Redirecting you to sign in…
       </div>
     );
@@ -83,7 +83,7 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
           New password
         </label>
         <div className="relative">
@@ -93,13 +93,13 @@ function ResetPasswordForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+            className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:placeholder-gray-500"
             placeholder="••••••••"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white"
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -110,7 +110,7 @@ function ResetPasswordForm() {
               <div
                 key={rule.label}
                 className={`flex items-center gap-1.5 text-xs ${
-                  rule.test(password) ? "text-green-600" : "text-gray-400"
+                  rule.test(password) ? "text-green-600 dark:text-green-400" : "text-gray-400 dark:text-gray-500"
                 }`}
               >
                 <Check className="h-3 w-3" />
@@ -121,7 +121,7 @@ function ResetPasswordForm() {
         )}
       </div>
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
           Confirm new password
         </label>
         <input
@@ -130,12 +130,12 @@ function ResetPasswordForm() {
           required
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+          className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:placeholder-gray-500"
           placeholder="••••••••"
         />
       </div>
 
-      {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl">{error}</div>}
 
       <button
         type="submit"
@@ -154,14 +154,14 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Image src="/shokoshoplogo.svg" alt="ShokoShop" width={36} height={36} />
-            <span className={`${bebas.className} text-2xl text-gray-900`}>ShokoShop</span>
+            <Image src="/shokoshoplogo.svg" alt="ShokoShop" width={36} height={36} className="dark:invert" />
+            <span className={`${bebas.className} text-2xl text-gray-900 dark:text-white`}>ShokoShop</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Set a new password</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Set a new password</h1>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <Suspense fallback={<div className="text-center text-sm text-gray-400">Loading…</div>}>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8">
+          <Suspense fallback={<div className="text-center text-sm text-gray-400 dark:text-gray-500">Loading…</div>}>
             <ResetPasswordForm />
           </Suspense>
         </div>

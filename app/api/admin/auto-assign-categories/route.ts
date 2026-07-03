@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { getGelatoProducts, GELATO_PRODUCTS_TAG } from "@/lib/gelato-data";
 import { getOverrides, setOverride } from "@/lib/gelato-overrides";
-import { detectCategory } from "@/lib/categories";
+import { detectCategories } from "@/lib/categories";
 
 export async function POST() {
   try {
@@ -13,13 +13,13 @@ export async function POST() {
     for (const p of products) {
       // Skip if already has a category
       const existing = overrides.find((o) => o.gelatoProductId === p.gelatoProductId);
-      if (existing?.category) continue;
+      if (existing?.categories?.length || existing?.category) continue;
 
       const text = `${p.name} ${p.description ?? ""}`;
-      const category = detectCategory(text);
-      if (!category) continue;
+      const categories = detectCategories(text);
+      if (categories.length === 0) continue;
 
-      await setOverride({ gelatoProductId: p.gelatoProductId, category });
+      await setOverride({ gelatoProductId: p.gelatoProductId, categories });
       assigned++;
     }
 

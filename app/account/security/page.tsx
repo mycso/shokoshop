@@ -105,35 +105,35 @@ export default function AccountSecurityPage() {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Link
         href="/account"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white mb-8"
       >
         <ArrowLeft className="h-4 w-4" /> Back to account
       </Link>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Security</h1>
-      <p className="text-gray-500 mb-8">Manage two-factor authentication for your account</p>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Security</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">Manage two-factor authentication for your account</p>
 
-      {status === "loading" && <div className="text-gray-400">Loading…</div>}
+      {status === "loading" && <div className="text-gray-400 dark:text-gray-500">Loading…</div>}
 
       {status !== "loading" && view === "idle" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className={`p-3 rounded-xl shrink-0 ${status === "enabled" ? "bg-green-50" : "bg-gray-100"}`}>
+            <div className={`p-3 rounded-xl shrink-0 ${status === "enabled" ? "bg-green-50 dark:bg-green-900/30" : "bg-gray-100 dark:bg-gray-800"}`}>
               {status === "enabled" ? (
-                <ShieldCheck className="h-5 w-5 text-green-600" />
+                <ShieldCheck className="h-5 w-5 text-green-600 dark:text-green-400" />
               ) : (
-                <ShieldOff className="h-5 w-5 text-gray-500" />
+                <ShieldOff className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               )}
             </div>
             <div>
-              <p className="font-semibold text-gray-900">Two-factor authentication</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-semibold text-gray-900 dark:text-white">Two-factor authentication</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {status === "enabled" ? "Enabled — your account has an extra layer of protection" : "Not enabled"}
               </p>
             </div>
           </div>
 
-          {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4">{error}</div>}
+          {error && <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl mb-4">{error}</div>}
 
           {status === "disabled" ? (
             <button
@@ -149,7 +149,7 @@ export default function AccountSecurityPage() {
                 setError(null);
                 setView("disabling");
               }}
-              className="border border-red-200 text-red-600 font-semibold px-5 py-2.5 rounded-xl hover:bg-red-50 transition-colors text-sm"
+              className="border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-semibold px-5 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors text-sm"
             >
               Disable two-factor authentication
             </button>
@@ -158,9 +158,9 @@ export default function AccountSecurityPage() {
       )}
 
       {view === "disabling" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <p className="font-semibold text-gray-900 mb-1">Disable two-factor authentication</p>
-          <p className="text-sm text-gray-500 mb-4">Confirm your password to continue.</p>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <p className="font-semibold text-gray-900 dark:text-white mb-1">Disable two-factor authentication</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Confirm your password to continue.</p>
           <form onSubmit={confirmDisable} className="space-y-4">
             <input
               type="password"
@@ -168,10 +168,10 @@ export default function AccountSecurityPage() {
               autoFocus
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="Current password"
             />
-            {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            {error && <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl">{error}</div>}
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -187,7 +187,7 @@ export default function AccountSecurityPage() {
                   setError(null);
                   setView("idle");
                 }}
-                className="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50"
+                className="px-5 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -197,9 +197,9 @@ export default function AccountSecurityPage() {
       )}
 
       {view === "enrolling" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <p className="font-semibold text-gray-900 mb-1">Scan this QR code</p>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <p className="font-semibold text-gray-900 dark:text-white mb-1">Scan this QR code</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Use an authenticator app (Google Authenticator, Authy, 1Password, etc.) to scan the code below, or
             enter the setup key manually.
           </p>
@@ -209,7 +209,7 @@ export default function AccountSecurityPage() {
               <img src={qrCodeDataUrl} alt="Two-factor QR code" width={200} height={200} />
             </div>
           )}
-          <p className="text-center text-xs text-gray-400 font-mono break-all mb-6">{secret}</p>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 font-mono break-all mb-6">{secret}</p>
 
           <form onSubmit={confirmEnroll} className="space-y-4">
             <input
@@ -218,11 +218,11 @@ export default function AccountSecurityPage() {
               autoFocus
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-3 text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-brand-light"
               placeholder="123456"
               maxLength={6}
             />
-            {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            {error && <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl">{error}</div>}
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -234,7 +234,7 @@ export default function AccountSecurityPage() {
               <button
                 type="button"
                 onClick={finishEnrollment}
-                className="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50"
+                className="px-5 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 Cancel
               </button>
@@ -244,13 +244,13 @@ export default function AccountSecurityPage() {
       )}
 
       {view === "backupCodes" && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <p className="font-semibold text-gray-900 mb-1">Save your backup codes</p>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+          <p className="font-semibold text-gray-900 dark:text-white mb-1">Save your backup codes</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
             Each code can be used once to sign in if you lose access to your authenticator app. Save them
             somewhere safe — <span className="font-medium">they won&apos;t be shown again</span>.
           </p>
-          <div className="bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-2 font-mono text-sm text-gray-800 mb-4">
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 grid grid-cols-2 gap-2 font-mono text-sm text-gray-800 dark:text-gray-100 mb-4">
             {backupCodes.map((c) => (
               <div key={c}>{c}</div>
             ))}
@@ -258,7 +258,7 @@ export default function AccountSecurityPage() {
           <div className="flex gap-3">
             <button
               onClick={copyBackupCodes}
-              className="inline-flex items-center gap-1.5 border border-gray-200 px-4 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-1.5 border border-gray-200 dark:border-gray-700 px-4 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? "Copied" : "Copy codes"}

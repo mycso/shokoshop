@@ -38,21 +38,21 @@ export default function Verify2FAPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Image src="/shokoshoplogo.svg" alt="ShokoShop" width={36} height={36} />
-            <span className={`${bebas.className} text-2xl text-gray-900`}>ShokoShop</span>
+            <Image src="/shokoshoplogo.svg" alt="ShokoShop" width={36} height={36} className="dark:invert" />
+            <span className={`${bebas.className} text-2xl text-gray-900 dark:text-white`}>ShokoShop</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Two-factor authentication</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Two-factor authentication</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             {useBackupCode
               ? "Enter one of your backup codes"
               : "Enter the 6-digit code from your authenticator app"}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label htmlFor="code" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
                 {useBackupCode ? "Backup code" : "Authentication code"}
               </label>
               <input
@@ -62,13 +62,13 @@ export default function Verify2FAPage() {
                 autoFocus
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-brand-light"
+                className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-3 text-sm text-center tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-brand-light dark:placeholder-gray-500"
                 placeholder={useBackupCode ? "XXXX-XXXX" : "123456"}
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>
+              <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl">{error}</div>
             )}
 
             <button
@@ -80,7 +80,7 @@ export default function Verify2FAPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
+          <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
             <button
               type="button"
               onClick={() => {
@@ -93,7 +93,7 @@ export default function Verify2FAPage() {
               {useBackupCode ? "Use authenticator code instead" : "Use a backup code instead"}
             </button>
           </div>
-          <div className="mt-4 text-center text-sm text-gray-500">
+          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
             <Link href="/auth/login" className="hover:underline">
               Back to sign in
             </Link>

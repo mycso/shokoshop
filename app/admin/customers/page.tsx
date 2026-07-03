@@ -42,36 +42,36 @@ export default function AdminCustomersPage() {
       <div className="flex items-center gap-3 mb-8">
         <Users className="h-6 w-6 text-brand" />
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customers</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             {DEMO_CUSTOMERS.length} registered customers
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <tr className="border-b border-gray-100 dark:border-gray-800">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Customer
               </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">
                 Orders
               </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                 Total Spent
               </th>
-              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                 Joined
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
             {DEMO_CUSTOMERS.map((customer) => (
               <tr
                 key={customer.id}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -79,20 +79,20 @@ export default function AdminCustomersPage() {
                       {customer.name[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-white">
                         {customer.name}
                       </p>
-                      <p className="text-xs text-gray-400">{customer.email}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{customer.email}</p>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-gray-600 hidden sm:table-cell">
+                <td className="px-6 py-4 text-gray-600 dark:text-gray-300 hidden sm:table-cell">
                   {customer.orders}
                 </td>
-                <td className="px-6 py-4 font-semibold text-gray-900 hidden md:table-cell">
+                <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white hidden md:table-cell">
                   {formatPrice(customer.spent)}
                 </td>
-                <td className="px-6 py-4 text-gray-500 hidden lg:table-cell">
+                <td className="px-6 py-4 text-gray-500 dark:text-gray-400 hidden lg:table-cell">
                   {new Date(customer.joined).toLocaleDateString("en-GB")}
                 </td>
               </tr>

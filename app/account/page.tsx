@@ -11,24 +11,24 @@ const MENU = [
     icon: Package,
     label: "My Orders",
     desc: "View and track your orders",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
+    color: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-900/30",
   },
   {
     href: "/account/returns",
     icon: PackageX,
     label: "Returns & Refunds",
     desc: "Manage return requests",
-    color: "text-red-500",
-    bg: "bg-red-50",
+    color: "text-red-500 dark:text-red-400",
+    bg: "bg-red-50 dark:bg-red-900/30",
   },
   {
     href: "/account/security",
     icon: ShieldCheck,
     label: "Security",
     desc: "Password and two-factor authentication",
-    color: "text-green-600",
-    bg: "bg-green-50",
+    color: "text-green-600 dark:text-green-400",
+    bg: "bg-green-50 dark:bg-green-900/30",
   },
 ];
 
@@ -50,7 +50,7 @@ export default function AccountPage() {
   }
 
   if (loading) {
-    return <div className="min-h-[60vh] flex items-center justify-center text-gray-400">Loading…</div>;
+    return <div className="min-h-[60vh] flex items-center justify-center text-gray-400 dark:text-gray-500">Loading…</div>;
   }
 
   return (
@@ -61,8 +61,8 @@ export default function AccountPage() {
           <User className="h-7 w-7 text-brand" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{user?.name ?? "My Account"}</h1>
-          <p className="text-sm text-gray-500">{user?.email}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{user?.name ?? "My Account"}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
         </div>
       </div>
 
@@ -72,32 +72,32 @@ export default function AccountPage() {
           <Link
             key={href}
             href={href}
-            className="flex items-center gap-4 bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all group"
+            className="flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-all group"
           >
             <div className={`p-3 rounded-xl ${bg} shrink-0`}>
               <Icon className={`h-5 w-5 ${color}`} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 group-hover:text-brand transition-colors">{label}</p>
-              <p className="text-sm text-gray-500">{desc}</p>
+              <p className="font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors">{label}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-brand transition-colors shrink-0" />
+            <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-brand transition-colors shrink-0" />
           </Link>
         ))}
 
         {/* Sign out */}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-all group text-left"
+          className="w-full flex items-center gap-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-all group text-left"
         >
-          <div className="p-3 rounded-xl bg-gray-100 shrink-0">
-            <LogOut className="h-5 w-5 text-gray-500" />
+          <div className="p-3 rounded-xl bg-gray-100 dark:bg-gray-800 shrink-0">
+            <LogOut className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </div>
           <div className="flex-1">
-            <p className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">Sign Out</p>
-            <p className="text-sm text-gray-500">Sign out of your account</p>
+            <p className="font-semibold text-gray-900 dark:text-white group-hover:text-red-600 transition-colors">Sign Out</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Sign out of your account</p>
           </div>
-          <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-red-400 transition-colors shrink-0" />
+          <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-red-400 transition-colors shrink-0" />
         </button>
       </div>
     </div>

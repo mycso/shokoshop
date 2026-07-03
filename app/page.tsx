@@ -219,12 +219,12 @@ export default async function HomePage() {
       </section>
 
       {/* Popular Products */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900">Popular Products</h2>
-              <p className="text-gray-500 mt-1">Start with our bestsellers</p>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Popular Products</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">Start with our bestsellers</p>
             </div>
             <Link
               href="/products"
@@ -238,12 +238,12 @@ export default async function HomePage() {
               <Link
                 key={product.id}
                 href={`/products/${product.slug}`}
-                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"
+                className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col"
               >
                 <div className={`relative h-64 overflow-hidden ${
                   /shirt|tee|hoodie|sweatshirt|apparel/i.test(product.name) || product.category === "Apparel"
-                    ? "bg-gray-300"
-                    : "bg-gray-100"
+                    ? "bg-gray-300 dark:bg-gray-700"
+                    : "bg-gray-100 dark:bg-gray-800"
                 }`}>
                   <Image
                     src={product.images[0]}
@@ -253,18 +253,18 @@ export default async function HomePage() {
                     unoptimized
                   />
                   {!product.inStock ? (
-                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-gray-600">Out of Stock</span>
+                    <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex items-center justify-center">
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-200">Out of Stock</span>
                     </div>
                   ) : product.price === 0 ? (
-                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center gap-2">
-                      <div className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
-                      <span className="text-sm font-semibold text-gray-600">Syncing…</span>
+                    <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex items-center justify-center gap-2">
+                      <div className="h-4 w-4 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand animate-spin" />
+                      <span className="text-sm font-semibold text-gray-600 dark:text-gray-200">Syncing…</span>
                     </div>
                   ) : null}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
-                  <h3 className="font-semibold text-gray-900 text-lg group-hover:text-brand transition-colors">
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-lg group-hover:text-brand transition-colors">
                     {product.name}
                   </h3>
                   {reviewSummary[product.id] && (
@@ -272,7 +272,7 @@ export default async function HomePage() {
                       <StarRating avg={reviewSummary[product.id].avg} count={reviewSummary[product.id].count} />
                     </div>
                   )}
-                  <p className="text-gray-500 text-sm mt-1 line-clamp-2">{product.description}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 line-clamp-2">{product.description}</p>
                   {/* Color swatches */}
                   {(() => {
                     const colorOpt = (product.productVariantOptions ?? []).find(
@@ -291,24 +291,24 @@ export default async function HomePage() {
                             <span
                               key={val}
                               title={val}
-                              className={`w-4 h-4 rounded-full inline-block shrink-0 ${light ? "border border-gray-300" : ""}`}
+                              className={`w-4 h-4 rounded-full inline-block shrink-0 ${light ? "border border-gray-300 dark:border-gray-600" : ""}`}
                               style={{ backgroundColor: hex }}
                             />
                           );
                         })}
                         {extra > 0 && (
-                          <span className="text-xs text-gray-400 ml-0.5">+{extra}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 ml-0.5">+{extra}</span>
                         )}
                       </div>
                     );
                   })()}
                   <div className="flex items-center justify-between mt-auto pt-3">
-                    <span className="text-xl font-bold text-gray-900">
+                    <span className="text-xl font-bold text-gray-900 dark:text-white">
                       {product.price > 0 ? (
                         <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-500">
-                          <span className="h-3 w-3 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
+                        <span className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-500 dark:text-gray-400">
+                          <span className="h-3 w-3 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand animate-spin" />
                           Syncing…
                         </span>
                       )}
@@ -328,15 +328,15 @@ export default async function HomePage() {
       </section>
 
       {/* Shop by Category */}
-      <section className="py-12 bg-white border-b border-gray-100">
+      <section className="py-12 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-5">Shop by Category</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-5">Shop by Category</h2>
           <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
-                href={`/products?category=${encodeURIComponent(cat.label)}`}
-                className="flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 border border-gray-200 rounded-full whitespace-nowrap hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium text-sm shrink-0 shadow-sm"
+                href={`/products?category=${cat.slug}`}
+                className="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full whitespace-nowrap hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-colors font-medium text-sm shrink-0 shadow-sm"
               >
                 <span>{cat.emoji}</span>
                 {cat.label}
@@ -347,7 +347,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="bg-gray-50 py-16">
+      <section className="bg-gray-50 dark:bg-gray-950 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -374,13 +374,13 @@ export default async function HomePage() {
             ].map(({ icon, title, desc }) => (
               <div
                 key={title}
-                className="flex flex-col items-center text-center p-6 rounded-2xl bg-white hover:shadow-md transition-shadow"
+                className="flex flex-col items-center text-center p-6 rounded-2xl bg-white dark:bg-gray-800 hover:shadow-md transition-shadow"
               >
-                <div className="mb-4 p-3 bg-gray-50 rounded-xl shadow-sm">
+                <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm">
                   {icon}
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-                <p className="text-sm text-gray-500">{desc}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p>
               </div>
             ))}
           </div>

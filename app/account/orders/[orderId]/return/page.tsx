@@ -98,7 +98,7 @@ export default function ReturnRequestPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-20 text-center text-gray-400">
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center text-gray-400 dark:text-gray-500">
         Loading…
       </div>
     );
@@ -107,7 +107,7 @@ export default function ReturnRequestPage() {
   if (!order) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-20 text-center">
-        <p className="text-gray-500">Order not found.</p>
+        <p className="text-gray-500 dark:text-gray-400">Order not found.</p>
         <Link href="/account/orders" className="text-brand hover:underline mt-4 block">
           Back to orders
         </Link>
@@ -118,11 +118,11 @@ export default function ReturnRequestPage() {
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-20 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
-          <CheckCircle className="h-8 w-8 text-green-600" />
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-6">
+          <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Return request submitted</h1>
-        <p className="text-gray-500 mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Return request submitted</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-8">
           We&apos;ve received your request for order{" "}
           <span className="font-mono font-semibold">#{orderId.slice(-8).toUpperCase()}</span>.
           Our team will review it and get back to you within 2 business days.
@@ -136,7 +136,7 @@ export default function ReturnRequestPage() {
           </Link>
           <Link
             href="/account/orders"
-            className="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Back to orders
           </Link>
@@ -147,30 +147,30 @@ export default function ReturnRequestPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <nav className="text-sm text-gray-500 mb-8 flex items-center gap-2">
-        <Link href="/account/orders" className="hover:text-gray-700">My Orders</Link>
+      <nav className="text-sm text-gray-500 dark:text-gray-400 mb-8 flex items-center gap-2">
+        <Link href="/account/orders" className="hover:text-gray-700 dark:hover:text-white">My Orders</Link>
         <span>/</span>
-        <Link href={`/account/orders/${orderId}`} className="hover:text-gray-700">
+        <Link href={`/account/orders/${orderId}`} className="hover:text-gray-700 dark:hover:text-white">
           #{orderId.slice(-8).toUpperCase()}
         </Link>
         <span>/</span>
-        <span className="text-gray-900 font-medium">Request Return</span>
+        <span className="text-gray-900 dark:text-white font-medium">Request Return</span>
       </nav>
 
       <div className="flex items-center gap-3 mb-8">
-        <div className="p-2.5 bg-red-50 rounded-xl">
-          <PackageX className="h-6 w-6 text-red-500" />
+        <div className="p-2.5 bg-red-50 dark:bg-red-900/30 rounded-xl">
+          <PackageX className="h-6 w-6 text-red-500 dark:text-red-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Request a Return</h1>
-          <p className="text-gray-500 text-sm">Order #{orderId.slice(-8).toUpperCase()}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Request a Return</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Order #{orderId.slice(-8).toUpperCase()}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Item selection */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Which items are you returning?</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Which items are you returning?</h2>
           <div className="space-y-3">
             {order.items.map((item) => (
               <label
@@ -178,7 +178,7 @@ export default function ReturnRequestPage() {
                 className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer transition-colors ${
                   selectedItems.has(item.id)
                     ? "border-brand bg-brand-light/30"
-                    : "border-gray-200 hover:border-gray-300"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                 }`}
               >
                 <input
@@ -188,28 +188,28 @@ export default function ReturnRequestPage() {
                   onChange={() => toggleItem(item.id)}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{item.name}</p>
                   {item.variantName && (
-                    <p className="text-xs text-gray-500">{item.variantName}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.variantName}</p>
                   )}
                 </div>
-                <span className="text-xs text-gray-500 shrink-0">Qty: {item.quantity}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">Qty: {item.quantity}</span>
               </label>
             ))}
           </div>
         </div>
 
         {/* Reason */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Reason for return</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Reason for return</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {REASONS.map((r) => (
               <label
                 key={r.value}
                 className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors text-sm ${
                   reason === r.value
-                    ? "border-brand bg-brand-light/30 text-gray-900 font-medium"
-                    : "border-gray-200 hover:border-gray-300 text-gray-700"
+                    ? "border-brand bg-brand-light/30 text-gray-900 dark:text-white font-medium"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-200"
                 }`}
               >
                 <input
@@ -225,30 +225,30 @@ export default function ReturnRequestPage() {
             ))}
           </div>
           <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Additional details <span className="text-gray-400 font-normal">(optional)</span>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1.5">
+              Additional details <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               placeholder="Tell us more about the issue…"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light resize-none"
+              className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light resize-none"
             />
           </div>
         </div>
 
         {/* Resolution */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Preferred resolution</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
+          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Preferred resolution</h2>
           <div className="space-y-2">
             {RESOLUTIONS.map((r) => (
               <label
                 key={r.value}
                 className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors text-sm ${
                   resolution === r.value
-                    ? "border-brand bg-brand-light/30 text-gray-900 font-medium"
-                    : "border-gray-200 hover:border-gray-300 text-gray-700"
+                    ? "border-brand bg-brand-light/30 text-gray-900 dark:text-white font-medium"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-200"
                 }`}
               >
                 <input
@@ -266,7 +266,7 @@ export default function ReturnRequestPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">
+          <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 text-sm px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
@@ -281,7 +281,7 @@ export default function ReturnRequestPage() {
           </button>
           <Link
             href={`/account/orders/${orderId}`}
-            className="flex-1 flex items-center justify-center gap-2 border border-gray-200 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-50 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Cancel

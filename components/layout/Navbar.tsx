@@ -40,7 +40,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -48,9 +48,9 @@ export default function Navbar() {
             <img
               src="/shokoshoplogo.svg"
               alt="ShokoShop logo"
-              className="h-8 w-8 object-contain"
+              className="h-8 w-8 object-contain dark:invert"
             />
-            <span className={`${bebas.className} text-xl font-bold text-gray-900`}>ShokoShop</span>
+            <span className={`${bebas.className} text-xl font-bold text-gray-900 dark:text-white`}>ShokoShop</span>
           </Link>
 
           {/* Desktop nav */}
@@ -59,7 +59,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 {link.label}
               </Link>
@@ -69,18 +69,18 @@ export default function Navbar() {
               <button
                 onClick={() => setCatOpen((o) => !o)}
                 onBlur={(e) => { if (!catRef.current?.contains(e.relatedTarget as Node)) setCatOpen(false); }}
-                className="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               >
                 Categories <ChevronDown className={`h-3.5 w-3.5 transition-transform ${catOpen ? "rotate-180" : ""}`} />
               </button>
               {catOpen && (
-                <div className="absolute left-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50">
+                <div className="absolute left-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 py-1.5 z-50">
                   {CATEGORIES.map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/products?category=${encodeURIComponent(cat.label)}`}
+                      href={`/products?category=${cat.slug}`}
                       onClick={() => setCatOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <span>{cat.emoji}</span>
                       {cat.label}
@@ -96,10 +96,10 @@ export default function Navbar() {
             <CurrencySelector />
             <Link
               href="/cart"
-              className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+              className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Cart"
             >
-              <ShoppingCart className="h-5 w-5 text-gray-700" />
+              <ShoppingCart className="h-5 w-5 text-gray-700 dark:text-gray-200" />
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-accent text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                   {itemCount > 9 ? "9+" : itemCount}
@@ -109,7 +109,7 @@ export default function Navbar() {
             {loggedIn ? (
               <button
                 onClick={handleSignOut}
-                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               >
                 <LogOut className="h-4 w-4" />
                 Sign Out
@@ -117,7 +117,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/auth/login"
-                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="hidden md:flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <User className="h-4 w-4" />
                 Account
@@ -126,13 +126,13 @@ export default function Navbar() {
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5 dark:text-gray-200" />
               ) : (
-                <Menu className="h-5 w-5" />
+                <Menu className="h-5 w-5 dark:text-gray-200" />
               )}
             </button>
           </div>
@@ -140,14 +140,14 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
+          <div className="md:hidden py-4 border-t border-gray-100 dark:border-gray-800">
             <div className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   {link.label}
                 </Link>
@@ -155,7 +155,7 @@ export default function Navbar() {
               {/* Categories accordion */}
               <button
                 onClick={() => setMobileCatOpen((o) => !o)}
-                className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+                className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 Categories
                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${mobileCatOpen ? "rotate-180" : ""}`} />
@@ -165,9 +165,9 @@ export default function Navbar() {
                   {CATEGORIES.map((cat) => (
                     <Link
                       key={cat.slug}
-                      href={`/products?category=${encodeURIComponent(cat.label)}`}
+                      href={`/products?category=${cat.slug}`}
                       onClick={() => { setMobileOpen(false); setMobileCatOpen(false); }}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
                       <span>{cat.emoji}</span>
                       {cat.label}
@@ -178,7 +178,7 @@ export default function Navbar() {
               {loggedIn ? (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full text-left"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 w-full text-left"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out
@@ -187,7 +187,7 @@ export default function Navbar() {
                 <Link
                   href="/auth/login"
                   onClick={() => setMobileOpen(false)}
-                  className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   Account
                 </Link>

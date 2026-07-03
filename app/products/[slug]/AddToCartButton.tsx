@@ -74,7 +74,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
       {/* Variant pickers with per-value prices */}
       {options.map((opt) => (
         <div key={opt.name}>
-          <span className="block text-sm font-semibold text-gray-700 mb-2">{opt.name}</span>
+          <span className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">{opt.name}</span>
           <div className="flex flex-wrap gap-2">
             {opt.values.map((val) => {
               const isSelected = selection[opt.name] === val;
@@ -87,12 +87,12 @@ export default function AddToCartButton({ product }: { product: Product }) {
                   className={`flex flex-col items-center px-4 py-2.5 rounded-xl border-2 font-medium transition-all min-w-[64px] ${
                     isSelected
                       ? "border-brand bg-brand-light text-brand-dark"
-                      : "border-gray-200 text-gray-700 hover:border-brand"
+                      : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand"
                   }`}
                 >
                   <span className="text-sm">{val}</span>
                   {price != null && price > 0 && (
-                    <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400"}`}>
+                    <span className={`text-xs mt-0.5 ${isSelected ? "text-brand" : "text-gray-400 dark:text-gray-500"}`}>
                       {formatPrice(price)}
                     </span>
                   )}
@@ -105,10 +105,10 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
       {/* Selected total price */}
       {selectedPrice > 0 && (
-        <div className="flex items-baseline gap-2 pt-1 border-t border-gray-100">
-          <span className="text-2xl font-bold text-gray-900">{formatPrice(selectedPrice)}</span>
+        <div className="flex items-baseline gap-2 pt-1 border-t border-gray-100 dark:border-gray-800">
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">{formatPrice(selectedPrice)}</span>
           {selectedVariant && (
-            <span className="text-sm text-gray-500">{selectedVariant.name}</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">{selectedVariant.name}</span>
           )}
         </div>
       )}

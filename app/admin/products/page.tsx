@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Pencil, RefreshCw, Wand2, FileDown, ChevronDown, Search } from "lucide-react";
 import { formatPrice } from "@/lib/products";
+import { categoryLabel } from "@/lib/categories";
 
 const PAGE_SIZE = 30;
 
@@ -29,7 +30,7 @@ export default function AdminProductsPage() {
     return (
       p.name?.toLowerCase().includes(q) ||
       p.id?.toLowerCase().includes(q) ||
-      p.category?.toLowerCase().includes(q)
+      (p.categories ?? []).some((c: string) => categoryLabel(c).toLowerCase().includes(q))
     );
   });
   const visibleProducts = filteredProducts.slice(0, visibleCount);
@@ -140,8 +141,8 @@ export default function AdminProductsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Products</h1>
+          <p className="text-gray-500 text-sm dark:text-gray-400">
             {search ? `${filteredProducts.length} of ${products.length} products` : `${products.length} products`}
           </p>
         </div>
@@ -149,7 +150,7 @@ export default function AdminProductsPage() {
           <button
             onClick={syncAllDesigns}
             disabled={syncingDesigns || syncing || autoAssigning}
-            className="inline-flex items-center gap-1.5 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 border border-gray-300 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             <FileDown className={`h-4 w-4 ${syncingDesigns ? "animate-pulse" : ""}`} />
             {syncingDesigns ? "Fetching Designs…" : "Fetch Designs from Gelato"}
@@ -174,23 +175,23 @@ export default function AdminProductsPage() {
       </div>
 
       {autoAssignResult && (
-        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${autoAssignResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
+        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${autoAssignResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" : "bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800"}`}>
           {autoAssignResult}
         </div>
       )}
 
       {designSyncResult && (
-        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${designSyncResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200" : "bg-blue-50 text-blue-700 border border-blue-200"}`}>
+        <div className={`mb-4 rounded-xl px-4 py-3 text-sm ${designSyncResult.startsWith("Error") ? "bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" : "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"}`}>
           {designSyncResult}
         </div>
       )}
 
       {syncLog.length > 0 && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 overflow-hidden">
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 overflow-hidden dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
           <button
             type="button"
             onClick={() => setSyncLogOpen((o) => !o)}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-green-100 transition-colors text-left"
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-green-100 transition-colors text-left dark:hover:bg-green-900/40"
           >
             <span className="font-semibold">Sync complete — {syncLog.length} products</span>
             <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${syncLogOpen ? "rotate-180" : ""}`} />
@@ -204,71 +205,73 @@ export default function AdminProductsPage() {
       )}
 
       <div className="relative mb-4 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search products…"
-          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+          className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-500"
         />
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-brand animate-spin" />
+          <div className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-brand animate-spin dark:border-gray-700" />
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden dark:bg-gray-900 dark:border-gray-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell">Status</th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">From Price</th>
+              <tr className="border-b border-gray-100 dark:border-gray-800">
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">Product</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden sm:table-cell dark:text-gray-400">Status</th>
+                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">From Price</th>
                 <th className="px-6 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {visibleProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                <tr key={product.id} className="hover:bg-gray-50 transition-colors dark:hover:bg-gray-800/50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="relative h-12 w-12 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 dark:bg-gray-800">
                         {product.thumbnail ? (
                           <Image src={product.thumbnail} alt={product.name} fill className="object-cover" unoptimized />
                         ) : (
-                          <div className="w-full h-full bg-gray-200" />
+                          <div className="w-full h-full bg-gray-200 dark:bg-gray-700" />
                         )}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">{product.name}</p>
-                        <p className="text-xs text-gray-400 font-mono">{product.id}</p>
-                        {product.category && (
-                          <span className="text-xs text-brand font-medium">{product.category}</span>
+                        <p className="font-medium text-gray-900 dark:text-white">{product.name}</p>
+                        <p className="text-xs text-gray-400 font-mono dark:text-gray-500">{product.id}</p>
+                        {product.categories?.length > 0 && (
+                          <span className="text-xs text-brand font-medium">
+                            {product.categories.map((c: string) => categoryLabel(c)).join(", ")}
+                          </span>
                         )}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 hidden sm:table-cell">
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                      product.status === "active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+                      product.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
                     }`}>
                       {product.status ?? "unknown"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-semibold text-gray-900">
+                  <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
                     {product.price > 0
                       ? `From ${formatPrice(product.price)}`
                       : syncing
-                        ? <span className="text-gray-400 font-normal text-xs">Syncing…</span>
-                        : <span className="text-gray-400 font-normal text-xs">—</span>}
+                        ? <span className="text-gray-400 font-normal text-xs dark:text-gray-500">Syncing…</span>
+                        : <span className="text-gray-400 font-normal text-xs dark:text-gray-500">—</span>}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 justify-end">
                       <Link
                         href={`/admin/products/${product.id}`}
-                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-brand transition-colors"
+                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-brand transition-colors dark:hover:bg-gray-800 dark:text-gray-400"
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
@@ -279,11 +282,11 @@ export default function AdminProductsPage() {
             </tbody>
           </table>
           {filteredProducts.length === 0 && (
-            <p className="text-center text-gray-400 text-sm py-10">No products match your search.</p>
+            <p className="text-center text-gray-400 text-sm py-10 dark:text-gray-500">No products match your search.</p>
           )}
           {visibleCount < filteredProducts.length && (
             <div ref={sentinelRef} className="flex justify-center py-6">
-              <div className="h-5 w-5 rounded-full border-2 border-gray-200 border-t-brand animate-spin" />
+              <div className="h-5 w-5 rounded-full border-2 border-gray-200 border-t-brand animate-spin dark:border-gray-700" />
             </div>
           )}
         </div>

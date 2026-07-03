@@ -27,24 +27,24 @@ const STATS = [
     value: "£3,842",
     change: "+8% this month",
     icon: DollarSign,
-    color: "text-green-600",
-    bg: "bg-green-50",
+    color: "text-green-600 dark:text-green-400",
+    bg: "bg-green-50 dark:bg-green-900/30",
   },
   {
     label: "Products",
     value: "6",
     change: "Active listings",
     icon: Package,
-    color: "text-purple-600",
-    bg: "bg-purple-50",
+    color: "text-purple-600 dark:text-purple-400",
+    bg: "bg-purple-50 dark:bg-purple-900/30",
   },
   {
     label: "Customers",
     value: "94",
     change: "+5 this week",
     icon: Users,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    color: "text-orange-600 dark:text-orange-400",
+    bg: "bg-orange-50 dark:bg-orange-900/30",
   },
 ];
 
@@ -67,10 +67,10 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Admin Dashboard
           </h1>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <p className="text-gray-500 text-sm mt-0.5 dark:text-gray-400">
             Manage your ShokoShop store
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
           </Link>
           <Link
             href="/admin/settings/gelato"
-            className="inline-flex items-center gap-1.5 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-1.5 border border-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             <Settings className="h-4 w-4" />
             Settings
@@ -97,26 +97,26 @@ export default function AdminDashboard() {
         {STATS.map(({ label, value, change, icon: Icon, color, bg }) => (
           <div
             key={label}
-            className="bg-white rounded-2xl border border-gray-100 p-5"
+            className="bg-white rounded-2xl border border-gray-100 p-5 dark:bg-gray-900 dark:border-gray-800"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2.5 rounded-xl ${bg}`}>
                 <Icon className={`h-5 w-5 ${color}`} />
               </div>
-              <TrendingUp className="h-4 w-4 text-gray-300" />
+              <TrendingUp className="h-4 w-4 text-gray-300 dark:text-gray-600" />
             </div>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
-            <p className="text-sm text-gray-500 mt-0.5">{label}</p>
-            <p className="text-xs text-green-600 mt-1 font-medium">{change}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+            <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">{label}</p>
+            <p className="text-xs text-green-600 mt-1 font-medium dark:text-green-400">{change}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent orders */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-semibold text-gray-900">Recent Orders</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white">Recent Orders</h2>
             <Link
               href="/admin/orders"
               className="text-sm text-brand hover:text-branddark flex items-center gap-1"
@@ -128,13 +128,13 @@ export default function AdminDashboard() {
             {RECENT_ORDERS.map((order) => (
               <div
                 key={order.id}
-                className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0"
+                className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0 dark:border-gray-800"
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {order.customer}
                   </p>
-                  <p className="text-xs text-gray-400 font-mono">
+                  <p className="text-xs text-gray-400 font-mono dark:text-gray-500">
                     #{order.id.slice(-8).toUpperCase()}
                   </p>
                 </div>
@@ -144,18 +144,18 @@ export default function AdminDashboard() {
                       order.status === "shipped"
                         ? "bg-brand-light text-brand-dark"
                         : order.status === "delivered"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
                     }`}
                   >
                     {order.status}
                   </span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
                     {formatPrice(order.total)}
                   </span>
                   <Link
                     href={`/admin/orders/${order.id}`}
-                    className="text-gray-400 hover:text-brand"
+                    className="text-gray-400 hover:text-brand dark:text-gray-500"
                   >
                     <ArrowRight className="h-4 w-4" />
                   </Link>
@@ -166,8 +166,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick links */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-semibold text-gray-900 mb-5">Quick Actions</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
+          <h2 className="font-semibold text-gray-900 mb-5 dark:text-white">Quick Actions</h2>
           <div className="space-y-2">
             {[
               { href: "/admin/products", label: "Manage Products", icon: Package },
@@ -188,13 +188,13 @@ export default function AdminDashboard() {
               <Link
                 key={href}
                 href={href}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group dark:hover:bg-gray-800"
               >
-                <Icon className="h-4 w-4 text-gray-500 group-hover:text-brand transition-colors" />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                <Icon className="h-4 w-4 text-gray-500 group-hover:text-brand transition-colors dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 dark:text-gray-200 dark:group-hover:text-white">
                   {label}
                 </span>
-                <ArrowRight className="h-3 w-3 text-gray-300 ml-auto group-hover:text-brand transition-colors" />
+                <ArrowRight className="h-3 w-3 text-gray-300 ml-auto group-hover:text-brand transition-colors dark:text-gray-600" />
               </Link>
             ))}
           </div>

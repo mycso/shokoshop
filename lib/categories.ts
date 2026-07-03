@@ -1,15 +1,24 @@
 export const CATEGORIES = [
-  { slug: "music",   label: "Music",   emoji: "🎵", color: "bg-purple-100 text-purple-700 border-purple-200" },
-  { slug: "sports",  label: "Sports",  emoji: "⚽", color: "bg-green-100 text-green-700 border-green-200" },
-  { slug: "films",   label: "Films",   emoji: "🎬", color: "bg-red-100 text-red-700 border-red-200" },
-  { slug: "kids",    label: "Kids",    emoji: "🧸", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-  { slug: "art",     label: "Art",     emoji: "🎨", color: "bg-pink-100 text-pink-700 border-pink-200" },
-  { slug: "culture", label: "Culture", emoji: "🌍", color: "bg-blue-100 text-blue-700 border-blue-200" },
+  { slug: "music",   label: "Music",    emoji: "🎵", color: "bg-purple-100 text-purple-700 border-purple-200" },
+  { slug: "sports",  label: "Sports",   emoji: "⚽", color: "bg-green-100 text-green-700 border-green-200" },
+  { slug: "films",   label: "Film & TV", emoji: "🎬", color: "bg-red-100 text-red-700 border-red-200" },
+  { slug: "kids",    label: "Kids",     emoji: "🧸", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  { slug: "art",     label: "Art",      emoji: "🎨", color: "bg-pink-100 text-pink-700 border-pink-200" },
+  { slug: "culture", label: "Culture",  emoji: "🌍", color: "bg-blue-100 text-blue-700 border-blue-200" },
 ] as const;
 
 export type CategorySlug = typeof CATEGORIES[number]["slug"];
 
 export const CATEGORY_LABELS = CATEGORIES.map((c) => c.label);
+
+export function categoryLabel(slug: string): string {
+  return CATEGORIES.find((c) => c.slug === slug)?.label ?? slug;
+}
+
+/** Maps a legacy stored label (e.g. "Films") back to its slug, for reading old data. */
+export function categorySlugFromLabel(label: string): string | undefined {
+  return CATEGORIES.find((c) => c.label === label || c.slug === label)?.slug;
+}
 
 // Keywords scored per category — higher score wins when text matches multiple
 const KEYWORDS: Record<CategorySlug, string[]> = {
@@ -51,22 +60,22 @@ const KEYWORDS: Record<CategorySlug, string[]> = {
 };
 
 /**
- * Scores the text against each category's keywords and returns the best match,
- * or null if nothing scores above zero.
+ * Scores the text against every category's keywords and returns the slugs of
+ * all categories that score above zero, best match first. A product can
+ * belong to more than one category (e.g. a Marvel movie tee scores on both
+ * "films" and "art"), so callers decide how many of these to keep.
  */
-export function detectCategory(text: string): string | null {
+export function detectCategories(text: string): string[] {
   const lower = text.toLowerCase();
-  let best: { label: string; score: number } | null = null;
+  const scored: { slug: CategorySlug; score: number }[] = [];
 
   for (const cat of CATEGORIES) {
     const score = KEYWORDS[cat.slug].reduce(
       (acc, kw) => acc + (lower.includes(kw) ? 1 : 0),
       0
     );
-    if (score > 0 && (!best || score > best.score)) {
-      best = { label: cat.label, score };
-    }
+    if (score > 0) scored.push({ slug: cat.slug, score });
   }
 
-  return best?.label ?? null;
+  return scored.sort((a, b) => b.score - a.score).map((s) => s.slug);
 }

@@ -23,19 +23,19 @@ function SuccessContent() {
     <div className="max-w-2xl mx-auto px-4 py-24 text-center">
       <div className="flex justify-center mb-8">
         <div className="relative">
-          <div className="h-28 w-28 rounded-full bg-green-50 ring-8 ring-green-100 flex items-center justify-center">
+          <div className="h-28 w-28 rounded-full bg-green-50 dark:bg-green-900/30 ring-8 ring-green-100 dark:ring-green-900/20 flex items-center justify-center">
             <CheckCircle className="h-14 w-14 text-green-500" />
           </div>
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-3">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
         Order Confirmed! 🎉
       </h1>
-      <p className="text-lg text-gray-600 mb-2">
+      <p className="text-lg text-gray-600 dark:text-gray-300 mb-2">
         Thank you for your purchase.
       </p>
-      <p className="text-gray-500 mb-8">
+      <p className="text-gray-500 dark:text-gray-400 mb-8">
         Your order has been received and is being prepared for fulfilment. You'll
         receive a confirmation email shortly.
       </p>
@@ -50,9 +50,9 @@ function SuccessContent() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8 text-left">
-        <h2 className="font-semibold text-gray-900 mb-4">What happens next?</h2>
-        <ol className="space-y-3 text-sm text-gray-600">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 mb-8 text-left">
+        <h2 className="font-semibold text-gray-900 dark:text-white mb-4">What happens next?</h2>
+        <ol className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
           {[
               "We send your order to Gelato for production",
               "Your item is produced and quality-checked",
@@ -81,14 +81,14 @@ function SuccessContent() {
         )}
         <Link
           href="/"
-          className="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <Home className="h-4 w-4" />
           Back to Home
         </Link>
         <Link
           href="/products"
-          className="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 font-semibold px-6 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           Continue Shopping
           <ArrowRight className="h-4 w-4" />
@@ -100,7 +100,7 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="py-24 text-center text-gray-400">Loading…</div>}>
+    <Suspense fallback={<div className="py-24 text-center text-gray-400 dark:text-gray-500">Loading…</div>}>
       <SuccessContent />
     </Suspense>
   );

@@ -6,7 +6,7 @@ const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-auto">
+    <footer className="bg-gray-900 dark:bg-black text-gray-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
@@ -21,7 +21,7 @@ export default function Footer() {
               
               <span className={`${bebas.className} text-xl font-bold text-white`}>ShokoShop</span>
             </div>
-            <p className="text-sm text-gray-400 max-w-xs">
+            <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
               Premium T-shirts and wall art exclusive designs delivered straight to your door.
             </p>
           </div>
@@ -70,11 +70,11 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-gray-500">
+        <div className="border-t border-gray-800 dark:border-gray-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} ShokoShop. All rights reserved.
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Powered by{" "}
             <span className="text-brand">Gelato</span> &amp;{" "}
             <span className="text-brand">Stripe</span>

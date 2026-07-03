@@ -90,7 +90,7 @@ async function getProducts() {
       price,
       variantPrices,
       images,
-      category: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.category ?? "",
+      categories: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.categories ?? [],
       inStock: p.status !== "inactive" && p.status !== "deleted",
       variants: (p.variants ?? []).map((v: any) => ({
         id: v.id,
@@ -121,7 +121,7 @@ export default async function ProductsPage({
   const reviewSummary = await getReviewsSummary(allProducts.map((p: any) => p.id));
 
   const products = allProducts.filter((p: any) => {
-    if (category && p.category !== category) return false;
+    if (category && !p.categories?.includes(category)) return false;
     if (q) {
       const query = q.toLowerCase();
       if (
@@ -136,10 +136,10 @@ export default async function ProductsPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           All Products
         </h1>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           Browse our collection and pick your favourite.
         </p>
       </div>
@@ -147,13 +147,13 @@ export default async function ProductsPage({
       {/* Search */}
       <form action="/products" method="GET" className="relative mb-6 max-w-md">
         {category && <input type="hidden" name="category" value={category} />}
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
         <input
           type="text"
           name="q"
           defaultValue={q ?? ""}
           placeholder="Search products…"
-          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-500"
         />
       </form>
 
@@ -162,7 +162,7 @@ export default async function ProductsPage({
         <Link
           href={q ? `/products?q=${encodeURIComponent(q)}` : "/products"}
           className={`text-sm px-4 py-2 rounded-full font-medium transition-colors ${
-            !category ? "bg-brand text-white" : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
+            !category ? "bg-brand text-white" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand"
           }`}
         >
           All
@@ -170,11 +170,11 @@ export default async function ProductsPage({
         {CATEGORIES.map((cat) => (
           <Link
             key={cat.slug}
-            href={`/products?category=${encodeURIComponent(cat.label)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
+            href={`/products?category=${cat.slug}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
             className={`text-sm px-4 py-2 rounded-full font-medium transition-colors ${
-              category === cat.label
+              category === cat.slug
                 ? "bg-brand text-white"
-                : "bg-white border border-gray-200 text-gray-700 hover:border-brand"
+                : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand"
             }`}
           >
             {cat.emoji} {cat.label}
@@ -183,7 +183,7 @@ export default async function ProductsPage({
       </div>
 
       {products.length === 0 && (
-        <p className="text-gray-500 py-16 text-center">
+        <p className="text-gray-500 dark:text-gray-400 py-16 text-center">
           No products match your search.{" "}
           <Link href="/products" className="text-brand underline">
             Clear filters
@@ -197,12 +197,12 @@ export default async function ProductsPage({
           <Link
             key={product.id}
             href={`/products/${product.slug}`}
-            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"
+            className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col"
           >
             <div className={`relative h-52 overflow-hidden ${
-              /shirt|tee|hoodie|sweatshirt|apparel/i.test(product.name) || product.category === "Apparel"
-                ? "bg-gray-300"
-                : "bg-gray-100"
+              /shirt|tee|hoodie|sweatshirt|apparel/i.test(product.name) || product.categories?.includes("Apparel")
+                ? "bg-gray-300 dark:bg-gray-700"
+                : "bg-gray-100 dark:bg-gray-800"
             }`}>
               <Image
                 src={product.images[0]}
@@ -211,20 +211,20 @@ export default async function ProductsPage({
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
               {!product.inStock ? (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                  <span className="text-sm font-semibold text-gray-600">
+                <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex items-center justify-center">
+                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
                     Out of Stock
                   </span>
                 </div>
               ) : product.price === 0 ? (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center gap-2">
-                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
-                  <span className="text-sm font-semibold text-gray-600">Syncing…</span>
+                <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/70 flex items-center justify-center gap-2">
+                  <div className="h-4 w-4 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand animate-spin" />
+                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">Syncing…</span>
                 </div>
               ) : null}
             </div>
             <div className="p-4 flex flex-col flex-1">
-              <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors">
+              <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-brand transition-colors">
                 {product.name}
               </h3>
               {reviewSummary[product.id] && (
@@ -232,7 +232,7 @@ export default async function ProductsPage({
                   <StarRating avg={reviewSummary[product.id].avg} count={reviewSummary[product.id].count} />
                 </div>
               )}
-              <p className="text-gray-400 text-xs mt-1 line-clamp-2">
+              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 line-clamp-2">
                 {product.description}
               </p>
               {/* Color swatches */}
@@ -253,24 +253,24 @@ export default async function ProductsPage({
                         <span
                           key={val}
                           title={val}
-                          className={`w-4 h-4 rounded-full inline-block shrink-0 ${light ? "border border-gray-300" : ""}`}
+                          className={`w-4 h-4 rounded-full inline-block shrink-0 ${light ? "border border-gray-300 dark:border-gray-600" : ""}`}
                           style={{ backgroundColor: hex }}
                         />
                       );
                     })}
                     {extra > 0 && (
-                      <span className="text-xs text-gray-400 ml-0.5">+{extra}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-0.5">+{extra}</span>
                     )}
                   </div>
                 );
               })()}
               <div className="flex items-center justify-between mt-auto pt-3">
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
                   {product.price > 0 ? (
                     <><span className="text-sm font-normal">From </span><PriceDisplay pence={product.price} /></>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-500">
-                      <span className="h-3 w-3 rounded-full border-2 border-gray-300 border-t-brand animate-spin" />
+                    <span className="inline-flex items-center gap-1.5 text-sm font-normal text-gray-500 dark:text-gray-400">
+                      <span className="h-3 w-3 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand animate-spin" />
                       Syncing…
                     </span>
                   )}

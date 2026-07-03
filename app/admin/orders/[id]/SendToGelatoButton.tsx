@@ -31,7 +31,7 @@ export default function SendToGelatoButton({ orderId, hasExisting = false }: { o
 
   if (state === "success") {
     return (
-      <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-sm font-medium">
+      <div className="flex items-center gap-2 text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl px-4 py-2.5 text-sm font-medium">
         <CheckCircle className="h-4 w-4 shrink-0" />
         {message}
       </div>
@@ -53,7 +53,7 @@ export default function SendToGelatoButton({ orderId, hasExisting = false }: { o
         {state === "loading" ? "Sending…" : hasExisting ? "Re-send to Gelato" : "Send to Gelato"}
       </button>
       {state === "error" && (
-        <div className="flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-xs">
+        <div className="flex items-center gap-2 text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2 text-xs">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           {message}
         </div>

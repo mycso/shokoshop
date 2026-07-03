@@ -9,12 +9,12 @@ export const metadata = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  paid: "bg-blue-100 text-blue-700",
-  processing: "bg-purple-100 text-purple-700",
-  shipped: "bg-blue-100 text-blue-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
+  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  paid: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  processing: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  shipped: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  delivered: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
 };
 
 const STATUS_OPTIONS = [
@@ -77,27 +77,27 @@ export default async function OrdersPage({
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-      <p className="text-gray-500 mb-8">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Orders</h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">
         View and track all your previous orders.
       </p>
 
       {allOrders.length > 0 && (
         <form action="/account/orders" method="GET" className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               name="q"
               defaultValue={q ?? ""}
               placeholder="Search order # or item…"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             />
           </div>
           <select
             name="status"
             defaultValue={status ?? ""}
-            className="rounded-xl border border-gray-200 bg-white text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand"
+            className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -114,7 +114,7 @@ export default async function OrdersPage({
           {(q || status) && (
             <Link
               href="/account/orders"
-              className="text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:border-brand transition-colors text-center"
+              className="text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-brand transition-colors text-center"
             >
               Clear
             </Link>
@@ -124,8 +124,8 @@ export default async function OrdersPage({
 
       {allOrders.length === 0 ? (
         <div className="text-center py-20">
-          <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No orders yet.</p>
+          <Package className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">No orders yet.</p>
           <Link
             href="/products"
             className="mt-4 inline-block text-brand font-medium hover:underline"
@@ -135,8 +135,8 @@ export default async function OrdersPage({
         </div>
       ) : paged.length === 0 ? (
         <div className="text-center py-20">
-          <Package className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">No orders match your search.</p>
+          <Package className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <p className="text-gray-500 dark:text-gray-400">No orders match your search.</p>
           <Link
             href="/account/orders"
             className="mt-4 inline-block text-brand font-medium hover:underline"
@@ -151,23 +151,23 @@ export default async function OrdersPage({
               <Link
                 key={order.id}
                 href={`/account/orders/${order.id}`}
-                className="block bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow group"
+                className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 hover:shadow-md transition-shadow group"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-sm text-gray-500">
+                      <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
                         #{order.id.slice(-8).toUpperCase()}
                       </span>
                       <span
                         className={`text-xs font-semibold px-2.5 py-0.5 rounded-full capitalize ${
-                          STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600"
+                          STATUS_COLORS[order.status] ?? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
                         }`}
                       >
                         {order.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       Placed{" "}
                       {new Date(order.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
@@ -175,18 +175,18 @@ export default async function OrdersPage({
                         year: "numeric",
                       })}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {order.items.length}{" "}
                       {order.items.length === 1 ? "item" : "items"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="font-bold text-gray-900">
+                      <p className="font-bold text-gray-900 dark:text-white">
                         {formatPrice(order.total)}
                       </p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-brand transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-brand transition-colors" />
                   </div>
                 </div>
               </Link>
@@ -195,31 +195,31 @@ export default async function OrdersPage({
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Page {page} of {totalPages}
               </p>
               <div className="flex gap-2">
                 {page > 1 ? (
                   <Link
                     href={pageHref(q, status, page - 1)}
-                    className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:border-brand transition-colors"
+                    className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand transition-colors"
                   >
                     Previous
                   </Link>
                 ) : (
-                  <span className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-100 text-gray-300">
+                  <span className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600">
                     Previous
                   </span>
                 )}
                 {page < totalPages ? (
                   <Link
                     href={pageHref(q, status, page + 1)}
-                    className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:border-brand transition-colors"
+                    className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-brand transition-colors"
                   >
                     Next
                   </Link>
                 ) : (
-                  <span className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-100 text-gray-300">
+                  <span className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600">
                     Next
                   </span>
                 )}

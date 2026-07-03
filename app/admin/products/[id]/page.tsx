@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2, Wand2, Upload, X, ImageIcon, Download, FileImage, CheckCircle2, ArrowUp, FileDown } from "lucide-react";
-import { CATEGORIES, detectCategory } from "@/lib/categories";
+import { CATEGORIES, detectCategories, categorySlugFromLabel } from "@/lib/categories";
 
 function formatPrice(pence: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
@@ -44,7 +44,7 @@ export default function EditProductPage({
   const [error, setError] = useState<string | null>(null);
   const [autoFilling, setAutoFilling] = useState(false);
   const [autoFillStatus, setAutoFillStatus] = useState<string | null>(null);
-  const [category, setCategory] = useState<string>("");
+  const [categories, setCategories] = useState<string[]>([]);
   const [customImages, setCustomImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -78,7 +78,13 @@ export default function EditProductPage({
             }
             setVariantPrices(pre);
           }
-          if (match?.category) setCategory(match.category);
+          if (match?.categories?.length) {
+            setCategories(match.categories);
+          } else if (match?.category) {
+            // Legacy single-label field from before multi-category support
+            const slug = categorySlugFromLabel(match.category);
+            if (slug) setCategories([slug]);
+          }
           if (match?.images?.length) { hasImages = true; setCustomImages(match.images); }
         }
 
@@ -332,7 +338,7 @@ export default function EditProductPage({
       const res = await fetch("/api/gelato/local-products", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gelatoProductId: product.id, variantPrices: vp, category: category || undefined }),
+        body: JSON.stringify({ gelatoProductId: product.id, variantPrices: vp, categories }),
       });
       if (!res.ok) throw new Error("Failed to save");
       setSaved(true);
@@ -355,7 +361,7 @@ export default function EditProductPage({
   if (!product) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-12 text-center">
-        <p className="text-gray-500">{error ?? "Product not found."}</p>
+        <p className="text-gray-500 dark:text-gray-400">{error ?? "Product not found."}</p>
         <Link href="/admin/products" className="text-brand hover:underline mt-4 block">
           Back to products
         </Link>
@@ -373,26 +379,26 @@ export default function EditProductPage({
       <div className="flex items-center gap-3 mb-8">
         <Link
           href="/admin/products"
-          className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+          className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800"
         >
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Set Variant Prices</h1>
-          <p className="text-sm text-gray-500 truncate max-w-xs">{product.title}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Set Variant Prices</h1>
+          <p className="text-sm text-gray-500 truncate max-w-xs dark:text-gray-400">{product.title}</p>
         </div>
       </div>
 
       {/* Product preview */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 flex items-center gap-4">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 flex items-center gap-4 dark:bg-gray-900 dark:border-gray-800">
         {product.previewUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.previewUrl} alt={product.title} className="h-20 w-20 rounded-xl object-cover bg-gray-100" />
+          <img src={product.previewUrl} alt={product.title} className="h-20 w-20 rounded-xl object-cover bg-gray-100 dark:bg-gray-800" />
         )}
         <div>
-          <p className="font-semibold text-gray-900">{product.title}</p>
-          <p className="text-xs text-gray-400 font-mono mt-0.5">{product.id}</p>
-          <span className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${product.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+          <p className="font-semibold text-gray-900 dark:text-white">{product.title}</p>
+          <p className="text-xs text-gray-400 font-mono mt-0.5 dark:text-gray-500">{product.id}</p>
+          <span className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${product.status === "active" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"}`}>
             {product.status}
           </span>
           {fromPrice > 0 && (
@@ -404,11 +410,11 @@ export default function EditProductPage({
       <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* Design file for print fulfillment */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <h2 className="font-semibold text-gray-900">Design File</h2>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <h2 className="font-semibold text-gray-900 dark:text-white">Design File</h2>
+              <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">
                 Optional override. When not set, Gelato uses the design already saved in the product template — including the neck label for inner-label products.
               </p>
             </div>
@@ -417,7 +423,7 @@ export default function EditProductPage({
                 type="button"
                 onClick={handleFetchDesignFromGelato}
                 disabled={fetchingDesign || designUploading}
-                className={`flex items-center gap-1.5 text-sm font-medium border px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 ${fetchingDesign ? "border-gray-200 text-gray-400" : "border-brand text-brand hover:bg-brand-light"}`}
+                className={`flex items-center gap-1.5 text-sm font-medium border px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50 ${fetchingDesign ? "border-gray-200 text-gray-400 dark:border-gray-700 dark:text-gray-500" : "border-brand text-brand hover:bg-brand-light"}`}
               >
                 {fetchingDesign ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 {fetchingDesign ? "Fetching…" : "Fetch from Gelato"}
@@ -430,19 +436,19 @@ export default function EditProductPage({
             </div>
           </div>
           {(designUploadError || fetchDesignMsg) && (
-            <p className={`text-sm rounded-xl px-3 py-2 mt-3 border ${(designUploadError ?? fetchDesignMsg ?? "").startsWith("Error") || designUploadError ? "bg-red-50 text-red-600 border-red-200" : "bg-blue-50 text-blue-700 border-blue-200"}`}>
+            <p className={`text-sm rounded-xl px-3 py-2 mt-3 border ${(designUploadError ?? fetchDesignMsg ?? "").startsWith("Error") || designUploadError ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"}`}>
               {designUploadError ?? fetchDesignMsg}
             </p>
           )}
           {designFilename ? (
-            <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3">
+            <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-3 dark:bg-green-900/20 dark:border-green-800">
               <div className="flex items-center gap-3 mb-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 dark:text-green-400" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-green-800">Design file set</p>
-                  <p className="text-xs text-green-600 font-mono truncate">{designFilename}</p>
+                  <p className="text-sm font-medium text-green-800 dark:text-green-300">Design file set</p>
+                  <p className="text-xs text-green-600 font-mono truncate dark:text-green-400">{designFilename}</p>
                 </div>
-                <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors">
+                <button type="button" onClick={handleDesignDelete} className="text-green-500 hover:text-red-500 transition-colors dark:text-green-400">
                   <X className="h-4 w-4" />
                 </button>
               </div>
@@ -450,29 +456,29 @@ export default function EditProductPage({
                 <img
                   src={`/api/designs/${encodeURIComponent(designFilename)}`}
                   alt="Design preview"
-                  className="w-full max-h-64 object-contain rounded-lg bg-white border border-green-100"
+                  className="w-full max-h-64 object-contain rounded-lg bg-white border border-green-100 dark:bg-gray-900 dark:border-green-900"
                 />
               ) : (
-                <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-green-100 text-sm text-gray-600">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-green-100 text-sm text-gray-600 dark:bg-gray-900 dark:border-green-900 dark:text-gray-300">
                   <FileDown className="h-5 w-5 text-red-500 shrink-0" />
                   PDF design file
                 </div>
               )}
             </div>
           ) : (
-            <div className="mt-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-              <CheckCircle2 className="h-5 w-5 text-blue-500 shrink-0" />
-              <p className="text-sm text-blue-700">Using Gelato template design — main print file and neck label are provided automatically from the product template.</p>
+            <div className="mt-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 dark:bg-blue-900/20 dark:border-blue-800">
+              <CheckCircle2 className="h-5 w-5 text-blue-500 shrink-0 dark:text-blue-400" />
+              <p className="text-sm text-blue-700 dark:text-blue-300">Using Gelato template design — main print file and neck label are provided automatically from the product template.</p>
             </div>
           )}
         </div>
 
         {/* Custom images */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-semibold text-gray-900">Custom Images</h2>
-              <p className="text-sm text-gray-500 mt-0.5">Lifestyle or editorial photos — shown first in the carousel for all colours.</p>
+              <h2 className="font-semibold text-gray-900 dark:text-white">Custom Images</h2>
+              <p className="text-sm text-gray-500 mt-0.5 dark:text-gray-400">Lifestyle or editorial photos — shown first in the carousel for all colours.</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -492,10 +498,10 @@ export default function EditProductPage({
             </div>
           </div>
           {uploadError && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-4">{uploadError}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2 mb-4 dark:text-red-300 dark:bg-red-900/30 dark:border-red-800">{uploadError}</p>
           )}
           {customImages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-xl text-gray-400">
+            <div className="flex flex-col items-center justify-center py-8 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 dark:border-gray-700 dark:text-gray-500">
               <ImageIcon className="h-8 w-8 mb-2" />
               <p className="text-sm">No custom images yet</p>
             </div>
@@ -504,7 +510,7 @@ export default function EditProductPage({
               {customImages.map((url, idx) => (
                 <div key={url} className="relative group">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-24 w-full object-cover rounded-xl bg-gray-100" />
+                  <img src={url} alt="" className="h-24 w-full object-cover rounded-xl bg-gray-100 dark:bg-gray-800" />
                   {idx === 0 && (
                     <span className="absolute bottom-1 left-1 bg-brand text-white text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none">
                       First
@@ -536,27 +542,27 @@ export default function EditProductPage({
         </div>
 
         {/* Category */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="font-semibold text-gray-900">Category</h2>
+            <h2 className="font-semibold text-gray-900 dark:text-white">Categories</h2>
             <button
               type="button"
               onClick={() => {
                 const text = `${product.title} ${product.description ?? ""}`;
-                const detected = detectCategory(text);
-                if (detected) setCategory(detected);
+                const detected = detectCategories(text);
+                if (detected.length) setCategories((prev) => Array.from(new Set([...prev, ...detected])));
               }}
               className="flex items-center gap-1.5 text-xs font-medium text-brand border border-brand px-2.5 py-1 rounded-lg hover:bg-brand-light transition-colors"
             >
               <Wand2 className="h-3 w-3" /> Auto-assign
             </button>
           </div>
-          <p className="text-sm text-gray-500 mb-4">Used for storefront filtering and the homepage category grid.</p>
+          <p className="text-sm text-gray-500 mb-4 dark:text-gray-400">Pick as many as apply — used for storefront filtering and the homepage category grid.</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setCategory("")}
-              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${!category ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand"}`}
+              onClick={() => setCategories([])}
+              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${categories.length === 0 ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"}`}
             >
               None
             </button>
@@ -564,8 +570,12 @@ export default function EditProductPage({
               <button
                 key={cat.slug}
                 type="button"
-                onClick={() => setCategory(cat.label)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${category === cat.label ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand"}`}
+                onClick={() =>
+                  setCategories((prev) =>
+                    prev.includes(cat.slug) ? prev.filter((s) => s !== cat.slug) : [...prev, cat.slug]
+                  )
+                }
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${categories.includes(cat.slug) ? "bg-brand text-white border-brand" : "bg-white border-gray-200 text-gray-600 hover:border-brand dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"}`}
               >
                 {cat.emoji} {cat.label}
               </button>
@@ -573,11 +583,11 @@ export default function EditProductPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 dark:bg-gray-900 dark:border-gray-800">
           <div className="flex items-start justify-between mb-1">
             <div>
-              <h2 className="font-semibold text-gray-900">Variant Prices</h2>
-              <p className="text-sm text-gray-500 mt-1 mb-5">
+              <h2 className="font-semibold text-gray-900 dark:text-white">Variant Prices</h2>
+              <p className="text-sm text-gray-500 mt-1 mb-5 dark:text-gray-400">
                 Set a price (£) for each variant. The lowest price shows as "From £X" in the store.
               </p>
             </div>
@@ -595,7 +605,7 @@ export default function EditProductPage({
             </button>
           </div>
           {autoFillStatus && (
-            <p className={`text-xs mb-4 px-3 py-2 rounded-lg ${autoFillStatus.startsWith("✓") ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
+            <p className={`text-xs mb-4 px-3 py-2 rounded-lg ${autoFillStatus.startsWith("✓") ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300" : "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"}`}>
               {autoFillStatus}
             </p>
           )}
@@ -603,11 +613,11 @@ export default function EditProductPage({
             {product.variants.map((v) => (
               <div key={v.id} className="flex items-center gap-4">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">{v.title}</p>
-                  <p className="text-xs text-gray-400 font-mono truncate">{v.productUid}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{v.title}</p>
+                  <p className="text-xs text-gray-400 font-mono truncate dark:text-gray-500">{v.productUid}</p>
                 </div>
                 <div className="relative w-32">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">£</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm dark:text-gray-400">£</span>
                   <input
                     type="number"
                     min="0"
@@ -615,7 +625,7 @@ export default function EditProductPage({
                     placeholder="0.00"
                     value={variantPrices[v.id] ?? ""}
                     onChange={(e) => handlePriceChange(v.id, e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                    className="w-full pl-7 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                   />
                 </div>
               </div>
@@ -624,7 +634,7 @@ export default function EditProductPage({
         </div>
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3 dark:text-red-300 dark:bg-red-900/30 dark:border-red-800">{error}</p>
         )}
 
         <div className="flex gap-3">
@@ -643,7 +653,7 @@ export default function EditProductPage({
           </button>
           <Link
             href="/admin/products"
-            className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center"
+            className="px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
           >
             Cancel
           </Link>

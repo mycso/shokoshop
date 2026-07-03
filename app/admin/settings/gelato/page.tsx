@@ -64,42 +64,42 @@ export default function GelatoSettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Gelato Settings</h1>
-      <p className="text-gray-500 text-sm mb-8">
+      <h1 className="text-2xl font-bold text-gray-900 mb-2 dark:text-white">Gelato Settings</h1>
+      <p className="text-gray-500 text-sm mb-8 dark:text-gray-400">
   Configure your Gelato API integration for production & fulfilment.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5 dark:bg-gray-900 dark:border-gray-800">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Gelato API Key
             </label>
             <input
               type="password"
               value={form.apiKey}
               onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="gel_live_xxxxxxxxxxxx"
             />
-            <p className="text-xs text-gray-400 mt-1.5">
+            <p className="text-xs text-gray-400 mt-1.5 dark:text-gray-500">
               Find your API key in the Gelato dashboard under API Access.
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Store ID
             </label>
             <input
               type="text"
               value={form.storeId}
               onChange={(e) => setForm({ ...form, storeId: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="your-store-id"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Webhook Secret
             </label>
             <input
@@ -108,46 +108,46 @@ export default function GelatoSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, webhookSecret: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="whsec_xxxxxxxxxxxx"
             />
-            <p className="text-xs text-gray-400 mt-1.5">
-              Webhook endpoint: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">/api/gelato/webhook</code>
+            <p className="text-xs text-gray-400 mt-1.5 dark:text-gray-500">
+              Webhook endpoint: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs dark:bg-gray-800 dark:text-gray-300">/api/gelato/webhook</code>
             </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Gelato Catalog URL
             </label>
             <input
               type="text"
               value={form.catalogUrl}
               onChange={(e) => setForm({ ...form, catalogUrl: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               placeholder="https://catalog.gelatoapis.com/v1/your-account/products"
             />
-            <p className="text-xs text-gray-400 mt-1.5">
+            <p className="text-xs text-gray-400 mt-1.5 dark:text-gray-500">
               Optional: paste your account-specific Gelato catalog URL here so the site can fetch your exact products.
             </p>
           </div>
-          <div className="mt-4 border-t pt-4">
-            <h3 className="text-sm font-semibold mb-2">Quick add product (manual)</h3>
+          <div className="mt-4 border-t pt-4 dark:border-gray-800">
+            <h3 className="text-sm font-semibold mb-2 dark:text-white">Quick add product (manual)</h3>
             <form onSubmit={handleAddManual} className="space-y-3">
               <div>
-                <input value={manual.gelatoProductId} onChange={(e) => setManual({ ...manual, gelatoProductId: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm" placeholder="Product UID (e.g. apparel_product_...)" />
+                <input value={manual.gelatoProductId} onChange={(e) => setManual({ ...manual, gelatoProductId: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Product UID (e.g. apparel_product_...)" />
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input value={manual.name} onChange={(e) => setManual({ ...manual, name: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm" placeholder="Name (optional)" />
-                <input value={manual.image} onChange={(e) => setManual({ ...manual, image: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm" placeholder="Image URL (optional)" />
+                <input value={manual.name} onChange={(e) => setManual({ ...manual, name: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Name (optional)" />
+                <input value={manual.image} onChange={(e) => setManual({ ...manual, image: e.target.value })} className="w-full border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Image URL (optional)" />
               </div>
               <div className="flex items-center gap-2">
-                <input value={manual.price} onChange={(e) => setManual({ ...manual, price: e.target.value })} className="w-32 border rounded-xl px-3 py-2 text-sm" placeholder="Price (cents)" />
+                <input value={manual.price} onChange={(e) => setManual({ ...manual, price: e.target.value })} className="w-32 border rounded-xl px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white" placeholder="Price (cents)" />
                 <button type="submit" className="bg-brand text-white px-4 py-2 rounded-xl text-sm">Add to local products</button>
               </div>
             </form>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 dark:text-gray-200">
               Default Shipment Method
             </label>
             <select
@@ -155,7 +155,7 @@ export default function GelatoSettingsPage() {
               onChange={(e) =>
                 setForm({ ...form, defaultShipmentMethod: e.target.value })
               }
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-light dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             >
               <option value="standard">Standard</option>
               <option value="express">Express</option>

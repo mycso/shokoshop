@@ -1,4 +1,5 @@
 import { get, put } from "@vercel/blob";
+import { categorySlugFromLabel } from "@/lib/categories";
 
 const OVERRIDES_PATH = "gelato-data/overrides.json";
 
@@ -15,6 +16,8 @@ export interface LocalProductOverride {
   price?: number;
   variantPrices?: Record<string, number>;
   images?: string[];
+  categories?: string[];
+  /** @deprecated legacy single-label field from before multi-category support; read-only migration path */
   category?: string;
   inStock?: boolean;
   variants?: unknown[];
@@ -59,7 +62,7 @@ export async function setOverride(entry: LocalProductOverride): Promise<void> {
  * variantPrices/images win over the Gelato-derived values; an override with
  * no matching product is appended as a standalone manual entry.
  */
-export function mergeOverrides<T extends { gelatoProductId?: string; variantPrices?: Record<string, number>; price?: number; images?: string[]; category?: string }>(
+export function mergeOverrides<T extends { gelatoProductId?: string; variantPrices?: Record<string, number>; price?: number; images?: string[]; categories?: string[] }>(
   products: T[],
   overrides: LocalProductOverride[]
 ): T[] {
@@ -79,8 +82,10 @@ export function mergeOverrides<T extends { gelatoProductId?: string; variantPric
       ? [...adminImages, ...gelatoExtras].filter(Boolean) as string[]
       : gelatoImages;
 
-    const category = o.category ?? p.category;
-    return { ...p, variantPrices, price, images, ...(category ? { category } : {}) };
+    // Legacy overrides only ever stored a single label (e.g. "Films") — map it to its slug once.
+    const legacyCategories = o.category ? [categorySlugFromLabel(o.category)].filter((s): s is string => !!s) : undefined;
+    const categories = o.categories ?? legacyCategories ?? p.categories;
+    return { ...p, variantPrices, price, images, ...(categories ? { categories } : {}) };
   });
 
   for (const o of overrides) {
