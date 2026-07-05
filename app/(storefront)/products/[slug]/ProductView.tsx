@@ -105,7 +105,7 @@ function ImageModal({
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+        className="absolute top-4 right-4 z-10 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
         aria-label="Close"
       >
         <X className="h-6 w-6" />
@@ -114,14 +114,14 @@ function ImageModal({
         <>
           <button
             onClick={(e) => { e.stopPropagation(); onPrev(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
             aria-label="Previous"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onNext(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors"
             aria-label="Next"
           >
             <ChevronRight className="h-6 w-6" />
