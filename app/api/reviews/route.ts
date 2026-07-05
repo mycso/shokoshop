@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getReviews, addReview, deleteReview } from "@/lib/reviews";
+import { getCurrentUser } from "@/lib/auth/dal";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -12,6 +13,10 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "You must be logged in to write a review" }, { status: 401 });
+    }
     const { productId, name, rating, text } = await request.json();
     if (!productId || !name || !rating || !text) {
       return NextResponse.json({ error: "productId, name, rating and text are required" }, { status: 400 });

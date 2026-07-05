@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect, useRef } from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Check, ChevronLeft, ChevronRight, Star, X } from "lucide-react";
+import { ShoppingCart, Check, ChevronLeft, ChevronRight, Star, X, Lock } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
 import { Product, ProductVariantOption } from "@/types";
@@ -280,6 +281,7 @@ function ReviewsSection({ productId }: { productId: string }) {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", rating: 0, text: "" });
   const [formError, setFormError] = useState<string | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     fetch(`/api/reviews?productId=${encodeURIComponent(productId)}`)
@@ -287,6 +289,9 @@ function ReviewsSection({ productId }: { productId: string }) {
       .then((data) => setReviews(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setLoading(false));
+    fetch("/api/auth/me")
+      .then((r) => setLoggedIn(r.ok))
+      .catch(() => setLoggedIn(false));
   }, [productId]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -331,12 +336,22 @@ function ReviewsSection({ productId }: { productId: string }) {
           )}
         </div>
         {!showForm && !submitted && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
-          >
-            Write a review
-          </button>
+          loggedIn ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
+            >
+              Write a review
+            </button>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="flex items-center gap-1.5 text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
+            >
+              <Lock className="h-3.5 w-3.5" />
+              Log in to write a review
+            </Link>
+          )
         )}
       </div>
 

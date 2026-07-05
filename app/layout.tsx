@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { CartProvider } from "@/lib/cart-context";
-import { CurrencyProvider } from "@/lib/currency-context";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "ShokoShop – T-Shirts & Wall Art",
@@ -19,13 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-gray-50 dark:bg-gray-950">
-        <CartProvider>
-          <CurrencyProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </CurrencyProvider>
-        </CartProvider>
+        {children}
       </body>
     </html>
   );

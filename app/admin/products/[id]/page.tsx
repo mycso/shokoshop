@@ -57,6 +57,20 @@ export default function EditProductPage({
 
   useEffect(() => {
     async function load() {
+      // Reset state left over from whichever product was previously loaded in this
+      // component instance — navigating between /admin/products/[id] pages client-side
+      // reuses the same mounted component, so stale values would otherwise persist
+      // until (or unless) the new product happens to have its own values to overwrite them.
+      setProduct(null);
+      setVariantPrices({});
+      setCategories([]);
+      setCustomImages([]);
+      setDesignFilename(null);
+      setAutoFillStatus(null);
+      setUploadError(null);
+      setDesignUploadError(null);
+      setFetchDesignMsg(null);
+      setLoadingProduct(true);
       try {
         const res = await fetch(`/api/gelato/store-products/${id}`);
         if (!res.ok) throw new Error(`API returned ${res.status}`);
