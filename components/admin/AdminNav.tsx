@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { Bebas_Neue } from "next/font/google";
 import {
   LayoutDashboard,
   Package,
@@ -15,6 +16,8 @@ import {
   LogOut,
   ChevronDown,
 } from "lucide-react";
+
+const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
 const LINKS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -52,8 +55,15 @@ export default function AdminNav() {
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          <Link href="/admin" className="font-bold text-gray-900 dark:text-white shrink-0">
-            ShokoShop <span className="text-brand">Admin</span>
+          <Link href="/admin" className="flex items-center gap-2 shrink-0">
+            <img
+              src="/shokoshoplogo.svg"
+              alt="ShokoShop logo"
+              className="h-8 w-8 object-contain dark:invert"
+            />
+            <span className={`${bebas.className} text-xl font-bold text-gray-900 dark:text-white`}>
+              ShokoShop <span className="text-brand">Admin</span>
+            </span>
           </Link>
 
           {/* Desktop nav */}
