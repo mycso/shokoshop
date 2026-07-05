@@ -51,6 +51,35 @@ function ImageModal({
   onNext: () => void;
   hasMultiple: boolean;
 }) {
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
+  const SWIPE_THRESHOLD = 40;
+
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    if (touchStartX.current == null || touchStartY.current == null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy)) isSwiping.current = true;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (isSwiping.current && hasMultiple && Math.abs(dx) > SWIPE_THRESHOLD) {
+      if (dx < 0) onNext();
+      else onPrev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -68,7 +97,11 @@ function ImageModal({
   return (
     <div
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+      style={{ touchAction: "pan-y" }}
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       <button
         onClick={onClose}
@@ -127,6 +160,9 @@ function Gallery({
   const [modalOpen, setModalOpen] = useState(false);
   const [lens, setLens] = useState<{ x: number; y: number } | null>(null);
   const imgRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
 
   function prev() { onSelect(activeIndex === 0 ? images.length - 1 : activeIndex - 1); }
   function next() { onSelect(activeIndex === images.length - 1 ? 0 : activeIndex + 1); }
@@ -137,6 +173,36 @@ function Gallery({
       x: ((e.clientX - rect.left) / rect.width) * 100,
       y: ((e.clientY - rect.top) / rect.height) * 100,
     });
+  }
+
+  const SWIPE_THRESHOLD = 40;
+
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    if (touchStartX.current == null || touchStartY.current == null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(dx) > Math.abs(dy)) isSwiping.current = true;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent<HTMLDivElement>) {
+    if (touchStartX.current == null || images.length <= 1) {
+      touchStartX.current = null;
+      touchStartY.current = null;
+      return;
+    }
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (isSwiping.current && Math.abs(dx) > SWIPE_THRESHOLD) {
+      if (dx < 0) next();
+      else prev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
   }
 
   return (
@@ -157,9 +223,13 @@ function Gallery({
         <div
           ref={imgRef}
           className="relative h-96 lg:h-[570px] rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-800 group cursor-zoom-in"
+          style={{ touchAction: "pan-y" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setLens(null)}
           onClick={() => setModalOpen(true)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <Image
             key={images[activeIndex]}
