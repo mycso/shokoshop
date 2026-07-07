@@ -6,7 +6,7 @@ import { StarRating } from "@/components/ui/StarRating";
 import { getGelatoProducts } from "@/lib/gelato-data";
 import { getReviewsSummary } from "@/lib/reviews";
 import { colorHex, isLightColor } from "@/lib/colors";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, detectCategories } from "@/lib/categories";
 
 async function getProducts() {
   const apiKey = process.env.GELATO_API_KEY!;
@@ -90,7 +90,8 @@ async function getProducts() {
       price,
       variantPrices,
       images,
-      categories: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.categories ?? [],
+      categories: localProducts.find((l: any) => l.gelatoProductId === p.id || l.slug === slug)?.categories
+        ?? detectCategories(`${name} ${(p.description ?? "").replace(/<[^>]+>/g, "")}`),
       inStock: p.status !== "inactive" && p.status !== "deleted",
       variants: (p.variants ?? []).map((v: any) => ({
         id: v.id,
