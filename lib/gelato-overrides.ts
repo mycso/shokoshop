@@ -1,4 +1,4 @@
-import { get, put, head, BlobPreconditionFailedError } from "@vercel/blob";
+import { get, put, head, BlobNotFoundError, BlobPreconditionFailedError } from "@vercel/blob";
 import { categorySlugFromLabel } from "@/lib/categories";
 
 const OVERRIDES_PATH = "gelato-data/overrides.json";
@@ -47,18 +47,25 @@ async function readOverrides(): Promise<{ overrides: LocalProductOverride[]; eta
   // etag (W/"..."), but put()'s ifMatch does a strong comparison and a weak
   // etag never satisfies it — every conditional write would fail even with
   // zero contention. head() returns the strong form.
+  //
+  // Neither call is wrapped in a catch-all here: get() already resolves to
+  // null (not a thrown error) when the blob genuinely doesn't exist yet, and
+  // head() throws BlobNotFoundError for that same case — both are handled
+  // explicitly below. Any other error (e.g. an access/auth failure) must
+  // propagate instead of being swallowed into "no overrides exist", which
+  // previously made every saved category/design file silently vanish from
+  // the admin UI whenever a transient read failure happened to hit.
   const [result, headResult] = await Promise.all([
-    get(OVERRIDES_PATH, { access: "private", useCache: false }).catch(() => null),
-    head(OVERRIDES_PATH).catch(() => null),
+    get(OVERRIDES_PATH, { access: "private", useCache: false }),
+    head(OVERRIDES_PATH).catch((err) => {
+      if (err instanceof BlobNotFoundError) return null;
+      throw err;
+    }),
   ]);
   if (!result?.stream) return { overrides: [] };
-  try {
-    const text = await new Response(result.stream).text();
-    const parsed = JSON.parse(text || "[]");
-    return { overrides: Array.isArray(parsed) ? parsed : [], etag: headResult?.etag };
-  } catch {
-    return { overrides: [], etag: headResult?.etag };
-  }
+  const text = await new Response(result.stream).text();
+  const parsed = JSON.parse(text || "[]");
+  return { overrides: Array.isArray(parsed) ? parsed : [], etag: headResult?.etag };
 }
 
 // Alongside `BlobPreconditionFailedError` (our own ifMatch failing), the

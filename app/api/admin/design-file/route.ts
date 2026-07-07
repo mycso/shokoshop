@@ -5,9 +5,13 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const productId = searchParams.get("productId");
   if (!productId) return Response.json({ error: "productId required" }, { status: 400 });
-  const overrides = await getOverrides();
-  const match = overrides.find((o) => o.gelatoProductId === productId);
-  return Response.json({ designFilename: match?.designFilename ?? null });
+  try {
+    const overrides = await getOverrides();
+    const match = overrides.find((o) => o.gelatoProductId === productId);
+    return Response.json({ designFilename: match?.designFilename ?? null });
+  } catch (err) {
+    return Response.json({ error: err instanceof Error ? err.message : "Failed to load design file" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -28,29 +32,37 @@ export async function POST(request: Request) {
   const filename = `${productId}-${Date.now()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  const overrides = await getOverrides();
-  const previousFilename = overrides.find((o) => o.gelatoProductId === productId)?.designFilename;
+  try {
+    const overrides = await getOverrides();
+    const previousFilename = overrides.find((o) => o.gelatoProductId === productId)?.designFilename;
 
-  await put(`product-designs/${filename}`, buffer, {
-    access: "private",
-    contentType: file.type,
-    allowOverwrite: true,
-  });
-
-  await setOverride({ gelatoProductId: productId, designFilename: filename });
-
-  if (previousFilename && previousFilename !== filename) {
-    await del(`product-designs/${previousFilename}`).catch(() => {
-      // Best-effort cleanup — a leftover orphaned blob isn't harmful.
+    await put(`product-designs/${filename}`, buffer, {
+      access: "private",
+      contentType: file.type,
+      allowOverwrite: true,
     });
-  }
 
-  return Response.json({ ok: true, designFilename: filename });
+    await setOverride({ gelatoProductId: productId, designFilename: filename });
+
+    if (previousFilename && previousFilename !== filename) {
+      await del(`product-designs/${previousFilename}`).catch(() => {
+        // Best-effort cleanup — a leftover orphaned blob isn't harmful.
+      });
+    }
+
+    return Response.json({ ok: true, designFilename: filename });
+  } catch (err) {
+    return Response.json({ error: err instanceof Error ? err.message : "Upload failed" }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request) {
   const { productId } = await request.json();
   if (!productId) return Response.json({ error: "productId required" }, { status: 400 });
-  await setOverride({ gelatoProductId: productId, designFilename: undefined });
-  return Response.json({ ok: true });
+  try {
+    await setOverride({ gelatoProductId: productId, designFilename: undefined });
+    return Response.json({ ok: true });
+  } catch (err) {
+    return Response.json({ error: err instanceof Error ? err.message : "Delete failed" }, { status: 500 });
+  }
 }

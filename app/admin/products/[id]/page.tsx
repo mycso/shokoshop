@@ -54,6 +54,7 @@ export default function EditProductPage({
   const [designUploadError, setDesignUploadError] = useState<string | null>(null);
   const [fetchingDesign, setFetchingDesign] = useState(false);
   const [fetchDesignMsg, setFetchDesignMsg] = useState<string | null>(null);
+  const [loadWarning, setLoadWarning] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -70,6 +71,7 @@ export default function EditProductPage({
       setUploadError(null);
       setDesignUploadError(null);
       setFetchDesignMsg(null);
+      setLoadWarning(null);
       setLoadingProduct(true);
       try {
         const res = await fetch(`/api/gelato/store-products/${id}`);
@@ -77,11 +79,18 @@ export default function EditProductPage({
         const data = await res.json();
         setProduct(data);
 
-        // Pre-fill existing prices and custom images from local store
+        // Pre-fill existing prices and custom images from local store.
+        // A failed fetch here is NOT the same as "nothing saved yet" — if we
+        // can't confirm what's actually stored, we must not silently show an
+        // empty state (looks like data vanished) or run the auto-fill/import
+        // fallbacks below (which would overwrite real saved data with fresh
+        // Gelato defaults, thinking none existed).
         let hasPrices = false;
         let hasImages = false;
+        let localDataConfirmed = false;
         const localRes = await fetch("/api/gelato/local-products");
         if (localRes.ok) {
+          localDataConfirmed = true;
           const localList: any[] = await localRes.json();
           const match = localList.find((l: any) => l.gelatoProductId === id);
           if (match?.variantPrices && Object.keys(match.variantPrices).length > 0) {
@@ -100,6 +109,8 @@ export default function EditProductPage({
             if (slug) setCategories([slug]);
           }
           if (match?.images?.length) { hasImages = true; setCustomImages(match.images); }
+        } else {
+          setLoadWarning("Couldn't confirm saved categories, prices, or images for this product — try refreshing before making changes.");
         }
 
         // designFilename lives in overrides, not local-products — fetch separately
@@ -107,10 +118,13 @@ export default function EditProductPage({
         if (dfRes.ok) {
           const dfData = await dfRes.json();
           if (dfData.designFilename) setDesignFilename(dfData.designFilename);
+        } else {
+          setLoadWarning((prev) => prev ?? "Couldn't confirm the saved design file for this product — try refreshing before making changes.");
         }
 
-        // Auto-fill prices from Gelato when none are saved yet
-        if (!hasPrices && data.variants?.length) {
+        // Auto-fill prices from Gelato when none are saved yet — only once we've
+        // actually confirmed there are none, not when the check itself failed.
+        if (localDataConfirmed && !hasPrices && data.variants?.length) {
           try {
             const priceRes = await fetch("/api/gelato/variant-prices", {
               method: "POST",
@@ -142,8 +156,9 @@ export default function EditProductPage({
           } catch { /* non-fatal — admin can fill manually */ }
         }
 
-        // Auto-import Gelato mockup images when none are saved yet
-        if (!hasImages) {
+        // Auto-import Gelato mockup images when none are saved yet — same
+        // caveat: only when we've confirmed there are none.
+        if (localDataConfirmed && !hasImages) {
           try {
             const imgRes = await fetch("/api/admin/product-images", {
               method: "PUT",
@@ -402,6 +417,12 @@ export default function EditProductPage({
           <p className="text-sm text-gray-500 truncate max-w-xs dark:text-gray-400">{product.title}</p>
         </div>
       </div>
+
+      {loadWarning && (
+        <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 dark:text-amber-300 dark:bg-amber-900/30 dark:border-amber-800">
+          ⚠️ {loadWarning}
+        </p>
+      )}
 
       {/* Product preview */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 flex items-center gap-4 dark:bg-gray-900 dark:border-gray-800">
