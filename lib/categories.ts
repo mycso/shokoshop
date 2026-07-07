@@ -66,24 +66,16 @@ const KEYWORDS: Record<CategorySlug, string[]> = {
  * "films" and "art"), so callers decide how many of these to keep.
  */
 export function detectCategories(text: string): string[] {
+  const lower = text.toLowerCase();
   const scored: { slug: CategorySlug; score: number }[] = [];
 
   for (const cat of CATEGORIES) {
     const score = KEYWORDS[cat.slug].reduce(
-      (acc, kw) => acc + (matchesKeyword(text, kw) ? 1 : 0),
+      (acc, kw) => acc + (lower.includes(kw) ? 1 : 0),
       0
     );
     if (score > 0) scored.push({ slug: cat.slug, score });
   }
 
   return scored.sort((a, b) => b.score - a.score).map((s) => s.slug);
-}
-
-// Whole-word match so short keywords (e.g. "art", "dj", "rap", "toy") don't
-// fire on unrelated words that merely contain them as a substring — "art"
-// inside "smart"/"start"/"cart", "dj" inside "adjustable", "rap" inside
-// "wrap"/"strap", "toy" inside "destroy".
-function matchesKeyword(text: string, keyword: string): boolean {
-  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`\\b${escaped}\\b`, "i").test(text);
 }
