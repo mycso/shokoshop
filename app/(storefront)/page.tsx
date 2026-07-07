@@ -10,6 +10,8 @@ import { getAllOrders } from "@/lib/orders";
 import { colorHex, isLightColor } from "@/lib/colors";
 import { CATEGORIES } from "@/lib/categories";
 
+export const dynamic = "force-dynamic";
+
 const archivo = Archivo_Black({ weight: ["400"], subsets: ["latin"] });
 
 const BANNER_IMAGES = [
