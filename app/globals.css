@@ -36,6 +36,9 @@
 .ring-brand-light { --tw-ring-color: var(--brand-light); }
 .hover\:bg-accent:hover { background-color: var(--accent); }
 
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
