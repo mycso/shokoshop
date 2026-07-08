@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingBag,
   Users,
+  UserCog,
   PackageX,
   Settings,
   Menu,
@@ -24,6 +25,7 @@ const LINKS = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/users", label: "Users", icon: UserCog },
   { href: "/admin/returns", label: "Returns", icon: PackageX },
 ];
 
