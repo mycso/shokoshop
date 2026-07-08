@@ -69,12 +69,12 @@ export default function AdminNav() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1 overflow-x-auto flex-1 min-w-0">
             {LINKS.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors shrink-0 ${
                   isActive(pathname, href)
                     ? "bg-brand-light text-brand"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
@@ -84,13 +84,13 @@ export default function AdminNav() {
                 {label}
               </Link>
             ))}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 onClick={() => setSettingsOpen((o) => !o)}
                 onBlur={(e) => {
                   if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) setSettingsOpen(false);
                 }}
-                className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors shrink-0 ${
                   settingsActive
                     ? "bg-brand-light text-brand"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
@@ -117,7 +117,7 @@ export default function AdminNav() {
             </div>
             <button
               onClick={handleSignOut}
-              className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-red-900/30"
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-red-900/30 shrink-0"
             >
               <LogOut className="h-4 w-4" />
               Sign Out
