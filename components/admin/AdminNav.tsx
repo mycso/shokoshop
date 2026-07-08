@@ -69,7 +69,7 @@ export default function AdminNav() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1 overflow-x-auto flex-1 min-w-0 no-scrollbar">
+          <nav className="hidden md:flex items-center gap-1 overflow-x-auto flex-1 min-w-0 justify-start lg:justify-end no-scrollbar">
             {LINKS.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
