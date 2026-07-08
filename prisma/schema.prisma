@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["public", "private"]
+  schemas  = ["private"]
 }
 
 model User {
@@ -23,7 +23,7 @@ model User {
   backupCodes         BackupCode[]
   passwordResetTokens PasswordResetToken[]
 
-  @@schema("public")
+  @@schema("private")
 }
 
 model BackupCode {
@@ -36,7 +36,7 @@ model BackupCode {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@schema("public")
+  @@schema("private")
 }
 
 model PasswordResetToken {
@@ -50,7 +50,7 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@schema("public")
+  @@schema("private")
 }
 
 model RateLimitHit {
