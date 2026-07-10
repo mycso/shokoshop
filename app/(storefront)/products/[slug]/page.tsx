@@ -3,6 +3,10 @@ import Link from "next/link";
 import ProductView from "./ProductView";
 import { getGelatoProducts } from "@/lib/gelato-data";
 import { getOverrides } from "@/lib/gelato-overrides";
+import { getReviewsSummary } from "@/lib/reviews";
+import { jsonLd } from "@/lib/json-ld";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://shokoshop.com";
 
 const GELATO_API_KEY = process.env.GELATO_API_KEY;
 const GELATO_STORE_ID = process.env.GELATO_STORE_ID;
@@ -223,9 +227,32 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = await fetchGelatoProduct(slug);
   if (!product) return {};
+
+  const plainDescription = (product.description ?? "").replace(/<[^>]+>/g, "").trim();
+  const priceStr = product.price > 0 ? `From £${(product.price / 100).toFixed(2)}. ` : "";
+  const description = plainDescription
+    ? `${priceStr}${plainDescription}`.slice(0, 160)
+    : `${priceStr}Custom ${product.name} — premium quality, fast UK delivery. Shop now at ShokoShop.`.slice(0, 160);
+
+  const url = `/products/${slug}`;
+
   return {
-    title: `${product.name} – ShokoShop`,
-    description: (product.description ?? "").replace(/<[^>]+>/g, "").slice(0, 160),
+    title: product.name,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title: product.name,
+      description,
+      images: product.images.slice(0, 4).map((src) => ({ url: src, alt: product.name })),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: product.images.slice(0, 1),
+    },
   };
 }
 
@@ -241,8 +268,67 @@ export default async function ProductDetailPage({
   // Strip HTML from description for plain-text display (used in metadata only now)
   void product.description; // consumed by ProductView
 
+  const reviewSummary = (await getReviewsSummary([product.id]))[product.id];
+  const plainDescription = (product.description ?? "").replace(/<[^>]+>/g, "").trim();
+  const productUrl = `${BASE_URL}/products/${slug}`;
+
+  // Product + Offer structured data drives Google's price/availability rich
+  // results and lets AI shopping assistants quote an accurate price and
+  // in-stock status when recommending this item — both directly tied to
+  // click-through and conversion, not just visibility.
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: plainDescription || product.name,
+    image: product.images,
+    sku: product.gelatoProductId,
+    url: productUrl,
+    brand: { "@type": "Brand", name: "ShokoShop" },
+    ...(reviewSummary && reviewSummary.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: Number(reviewSummary.avg.toFixed(1)),
+            reviewCount: reviewSummary.count,
+          },
+        }
+      : {}),
+    offers:
+      product.price > 0
+        ? {
+            "@type": "Offer",
+            url: productUrl,
+            priceCurrency: "GBP",
+            price: (product.price / 100).toFixed(2),
+            availability: product.inStock
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
+          }
+        : undefined,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "Products", item: `${BASE_URL}/products` },
+      { "@type": "ListItem", position: 3, name: product.name, item: productUrl },
+    ],
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(breadcrumbJsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 dark:text-gray-400 mb-8 flex items-center gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
         <Link href="/" className="hover:text-gray-700 dark:hover:text-white shrink-0">Home</Link>

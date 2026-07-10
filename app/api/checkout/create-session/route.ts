@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { Cart, ShippingAddress } from "@/types";
 import { createOrder, generateOrderId } from "@/lib/orders";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
+import { SHIPPING_COUNTRIES } from "@/lib/countries";
 import { sendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 import { sendAdminOrderNotificationEmail } from "@/lib/email/send-admin-order-notification";
 
@@ -14,6 +15,7 @@ export async function POST(request: Request) {
       shippingAddress,
       currency = "GBP",
       rate = 1,
+      shipping,
     }: {
       cart: Cart;
       currency?: string;
@@ -29,11 +31,24 @@ export async function POST(request: Request) {
         postalCode: string;
         country: string;
       };
+      // Shipping quote fetched by the checkout page from
+      // /api/checkout/shipping-quote — reused here rather than re-queried so
+      // the price charged matches what the customer saw. Falls back to the
+      // static rate table when absent/malformed, same as the quote endpoint
+      // itself does when Gelato can't be reached.
+      shipping?: { shipmentMethodUid?: string; pricePence?: number; label?: string };
     } = await request.json();
 
     if (!cart?.items?.length) {
       return Response.json({ error: "Cart is empty" }, { status: 400 });
     }
+
+    const shippingPence =
+      typeof shipping?.pricePence === "number" && shipping.pricePence >= 0
+        ? shipping.pricePence
+        : shippingCostPence(shippingAddress.country);
+    const shippingDisplayName = shipping?.label || shippingLabel(shippingAddress.country);
+    const shipmentMethodUid = shipping?.shipmentMethodUid || "standard";
 
     const orderId = generateOrderId();
     const customerName = `${shippingAddress.firstName} ${shippingAddress.lastName}`;
@@ -90,14 +105,14 @@ export async function POST(request: Request) {
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: {
-              amount: Math.round(shippingCostPence(shippingAddress.country) * rate),
+              amount: Math.round(shippingPence * rate),
               currency: currency.toLowerCase(),
             },
-            display_name: shippingLabel(shippingAddress.country),
+            display_name: shippingDisplayName,
           },
         }],
         shipping_address_collection: {
-          allowed_countries: ["GB", "US", "CA", "AU", "AE", "DE", "FR", "ES", "IT", "NL"],
+          allowed_countries: [...SHIPPING_COUNTRIES],
         },
         success_url: `${baseUrl}/checkout/success?orderId=${orderId}`,
         cancel_url: `${baseUrl}/checkout`,
@@ -112,6 +127,7 @@ export async function POST(request: Request) {
         total: cart.total,
         status: "pending",
         shippingAddress: address,
+        shipmentMethodUid,
         stripeSessionId: session.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -129,6 +145,7 @@ export async function POST(request: Request) {
       total: cart.total,
       status: "paid",
       shippingAddress: address,
+      shipmentMethodUid,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });

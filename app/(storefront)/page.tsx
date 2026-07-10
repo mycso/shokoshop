@@ -9,6 +9,9 @@ import { getReviewsSummary } from "@/lib/reviews";
 import { getAllOrders } from "@/lib/orders";
 import { colorHex, isLightColor } from "@/lib/colors";
 import { CATEGORIES } from "@/lib/categories";
+import { jsonLd } from "@/lib/json-ld";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://shokoshop.com";
 
 export const dynamic = "force-dynamic";
 
@@ -149,8 +152,24 @@ export default async function HomePage() {
   const featured = await getPopularProducts(20);
   const reviewSummary = await getReviewsSummary(featured.map((p) => p.id));
 
+  const bestsellersJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Bestsellers",
+    itemListElement: featured.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${BASE_URL}/products/${p.slug}`,
+      name: p.name,
+    })),
+  };
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(bestsellersJsonLd) }}
+      />
       {/* Hero */}
       <section className="relative bg-accent text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">

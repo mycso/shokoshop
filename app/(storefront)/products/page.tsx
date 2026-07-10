@@ -6,7 +6,10 @@ import { StarRating } from "@/components/ui/StarRating";
 import { getGelatoProducts } from "@/lib/gelato-data";
 import { getReviewsSummary } from "@/lib/reviews";
 import { colorHex, isLightColor } from "@/lib/colors";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, categoryLabel } from "@/lib/categories";
+import { jsonLd } from "@/lib/json-ld";
+
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://shokoshop.com";
 
 async function getProducts() {
   const apiKey = process.env.GELATO_API_KEY!;
@@ -105,10 +108,47 @@ async function getProducts() {
   });
 }
 
-export const metadata = {
-  title: "Products – ShokoShop",
-  description: "Browse our collection of custom printed products.",
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; q?: string }>;
+}) {
+  const { category, q } = await searchParams;
+
+  // Category pages act as themed landing pages (e.g. "Music" merch) — give
+  // each one its own targeted title/description so it can rank and convert
+  // on its own, rather than every filter sharing one generic listing page.
+  if (category) {
+    const label = categoryLabel(category);
+    const title = `${label} T-Shirts, Hoodies & Wall Art`;
+    const description = `Shop custom ${label.toLowerCase()}-inspired T-shirts, hoodies and wall art. Exclusive designs, premium print quality, fast UK delivery.`;
+    const url = `/products?category=${category}`;
+    return {
+      title,
+      description,
+      alternates: { canonical: url },
+      openGraph: { title, description, url },
+    };
+  }
+
+  // Search-result pages are thin, near-duplicate content — keep them out of
+  // the index, but leave crawling open so the links they contain still get
+  // followed.
+  if (q) {
+    return {
+      title: `Search results for "${q}"`,
+      description: `Products matching "${q}" at ShokoShop.`,
+      robots: { index: false, follow: true },
+    };
+  }
+
+  return {
+    title: "All Products",
+    description:
+      "Browse the full ShokoShop collection — custom T-shirts, hoodies, posters and canvas prints across music, film, sports, kids, art and culture themes.",
+    alternates: { canonical: "/products" },
+  };
+}
 
 export default async function ProductsPage({
   searchParams,
@@ -132,8 +172,26 @@ export default async function ProductsPage({
     return true;
   });
 
+  // ItemList structured data so search engines and AI shopping assistants
+  // can read the catalogue (name, price, image) directly off this page
+  // without needing to crawl every product page individually.
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: products.slice(0, 50).map((p, i: number) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${BASE_URL}/products/${p.slug}`,
+      name: p.name,
+    })),
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(itemListJsonLd) }}
+      />
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">

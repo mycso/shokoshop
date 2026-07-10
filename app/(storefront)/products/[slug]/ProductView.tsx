@@ -393,11 +393,11 @@ function ReviewsSection({ productId }: { productId: string }) {
 
   return (
     <div className="mt-16 border-t border-gray-100 dark:border-gray-800 pt-12">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Customer Reviews</h2>
           {reviews.length > 0 && (
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
               <StarRating value={Math.round(avg)} />
               <span className="text-sm text-gray-500 dark:text-gray-400">
                 {avg.toFixed(1)} out of 5 · {reviews.length} review{reviews.length !== 1 ? "s" : ""}
@@ -409,14 +409,14 @@ function ReviewsSection({ productId }: { productId: string }) {
           loggedIn ? (
             <button
               onClick={() => setShowForm(true)}
-              className="text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
+              className="self-start text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
             >
               Write a review
             </button>
           ) : (
             <Link
               href="/auth/login"
-              className="flex items-center gap-1.5 text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors"
+              className="self-start flex items-center gap-1.5 text-sm font-semibold text-brand border border-brand px-4 py-2 rounded-xl hover:bg-brand-light transition-colors whitespace-nowrap"
             >
               <Lock className="h-3.5 w-3.5" />
               Log in to write a review
@@ -488,7 +488,7 @@ function ReviewsSection({ productId }: { productId: string }) {
         <div className="space-y-6">
           {[...reviews].reverse().map((r) => (
             <div key={r.id} className="border-b border-gray-100 dark:border-gray-800 pb-6 last:border-0">
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2">
                 <StarRating value={r.rating} />
                 <span className="font-semibold text-gray-900 dark:text-white text-sm">{r.name}</span>
                 <span className="text-xs text-gray-400 dark:text-gray-500">

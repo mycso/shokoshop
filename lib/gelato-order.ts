@@ -11,7 +11,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://shokoshop.com";
  * live ecommerce store product. The productUid encodes the physical product
  * SKU (size, colour, blank type) needed for direct order fulfillment.
  */
-async function resolveProductUid(
+export async function resolveProductUid(
   productId: string,
   variantName: string | undefined,
   fallback: string,
@@ -112,7 +112,10 @@ export async function submitGelatoOrder(order: Order, { retry = false }: { retry
     orderReferenceId: retry ? `${order.id}_r${Date.now()}` : order.id,
     customerReferenceId: order.customerEmail,
     currency: "GBP",
-    shipmentMethodUid: "standard",
+    // Use the same shipment method the customer was quoted and charged for
+    // at checkout, so fulfilment cost matches what was collected. Falls back
+    // to "standard" for older orders placed before quoting was wired up.
+    shipmentMethodUid: order.shipmentMethodUid ?? "standard",
     shippingAddress: {
       firstName,
       lastName,

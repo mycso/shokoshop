@@ -55,6 +55,7 @@ export interface Order {
   total: number;
   status: OrderStatus;
   shippingAddress: ShippingAddress;
+  shipmentMethodUid?: string; // Gelato shipment method used for the quoted/charged shipping price
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
   gelatoOrderId?: string;

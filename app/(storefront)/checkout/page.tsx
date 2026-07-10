@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Lock } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { useCurrency } from "@/lib/currency-context";
-import { shippingCostPence } from "@/lib/shipping";
+import { shippingCostPence, shippingLabel } from "@/lib/shipping";
+import { SHIPPING_COUNTRY_OPTIONS, requiresPostcode } from "@/lib/countries";
+
+interface ShippingQuoteState {
+  pricePence: number;
+  label: string;
+  shipmentMethodUid: string;
+  loading: boolean;
+}
 
 export default function CheckoutPage() {
   const { cart } = useCart();
@@ -28,6 +36,60 @@ export default function CheckoutPage() {
     country: "GB",
   });
 
+  const [shipping, setShipping] = useState<ShippingQuoteState>({
+    pricePence: shippingCostPence("GB"),
+    label: shippingLabel("GB"),
+    shipmentMethodUid: "standard",
+    loading: false,
+  });
+
+  // Cart contents rarely change on the checkout screen, so key the quote
+  // fetch off a lightweight summary rather than the array reference (which
+  // can change identity on every cart-context re-render).
+  const cartKey = cart.items.map((i) => `${i.productId}:${i.variantId ?? ""}:${i.quantity}`).join(",");
+
+  // Live shipping quote from Gelato for the entered destination, debounced
+  // so it doesn't fire on every keystroke. Falls back to the flat-rate
+  // table (via the API route itself) if Gelato can't be reached.
+  useEffect(() => {
+    if (cart.items.length === 0 || !form.country) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      setShipping((s) => ({ ...s, loading: true }));
+      try {
+        const res = await fetch("/api/checkout/shipping-quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: cart.items,
+            country: form.country,
+            postalCode: form.postalCode,
+            state: form.state,
+            city: form.city,
+          }),
+        });
+        const data = await res.json();
+        if (!cancelled && res.ok) {
+          setShipping({
+            pricePence: data.pricePence,
+            label: data.label,
+            shipmentMethodUid: data.shipmentMethodUid,
+            loading: false,
+          });
+        } else if (!cancelled) {
+          setShipping((s) => ({ ...s, loading: false }));
+        }
+      } catch {
+        if (!cancelled) setShipping((s) => ({ ...s, loading: false }));
+      }
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.country, form.postalCode, form.state, form.city, cartKey]);
+
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) {
@@ -43,7 +105,17 @@ export default function CheckoutPage() {
       const res = await fetch("/api/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cart, shippingAddress: form, currency, rate }),
+        body: JSON.stringify({
+          cart,
+          shippingAddress: form,
+          currency,
+          rate,
+          shipping: {
+            shipmentMethodUid: shipping.shipmentMethodUid,
+            pricePence: shipping.pricePence,
+            label: shipping.label,
+          },
+        }),
       });
       const data = await res.json();
       if (data.url) {
@@ -206,12 +278,12 @@ export default function CheckoutPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Postcode{form.country !== "AE" ? " *" : ""}
+                  Postcode{requiresPostcode(form.country) ? " *" : ""}
                 </label>
                 <input
                   type="text"
                   name="postalCode"
-                  required={form.country !== "AE"}
+                  required={requiresPostcode(form.country)}
                   value={form.postalCode}
                   onChange={handleChange}
                   className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
@@ -228,16 +300,9 @@ export default function CheckoutPage() {
                   onChange={handleChange}
                   className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                 >
-                  <option value="GB">United Kingdom</option>
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="AU">Australia</option>
-                  <option value="AE">United Arab Emirates</option>
-                  <option value="DE">Germany</option>
-                  <option value="FR">France</option>
-                  <option value="ES">Spain</option>
-                  <option value="IT">Italy</option>
-                  <option value="NL">Netherlands</option>
+                  {SHIPPING_COUNTRY_OPTIONS.map(({ code, name }) => (
+                    <option key={code} value={code}>{name}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -251,7 +316,7 @@ export default function CheckoutPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || shipping.loading}
             className="w-full flex items-center justify-center gap-2 bg-brand text-white font-semibold py-4 rounded-xl hover:bg-brand-dark disabled:opacity-60 transition-colors text-base"
           >
             {loading ? (
@@ -309,11 +374,21 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-gray-600 dark:text-gray-300">
                 <span>Shipping</span>
-                <span className="font-medium">{formatPrice(shippingCostPence(form.country))}</span>
+                <span className="font-medium">
+                  {shipping.loading ? (
+                    <span className="inline-flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+                      <span className="h-3 w-3 rounded-full border-2 border-gray-300 dark:border-gray-600 border-t-brand animate-spin" />
+                      Calculating…
+                    </span>
+                  ) : (
+                    formatPrice(shipping.pricePence)
+                  )}
+                </span>
               </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500 -mt-1">{shipping.label}</p>
               <div className="flex justify-between font-bold text-gray-900 dark:text-white text-base pt-1 border-t border-gray-100 dark:border-gray-800">
                 <span>Total</span>
-                <span>{formatPrice(cart.total + shippingCostPence(form.country))}</span>
+                <span>{formatPrice(cart.total + shipping.pricePence)}</span>
               </div>
             </div>
           </div>
