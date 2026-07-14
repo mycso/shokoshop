@@ -3,9 +3,11 @@ import type { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "user_session";
 export const PENDING_2FA_COOKIE = "pending_2fa_session";
+export const ADMIN_SESSION_COOKIE = "admin_session";
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 const PENDING_2FA_MAX_AGE = 60 * 5; // 5 minutes
+const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export interface SessionPayload {
   sub: string;
@@ -18,6 +20,10 @@ export interface Pending2FAPayload {
   sub: string;
 }
 
+export interface AdminSessionPayload {
+  sub: "admin";
+}
+
 function getSecretKey(): Uint8Array {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET is not set");
@@ -26,7 +32,7 @@ function getSecretKey(): Uint8Array {
 
 async function signToken(
   payload: object,
-  typ: "session" | "pending_2fa",
+  typ: "session" | "pending_2fa" | "admin",
   maxAgeSeconds: number
 ): Promise<string> {
   return new SignJWT({ ...payload, typ })
@@ -38,7 +44,7 @@ async function signToken(
 
 async function verifyToken(
   token: string,
-  expectedTyp: "session" | "pending_2fa"
+  expectedTyp: "session" | "pending_2fa" | "admin"
 ): Promise<Record<string, unknown> | null> {
   try {
     const { payload } = await jwtVerify(token, getSecretKey());
@@ -81,6 +87,30 @@ export function setSessionCookie(res: NextResponse, payload: string): void {
 
 export function clearSessionCookie(res: NextResponse): void {
   res.cookies.delete(SESSION_COOKIE);
+}
+
+export async function signAdminSession(): Promise<string> {
+  return signToken({ sub: "admin" }, "admin", ADMIN_SESSION_MAX_AGE);
+}
+
+export async function verifyAdminSession(token: string): Promise<AdminSessionPayload | null> {
+  const payload = await verifyToken(token, "admin");
+  if (!payload) return null;
+  return payload as unknown as AdminSessionPayload;
+}
+
+export function setAdminSessionCookie(res: NextResponse, payload: string): void {
+  res.cookies.set(ADMIN_SESSION_COOKIE, payload, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: ADMIN_SESSION_MAX_AGE,
+    path: "/",
+  });
+}
+
+export function clearAdminSessionCookie(res: NextResponse): void {
+  res.cookies.delete(ADMIN_SESSION_COOKIE);
 }
 
 export function setPending2FACookie(res: NextResponse, payload: string): void {

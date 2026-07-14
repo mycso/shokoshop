@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-
-const COOKIE = "admin_session";
-const MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+import {
+  clearAdminSessionCookie,
+  setAdminSessionCookie,
+  signAdminSession,
+} from "@/lib/auth/session";
 
 export async function POST(request: Request) {
   const { password } = await request.json();
@@ -12,18 +14,13 @@ export async function POST(request: Request) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(COOKIE, adminPassword, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: MAX_AGE,
-    path: "/",
-  });
+  const token = await signAdminSession();
+  setAdminSessionCookie(res, token);
   return res;
 }
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.delete(COOKIE);
+  clearAdminSessionCookie(res);
   return res;
 }

@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_SESSION_COOKIE, verifyAdminSession } from "@/lib/auth/session";
 
-const COOKIE = "admin_session";
+async function isAdminAuthenticated(request: NextRequest): Promise<boolean> {
+  const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+  if (!token) return false;
+  const session = await verifyAdminSession(token);
+  return session !== null;
+}
 
-export function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // If already authenticated as admin, skip the login page
   if (pathname === "/admin/login") {
-    const session = request.cookies.get(COOKIE)?.value;
-    const password = process.env.ADMIN_PASSWORD;
-    if (password && session === password) {
+    if (await isAdminAuthenticated(request)) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     return NextResponse.next();
@@ -20,10 +24,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = request.cookies.get(COOKIE)?.value;
-  const password = process.env.ADMIN_PASSWORD;
-
-  if (!password || session !== password) {
+  if (!(await isAdminAuthenticated(request))) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
     loginUrl.searchParams.set("from", pathname);
