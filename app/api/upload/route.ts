@@ -1,27 +1,35 @@
-import { put } from "@vercel/blob";
-import { randomUUID } from "crypto";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"]);
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
 
+// Issues a short-lived client token so the browser can upload the file
+// straight to Blob storage, bypassing the function body size limit.
 export async function POST(request: Request) {
-  const formData = await request.formData();
-  const file = formData.get("file") as File | null;
+  const body = (await request.json()) as HandleUploadBody;
 
-  if (!file) {
-    return Response.json({ error: "No file provided" }, { status: 400 });
+  try {
+    const jsonResponse = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async (pathname) => {
+        if (!pathname.startsWith("designs/")) {
+          throw new Error("Invalid upload path");
+        }
+        return {
+          allowedContentTypes: ALLOWED_TYPES,
+          maximumSizeInBytes: MAX_SIZE,
+          addRandomSuffix: false,
+        };
+      },
+      onUploadCompleted: async () => {},
+    });
+
+    return Response.json(jsonResponse);
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Upload failed" },
+      { status: 400 }
+    );
   }
-  if (!ALLOWED_TYPES.has(file.type)) {
-    return Response.json({ error: "Only image files are accepted" }, { status: 400 });
-  }
-  if (file.size > MAX_SIZE) {
-    return Response.json({ error: "File too large (max 20MB)" }, { status: 400 });
-  }
-
-  const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-  const filename = `designs/${randomUUID()}.${ext}`;
-
-  const blob = await put(filename, file, { access: "public" });
-
-  return Response.json({ url: blob.url });
 }

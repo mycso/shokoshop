@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { upload } from "@vercel/blob/client";
 import {
   Upload,
   X,
@@ -53,14 +54,11 @@ export default function CustomiseClient({ product }: { product: Product }) {
     if (uploadedFile) {
       setIsUploading(true);
       try {
-        const form = new FormData();
-        form.append("file", uploadedFile);
-        const res = await fetch("/api/upload", { method: "POST", body: form });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error((err as { error?: string }).error ?? "Upload failed");
-        }
-        const { url } = await res.json() as { url: string };
+        const ext = uploadedFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const { url } = await upload(`designs/${crypto.randomUUID()}.${ext}`, uploadedFile, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+        });
         addItem({
           productId: product.gelatoProductId ?? product.id,
           name: product.name,
