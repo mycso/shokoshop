@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createReturn, generateReturnId, getReturnByOrderId } from "@/lib/returns";
 import { getOrderById } from "@/lib/orders";
+import { getCurrentUser } from "@/lib/auth/dal";
 import { ReturnReason, ReturnResolution } from "@/types";
 import { sendReturnRequestReceivedEmail } from "@/lib/email/send-return-request";
 import { sendAdminReturnNotificationEmail } from "@/lib/email/send-admin-return-notification";
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const { orderId, items, reason, description, resolution } = body as {
       orderId: string;
@@ -23,6 +29,11 @@ export async function POST(req: NextRequest) {
 
     const order = await getOrderById(orderId);
     if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const owns = order.userId ? order.userId === user.id : order.customerEmail === user.email;
+    if (!owns) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 

@@ -1,7 +1,9 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 const MAX_SIZE = 20 * 1024 * 1024; // 20MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
+// SVG is deliberately excluded: it can embed <script>, which executes if the
+// file is ever opened directly rather than rendered as an <img> (stored XSS).
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 // Issues a short-lived client token so the browser can upload the file
 // straight to Blob storage, bypassing the function body size limit.

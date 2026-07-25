@@ -1,11 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   clearAdminSessionCookie,
   setAdminSessionCookie,
   signAdminSession,
 } from "@/lib/auth/session";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
-export async function POST(request: Request) {
+export const runtime = "nodejs";
+
+export async function POST(request: NextRequest) {
+  const allowed = await checkRateLimit(`admin-login:${getClientIp(request)}`, 10, 15 * 60);
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many attempts. Please try again later." }, { status: 429 });
+  }
+
   const { password } = await request.json();
   const adminPassword = process.env.ADMIN_PASSWORD;
 

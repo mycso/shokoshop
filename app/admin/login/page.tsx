@@ -7,7 +7,10 @@ import { Lock, Loader2, Eye, EyeOff } from "lucide-react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const from = searchParams.get("from") ?? "/admin";
+  // Only ever redirect to a same-site path — "from" is attacker-controlled
+  // via the URL, so reject absolute/protocol-relative values (open redirect).
+  const rawFrom = searchParams.get("from") ?? "/admin";
+  const from = rawFrom.startsWith("/") && !rawFrom.startsWith("//") ? rawFrom : "/admin";
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

@@ -1,25 +1,44 @@
 import Stripe from "stripe";
-import { Cart, ShippingAddress } from "@/types";
+import { Cart, CartItem, ShippingAddress } from "@/types";
 import { createOrder, generateOrderId } from "@/lib/orders";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
 import { SHIPPING_COUNTRIES } from "@/lib/countries";
+import { getGelatoProducts } from "@/lib/gelato-data";
+import { getGelatoShippingQuote } from "@/lib/gelato-shipping";
 import { sendOrderConfirmationEmail } from "@/lib/email/send-order-confirmation";
 import { sendAdminOrderNotificationEmail } from "@/lib/email/send-admin-order-notification";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+const SUPPORTED_CURRENCIES = new Set(["GBP", "USD", "EUR", "CAD", "AUD", "AED"]);
+const MAX_QUANTITY_PER_ITEM = 50;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Looks up the live GBP-per-unit rate rather than trusting a client-supplied
+// value — otherwise a manipulated `rate` would under-charge in that currency
+// even after prices are re-verified in GBP.
+async function getFxRate(currency: string): Promise<number> {
+  if (currency === "GBP") return 1;
+  try {
+    const data = await fetch("https://api.exchangerate-api.com/v4/latest/GBP", {
+      next: { revalidate: 3600 },
+    }).then((r) => r.json());
+    const rate = data?.rates?.[currency];
+    return typeof rate === "number" && rate > 0 ? rate : 1;
+  } catch {
+    return 1;
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const {
       cart,
       shippingAddress,
-      currency = "GBP",
-      rate = 1,
-      shipping,
+      currency: requestedCurrency = "GBP",
     }: {
       cart: Cart;
       currency?: string;
-      rate?: number;
       shippingAddress: {
         email: string;
         firstName: string;
@@ -31,24 +50,63 @@ export async function POST(request: Request) {
         postalCode: string;
         country: string;
       };
-      // Shipping quote fetched by the checkout page from
-      // /api/checkout/shipping-quote — reused here rather than re-queried so
-      // the price charged matches what the customer saw. Falls back to the
-      // static rate table when absent/malformed, same as the quote endpoint
-      // itself does when Gelato can't be reached.
-      shipping?: { shipmentMethodUid?: string; pricePence?: number; label?: string };
     } = await request.json();
 
     if (!cart?.items?.length) {
       return Response.json({ error: "Cart is empty" }, { status: 400 });
     }
+    if (
+      !shippingAddress?.email ||
+      !EMAIL_RE.test(shippingAddress.email) ||
+      !shippingAddress.firstName ||
+      !shippingAddress.lastName ||
+      !shippingAddress.line1 ||
+      !shippingAddress.city ||
+      !shippingAddress.postalCode ||
+      !shippingAddress.country
+    ) {
+      return Response.json({ error: "Missing or invalid shipping address" }, { status: 400 });
+    }
 
-    const shippingPence =
-      typeof shipping?.pricePence === "number" && shipping.pricePence >= 0
-        ? shipping.pricePence
-        : shippingCostPence(shippingAddress.country);
-    const shippingDisplayName = shipping?.label || shippingLabel(shippingAddress.country);
-    const shipmentMethodUid = shipping?.shipmentMethodUid || "standard";
+    const currency = SUPPORTED_CURRENCIES.has((requestedCurrency ?? "").toUpperCase())
+      ? (requestedCurrency.toUpperCase() as string)
+      : "GBP";
+    const rate = await getFxRate(currency);
+
+    // Re-price every line item from the canonical Gelato catalog. The client
+    // only ever sends product/variant identifiers from here on — never trust
+    // a client-supplied price, or checkout can be completed for £0.01.
+    const catalog = await getGelatoProducts();
+    const verifiedItems: (CartItem & { price: number })[] = [];
+    for (const item of cart.items) {
+      const quantity = Math.max(1, Math.min(MAX_QUANTITY_PER_ITEM, Math.floor(item.quantity) || 1));
+      const product = catalog.find((p) => p.gelatoProductId === item.productId);
+      const price = (item.gelatoProductId && product?.variantPrices[item.gelatoProductId]) || product?.price;
+      if (!product || typeof price !== "number" || price <= 0) {
+        return Response.json({ error: "One or more items could not be verified" }, { status: 400 });
+      }
+      verifiedItems.push({ ...item, quantity, price });
+    }
+    const total = verifiedItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+    // Re-quote shipping server-side too, for the same reason — never trust a
+    // client-echoed price, even one that originally came from our own quote
+    // endpoint.
+    const shippingQuote = await getGelatoShippingQuote(
+      verifiedItems.map((i) => ({ productId: i.productId, variantName: i.variantName, quantity: i.quantity })),
+      {
+        country: shippingAddress.country,
+        postalCode: shippingAddress.postalCode,
+        state: shippingAddress.state,
+        city: shippingAddress.city,
+      }
+    );
+    const shippingPence = shippingQuote?.pricePence ?? shippingCostPence(shippingAddress.country);
+    const shippingDisplayName =
+      shippingQuote?.name && shippingQuote.minDeliveryDays && shippingQuote.maxDeliveryDays
+        ? `${shippingQuote.name} (${shippingQuote.minDeliveryDays}–${shippingQuote.maxDeliveryDays} business days)`
+        : shippingQuote?.name ?? shippingLabel(shippingAddress.country);
+    const shipmentMethodUid = shippingQuote?.shipmentMethodUid ?? "standard";
 
     const orderId = generateOrderId();
     const customerName = `${shippingAddress.firstName} ${shippingAddress.lastName}`;
@@ -85,7 +143,7 @@ export async function POST(request: Request) {
         payment_method_types: ["card"],
         mode: "payment",
         customer_email: shippingAddress.email,
-        line_items: cart.items.map((item) => ({
+        line_items: verifiedItems.map((item) => ({
           price_data: {
             currency: currency.toLowerCase(),
             product_data: {
@@ -123,8 +181,8 @@ export async function POST(request: Request) {
         id: orderId,
         customerEmail: shippingAddress.email,
         customerName,
-        items: cart.items,
-        total: cart.total,
+        items: verifiedItems,
+        total,
         status: "pending",
         shippingAddress: address,
         shipmentMethodUid,
@@ -141,8 +199,8 @@ export async function POST(request: Request) {
       id: orderId,
       customerEmail: shippingAddress.email,
       customerName,
-      items: cart.items,
-      total: cart.total,
+      items: verifiedItems,
+      total,
       status: "paid",
       shippingAddress: address,
       shipmentMethodUid,
