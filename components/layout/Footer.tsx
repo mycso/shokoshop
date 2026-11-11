@@ -67,6 +67,11 @@ export default function Footer() {
                   My Orders
                 </Link>
               </li>
+              <li>
+                <Link href="/shipping" className="hover:text-white transition-colors">
+                  Shipping &amp; Delivery
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
     { url: `${BASE_URL}/products`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: `${BASE_URL}/shipping`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   // Category landing pages (e.g. /products?category=music) — indexable
