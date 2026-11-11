@@ -412,7 +412,7 @@ export default async function HomePage() {
       <section className="bg-brand text-white py-20">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Ready to create something amazing?
+            Ready to get something amazing?
           </h2>
           <p className="text-white/80 text-lg mb-8">
             Join thousands of customers who trust ShokoShop for premium T-shirts and wall art.
