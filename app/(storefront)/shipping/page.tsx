@@ -61,6 +61,25 @@ export default function ShippingPage() {
 
       <ShippingRates />
 
+      <div className="text-sm text-gray-500 dark:text-gray-400 mt-6 space-y-1">
+        <p>
+          <strong>Local production hubs</strong> (USA, Canada, UK, EU, Australia,
+          Brazil, Japan, India): orders rarely cross a border, and
+          production-to-door time averages 5–7 business days.
+        </p>
+        <p>
+          <strong>Other Europe &amp; EFTA:</strong> items we can&apos;t produce
+          locally are routed to a neighbouring European hub.
+        </p>
+        <p>
+          <strong>Worldwide:</strong> remote destinations, or items without a
+          local print partner, ship internationally.
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          Delivery times are business days in transit after production.
+        </p>
+      </div>
+
       <p className="text-xs text-gray-400 dark:text-gray-500 mt-6">
         Rates are per order and shown as estimates, converted from GBP at
         current exchange rates. The exact cost and delivery time for your

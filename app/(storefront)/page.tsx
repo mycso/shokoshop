@@ -385,7 +385,7 @@ export default async function HomePage() {
               {
                 icon: <Truck className="h-6 w-6 text-green-500" />,
                 title: "Fast Shipping",
-                desc: "Delivered in 3–7 business days",
+                desc: "Typically delivered in 5–7 business days",
               },
               {
                 icon: <Package className="h-6 w-6 text-purple-500" />,

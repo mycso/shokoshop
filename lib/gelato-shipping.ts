@@ -16,7 +16,10 @@ export interface ShippingQuoteAddress {
   city?: string;
 }
 
+export type ShippingMethodType = "standard" | "express";
+
 export interface ShippingQuote {
+  method: ShippingMethodType;
   shipmentMethodUid: string;
   name: string;
   pricePence: number; // GBP, pence
@@ -29,6 +32,7 @@ interface GelatoShipmentMethod {
   name: string;
   price: number;
   currency: string;
+  type?: string; // Gelato: "normal" | "express" | "pallet"
   minDeliveryDays?: number;
   maxDeliveryDays?: number;
 }
@@ -50,11 +54,28 @@ interface GelatoQuoteGroup {
  */
 export async function getGelatoShippingQuote(
   items: ShippingQuoteItem[],
-  address: ShippingQuoteAddress
+  address: ShippingQuoteAddress,
+  method: ShippingMethodType = "standard"
 ): Promise<ShippingQuote | null> {
+  const options = await getGelatoShippingOptions(items, address);
+  if (options.length === 0) return null;
+  // Express was requested but isn't offered for this order: the caller falls
+  // back to standard rather than failing checkout.
+  return options.find((o) => o.method === method) ?? options.find((o) => o.method === "standard") ?? options[0];
+}
+
+/**
+ * Every shipping option (cheapest standard, cheapest express) that Gelato
+ * offers for the whole cart. Empty when Gelato can't be reached or no method
+ * is common to every fulfilment facility.
+ */
+export async function getGelatoShippingOptions(
+  items: ShippingQuoteItem[],
+  address: ShippingQuoteAddress
+): Promise<ShippingQuote[]> {
   const apiKey = GELATO_API_KEY;
   const storeId = GELATO_STORE_ID;
-  if (!apiKey || !storeId || items.length === 0) return null;
+  if (!apiKey || !storeId || items.length === 0) return [];
 
   try {
     const products = await Promise.all(
@@ -87,11 +108,11 @@ export async function getGelatoShippingQuote(
         products,
       }),
     });
-    if (!res.ok) return null;
+    if (!res.ok) return [];
 
     const data = await res.json();
     const groups: GelatoQuoteGroup[] = Array.isArray(data.quotes) ? data.quotes : [];
-    if (groups.length === 0) return null;
+    if (groups.length === 0) return [];
 
     // The Gelato order-creation call takes a single shipmentMethodUid for the
     // whole order, so when items ship from multiple fulfilment facilities we
@@ -101,12 +122,13 @@ export async function getGelatoShippingQuote(
       (g) => new Set((g.shipmentMethods ?? []).map((m) => m.shipmentMethodUid))
     );
     const commonUids = [...uidSets[0]].filter((uid) => uidSets.every((s) => s.has(uid)));
-    if (commonUids.length === 0) return null;
+    if (commonUids.length === 0) return [];
 
-    let best: ShippingQuote | null = null;
+    const best: Partial<Record<ShippingMethodType, ShippingQuote>> = {};
     for (const uid of commonUids) {
       let total = 0;
       let name = uid;
+      let isExpress = false;
       let minDays = 0;
       let maxDays = 0;
       for (const group of groups) {
@@ -114,11 +136,15 @@ export async function getGelatoShippingQuote(
         if (!method) continue;
         total += method.price;
         name = method.name;
+        isExpress = isExpress || method.type === "express" || /express/i.test(method.name);
         minDays = Math.max(minDays, method.minDeliveryDays ?? 0);
         maxDays = Math.max(maxDays, method.maxDeliveryDays ?? 0);
       }
-      if (!best || total < best.pricePence / 100) {
-        best = {
+      const kind: ShippingMethodType = isExpress ? "express" : "standard";
+      const current = best[kind];
+      if (!current || total < current.pricePence / 100) {
+        best[kind] = {
+          method: kind,
           shipmentMethodUid: uid,
           name,
           pricePence: Math.round(total * 100),
@@ -127,8 +153,8 @@ export async function getGelatoShippingQuote(
         };
       }
     }
-    return best;
+    return [best.standard, best.express].filter((q): q is ShippingQuote => !!q);
   } catch {
-    return null;
+    return [];
   }
 }

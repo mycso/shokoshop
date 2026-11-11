@@ -36,7 +36,9 @@ export async function POST(request: Request) {
       cart,
       shippingAddress,
       currency: requestedCurrency = "GBP",
+      shippingMethod: requestedMethod,
     }: {
+      shippingMethod?: string;
       cart: Cart;
       currency?: string;
       shippingAddress: {
@@ -99,7 +101,8 @@ export async function POST(request: Request) {
         postalCode: shippingAddress.postalCode,
         state: shippingAddress.state,
         city: shippingAddress.city,
-      }
+      },
+      requestedMethod === "express" ? "express" : "standard"
     );
     const shippingPence = shippingQuote?.pricePence ?? shippingCostPence(shippingAddress.country);
     const shippingDisplayName =

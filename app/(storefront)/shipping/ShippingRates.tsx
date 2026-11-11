@@ -3,13 +3,10 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { SHIPPING_COUNTRY_OPTIONS } from "@/lib/countries";
-import { shippingCostPence } from "@/lib/shipping";
+import { shippingCostPence, transitLabel } from "@/lib/shipping";
 import { COUNTRY_CURRENCY, useCurrency } from "@/lib/currency-context";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
-const DELIVERY = "3–7 business days";
-const DELIVERY_INTL = "5–14 business days";
-const FAST_COUNTRIES = new Set(["GB", "US", "CA", "AU", "AE", "DE", "FR", "ES", "IT", "NL"]);
 
 export default function ShippingRates() {
   const { formatPrice, currency } = useCurrency();
@@ -53,7 +50,8 @@ export default function ShippingRates() {
                 <th className="px-4 py-3 font-medium">Local currency</th>
                 <th className="px-4 py-3 font-medium">T-shirts ({currency})</th>
                 <th className="px-4 py-3 font-medium">Hanging items ({currency})</th>
-                <th className="px-4 py-3 font-medium">Delivery</th>
+                <th className="px-4 py-3 font-medium">Standard</th>
+                <th className="px-4 py-3 font-medium">Express</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-700 dark:text-gray-300">
@@ -65,15 +63,14 @@ export default function ShippingRates() {
                     <td className="px-4 py-2.5">{COUNTRY_CURRENCY[code] ?? "—"}</td>
                     <td className="px-4 py-2.5">{price}</td>
                     <td className="px-4 py-2.5">{price}</td>
-                    <td className="px-4 py-2.5">
-                      {FAST_COUNTRIES.has(code) ? DELIVERY : DELIVERY_INTL}
-                    </td>
+                    <td className="px-4 py-2.5">{transitLabel(code)}</td>
+                    <td className="px-4 py-2.5">{transitLabel(code, "express")}</td>
                   </tr>
                 );
               })}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
                     No countries match “{query}”.
                   </td>
                 </tr>

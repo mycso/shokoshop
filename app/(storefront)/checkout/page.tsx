@@ -10,10 +10,15 @@ import { useCurrency } from "@/lib/currency-context";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
 import { SHIPPING_COUNTRY_OPTIONS, requiresPostcode } from "@/lib/countries";
 
-interface ShippingQuoteState {
+interface ShippingOption {
+  method: "standard" | "express";
   pricePence: number;
   label: string;
   shipmentMethodUid: string;
+}
+
+interface ShippingQuoteState {
+  options: ShippingOption[];
   loading: boolean;
 }
 
@@ -37,11 +42,21 @@ export default function CheckoutPage() {
   });
 
   const [shipping, setShipping] = useState<ShippingQuoteState>({
-    pricePence: shippingCostPence("GB"),
-    label: shippingLabel("GB"),
-    shipmentMethodUid: "standard",
+    options: [
+      {
+        method: "standard",
+        pricePence: shippingCostPence("GB"),
+        label: shippingLabel("GB"),
+        shipmentMethodUid: "standard",
+      },
+    ],
     loading: false,
   });
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
+  // Falls back to the first option when the chosen method isn't offered for
+  // the current destination (e.g. express unavailable after a country change).
+  const selected =
+    shipping.options.find((o) => o.method === shippingMethod) ?? shipping.options[0];
 
   // Cart contents rarely change on the checkout screen, so key the quote
   // fetch off a lightweight summary rather than the array reference (which
@@ -71,9 +86,7 @@ export default function CheckoutPage() {
         const data = await res.json();
         if (!cancelled && res.ok) {
           setShipping({
-            pricePence: data.pricePence,
-            label: data.label,
-            shipmentMethodUid: data.shipmentMethodUid,
+            options: Array.isArray(data.options) && data.options.length > 0 ? data.options : [data],
             loading: false,
           });
         } else if (!cancelled) {
@@ -110,11 +123,7 @@ export default function CheckoutPage() {
           shippingAddress: form,
           currency,
           rate,
-          shipping: {
-            shipmentMethodUid: shipping.shipmentMethodUid,
-            pricePence: shipping.pricePence,
-            label: shipping.label,
-          },
+          shippingMethod: selected.method,
         }),
       });
       const data = await res.json();
@@ -381,14 +390,44 @@ export default function CheckoutPage() {
                       Calculating…
                     </span>
                   ) : (
-                    formatPrice(shipping.pricePence)
+                    formatPrice(selected.pricePence)
                   )}
                 </span>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 -mt-1">{shipping.label}</p>
+              {shipping.options.length > 1 ? (
+                <div className="space-y-2 pt-1">
+                  {shipping.options.map((o) => (
+                    <label
+                      key={o.method}
+                      className={`flex items-start justify-between gap-3 rounded-lg border p-3 cursor-pointer ${
+                        o.method === selected.method
+                          ? "border-brand"
+                          : "border-gray-200 dark:border-gray-700"
+                      }`}
+                    >
+                      <span className="flex items-start gap-2">
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          className="mt-0.5"
+                          checked={o.method === selected.method}
+                          onChange={() => setShippingMethod(o.method)}
+                        />
+                        <span className="text-xs">
+                          <span className="block font-medium capitalize">{o.method}</span>
+                          <span className="text-gray-400 dark:text-gray-500">{o.label}</span>
+                        </span>
+                      </span>
+                      <span className="font-medium">{formatPrice(o.pricePence)}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400 dark:text-gray-500 -mt-1">{selected.label}</p>
+              )}
               <div className="flex justify-between font-bold text-gray-900 dark:text-white text-base pt-1 border-t border-gray-100 dark:border-gray-800">
                 <span>Total</span>
-                <span>{formatPrice(cart.total + shipping.pricePence)}</span>
+                <span>{formatPrice(cart.total + selected.pricePence)}</span>
               </div>
             </div>
           </div>

@@ -824,7 +824,7 @@ export default function ProductView({ product }: { product: Product }) {
         {/* Perks */}
         <ul className="space-y-2 mt-8">
           {[
-            "Ships in 3–7 business days",
+            "Typically delivered in 5–7 business days",
             "Premium print quality",
             "Produced & fulfilled by Gelato",
             "Satisfaction guaranteed",

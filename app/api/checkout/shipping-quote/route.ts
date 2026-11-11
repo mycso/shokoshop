@@ -1,5 +1,5 @@
 import { CartItem } from "@/types";
-import { getGelatoShippingQuote } from "@/lib/gelato-shipping";
+import { getGelatoShippingOptions } from "@/lib/gelato-shipping";
 import { shippingCostPence, shippingLabel } from "@/lib/shipping";
 
 export async function POST(request: Request) {
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "country is required" }, { status: 400 });
   }
 
-  const quote = await getGelatoShippingQuote(
+  const quotes = await getGelatoShippingOptions(
     (items ?? []).map((item) => ({
       productId: item.productId,
       variantName: item.variantName,
@@ -30,16 +30,17 @@ export async function POST(request: Request) {
     { country, postalCode, state, city }
   );
 
-  if (quote) {
-    return Response.json({
-      source: "gelato",
+  if (quotes.length > 0) {
+    const options = quotes.map((quote) => ({
+      method: quote.method,
       shipmentMethodUid: quote.shipmentMethodUid,
       label:
         quote.minDeliveryDays && quote.maxDeliveryDays
           ? `${quote.name} (${quote.minDeliveryDays}–${quote.maxDeliveryDays} business days)`
           : quote.name,
       pricePence: quote.pricePence,
-    });
+    }));
+    return Response.json({ source: "gelato", options, ...options[0] });
   }
 
   // Gelato unreachable/unconfigured or has no shipment method common to
@@ -47,6 +48,15 @@ export async function POST(request: Request) {
   // checkout is never blocked by a third-party API.
   return Response.json({
     source: "fallback",
+    options: [
+      {
+        method: "standard",
+        shipmentMethodUid: "standard",
+        label: shippingLabel(country),
+        pricePence: shippingCostPence(country),
+      },
+    ],
+    method: "standard",
     shipmentMethodUid: "standard",
     label: shippingLabel(country),
     pricePence: shippingCostPence(country),
