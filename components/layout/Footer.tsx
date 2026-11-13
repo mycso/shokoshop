@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Bebas_Neue } from "next/font/google";
+import { CATEGORIES } from "@/lib/categories";
 
 const bebas = Bebas_Neue({ weight: ["400"], subsets: ["latin"] });
 
@@ -35,16 +36,13 @@ export default function Footer() {
                   All Products
                 </Link>
               </li>
-              <li>
-                <Link href="/products?category=Apparel" className="hover:text-white transition-colors">
-                  Apparel
-                </Link>
-              </li>
-              <li>
-                <Link href="/products?category=Wall+Art" className="hover:text-white transition-colors">
-                  Wall Art
-                </Link>
-              </li>
+              {CATEGORIES.map((cat) => (
+                <li key={cat.slug}>
+                  <Link href={`/products?category=${cat.slug}`} className="hover:text-white transition-colors">
+                    {cat.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
